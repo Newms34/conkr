@@ -13,6 +13,8 @@ var sass = require('gulp-sass');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
+var kid = require('child_process');
+var ps = require('ps-node');
 var gutil = require('gulp-util');
 var cleany = require('gulp-clean-css')
 // Lint Task
@@ -40,6 +42,22 @@ gulp.task('scripts', function() {
         .pipe(gulp.dest('public/js'));
 });
 
+gulp.task('checkDB', function() {
+    if (process.platform == 'win32' && process.env.USERNAME == 'Newms') {
+        console.log('Checking to see if mongod already running!');
+        ps.lookup({ command: 'mongod' }, function(e, f) {
+            if (!f.length){
+                //database not already running, so start it up!
+                kid.exec('c: && cd c:\\mongodb\\bin && start mongod -dbpath "d:\\data\\mongo\\db" && pause',function(err,stdout,stderr){
+                    if (err) console.log('Uh oh! An error of "',err,'" prevented the DB from starting!');
+                })
+            }else{
+                console.log('mongod running!')
+            }
+        })
+    }
+})
+
 // Watch Files For Changes
 gulp.task('watch', function() {
     gulp.watch(['build/js/*.js', 'build/js/**/*.js'], ['lint', 'scripts']);
@@ -50,4 +68,4 @@ gulp.task('watch', function() {
 gulp.task('render', ['lint', 'sass', 'scripts'])
 
 // Default Task
-gulp.task('default', ['lint', 'sass', 'scripts',  'watch']);
+gulp.task('default', ['lint', 'sass', 'scripts', 'checkDB', 'watch']);

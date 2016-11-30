@@ -1,7 +1,7 @@
 app.factory('mapFact', function($rootScope) {
     var smoothAmt = 100,
         countries = {
-            names: ['Nasteaburg', 'Dutralor', 'Eslos', 'Oglyae', 'Cruiria', 'Whuadal', 'Ethua', 'Estaria', 'Shiod', 'Skesh', 'Froe', 'Glen', 'Yacluoria', 'Desmayyae', 'Oskana', 'Echea', 'Pleiles', 'Ploussau', 'Usnea', 'Oprijan', 'Fleol', 'Spijan', 'Flie Stril', 'Iecheidal', 'Beplayburg', 'Raprana', 'Qescyae', 'Smeuqua', 'Tresil', 'Ospary', 'Eflary', 'Bloek', 'Pral', 'Cluyx Smea', 'Cegriydal', 'Ethoeque', 'Pacril', 'Justril', 'Stoynga', 'Swuyque', 'Osnyae', 'Estron', 'Flauh', 'Clyae', 'Theul Plar', 'Osmoirus', 'Osliuji', 'Qetrington', 'Cuflus', 'Brioca', 'Skuocia', 'Ashad', 'Ecrar', 'Snoyg','Drington', 'Cresh', 'Cutraynia', 'Qechiavania', 'Pechary', 'Jadrar', 'Striurus', 'Smoiburg', 'Aspil', 'Ascington', 'Thain', 'Brex','Prax', 'Gusmaonga', 'Jestruibia', 'Woscyae', 'Vascea', 'Dreyssau', 'Flecia', 'Aglos', 'Estyae', 'Shiyk', 'Thesh', 'Glaeq', 'Slea', 'Fasmiulia', 'Pagluorhiel', 'Wachil', 'Wegrya', 'Snobar', 'Smeobar', 'Athana', 'Ogresh', 'Smait', 'Whus', 'Zusleuland', 'Ofleilor', 'Beflington', 'Cusmyae', 'Swobia', 'Thiostan', 'Uclain', 'Adryae', 'Frio', 'Spington', 'Gloir', 'Star', 'Fustredor', 'Pucrourhiel', 'Quplana', 'Tasnye', 'Spoubia', 'Griycia', 'Uchos', 'Achyae', 'Gruoz', 'Smijan', 'Swiur', 'Crary'],
+            names: ['Nasteaburg', 'Dutralor', 'Eslos', 'Oglyae', 'Cruiria', 'Whuadal', 'Ethua', 'Estaria', 'Shiod', 'Skesh', 'Froe', 'Glen', 'Yacluoria', 'Desmayyae', 'Oskana', 'Echea', 'Pleiles', 'Ploussau', 'Usnea', 'Oprijan', 'Fleol', 'Spijan', 'Flie Stril', 'Iecheidal', 'Beplayburg', 'Raprana', 'Qescyae', 'Smeuqua', 'Tresil', 'Ospary', 'Eflary', 'Bloek', 'Pral', 'Cluyx Smea', 'Cegriydal', 'Ethoeque', 'Pacril', 'Justril', 'Stoynga', 'Swuyque', 'Osnyae', 'Estron', 'Flauh', 'Clyae', 'Theul Plar', 'Osmoirus', 'Osliuji', 'Qetrington', 'Cuflus', 'Brioca', 'Skuocia', 'Ashad', 'Ecrar', 'Snoyg', 'Drington', 'Cresh', 'Cutraynia', 'Qechiavania', 'Pechary', 'Jadrar', 'Striurus', 'Smoiburg', 'Aspil', 'Ascington', 'Thain', 'Brex', 'Prax', 'Gusmaonga', 'Jestruibia', 'Woscyae', 'Vascea', 'Dreyssau', 'Flecia', 'Aglos', 'Estyae', 'Shiyk', 'Thesh', 'Glaeq', 'Slea', 'Fasmiulia', 'Pagluorhiel', 'Wachil', 'Wegrya', 'Snobar', 'Smeobar', 'Athana', 'Ogresh', 'Smait', 'Whus', 'Zusleuland', 'Ofleilor', 'Beflington', 'Cusmyae', 'Swobia', 'Thiostan', 'Uclain', 'Adryae', 'Frio', 'Spington', 'Gloir', 'Star', 'Fustredor', 'Pucrourhiel', 'Quplana', 'Tasnye', 'Spoubia', 'Griycia', 'Uchos', 'Achyae', 'Gruoz', 'Smijan', 'Swiur', 'Crary'],
             prefs: ['East', 'West', 'North', 'South', 'Republic of', 'Kingdom of', 'Empire of']
         };
 
@@ -100,10 +100,29 @@ app.factory('mapFact', function($rootScope) {
                     } else {
                         this.doAllCells();
                         this.render();
+                        this.makeCellNames();
                         this.getCellNames();
                     }
                 },
-
+                makeCellNames: function() {
+                    for (var n = 0; n < this.diagram.cells.length; n++) {
+                        var cell = this.diagram.cells[n];
+                        var newName = null;
+                        if (cell.isLand) {
+                            var isUnique = false;
+                            while (!isUnique) {
+                                newName = countries.names[Math.floor(Math.random() * countries.names.length)];
+                                if (Math.random() > 0.7) {
+                                    newName = countries.prefs[Math.floor(Math.random() * countries.prefs.length)] + ' ' + newName;
+                                }
+                                //Now check if we already have this name
+                                isUnique = this.countryNames.indexOf(newName) < 0;
+                                cell.name = newName;
+                            }
+                            this.countryNames.push(newName);
+                        }
+                    }
+                },
                 distance: function(a, b) {
                     var dx = a.x - b.x,
                         dy = a.y - b.y;
@@ -175,9 +194,6 @@ app.factory('mapFact', function($rootScope) {
                         return;
                     }
                     //to get angle: 
-
-
-
                     ctx.lineWidth = 5;
                     var edges = this.diagram.edges,
                         iEdge = edges.length,
@@ -200,15 +216,15 @@ app.factory('mapFact', function($rootScope) {
                     }
 
                     // sites
-                    ctx.beginPath();
-                    ctx.fillStyle = '#44f';
-                    var sites = this.sites,
-                        iSite = sites.length;
-                    while (iSite--) {
-                        v = sites[iSite];
-                        ctx.rect(v.x - 2 / 3, v.y - 2 / 3, 2, 2);
-                    }
-                    ctx.fill();
+                    // ctx.beginPath();
+                    // ctx.fillStyle = '#44f';
+                    // var sites = this.sites,
+                    //     iSite = sites.length;
+                    // while (iSite--) {
+                    //     v = sites[iSite];
+                    //     ctx.rect(v.x - 2 / 3, v.y - 2 / 3, 2, 2);
+                    // }
+                    // ctx.fill();
                 },
                 getEdgeGrad: function(e) {
                     console.log('EDGEGRAD', e);
@@ -236,11 +252,12 @@ app.factory('mapFact', function($rootScope) {
                         dest = this.findCell(e.rSite.x, e.rSite.y),
                         ang = Math.atan((e.rSite.y - e.lSite.y) / (e.rSite.x - e.lSite.x)) + (0 * Math.PI / 2),
                         midPt = { x: (e.rSite.x + e.lSite.x) / 2, y: (e.rSite.y - e.lSite.y) },
-                        dh = 5 * Math.sin(ang),
-                        dw = 5 * Math.cos(ang);
+                        dh = 2.5 * Math.sin(ang),
+                        dw = 2.5 * Math.cos(ang);
                     if (ang > Math.PI) {
                         ang = Math.PI - ang;
                     }
+                    ang = 0 - ang;
                     console.log('SOURCE', source, 'DEST', dest, 'src', this.cellIdFromPoint(e.lSite.x, e.lSite.y), 'd', this.cellIdFromPoint(e.rSite.x, e.rSite.y), 'full input', e);
                     grad.xi = midPt.x - dw;
                     grad.xf = midPt.x + dw;
@@ -258,27 +275,17 @@ app.factory('mapFact', function($rootScope) {
                     var ctx = this.canvas.getContext('2d');
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
-                        var newName = null;
-                        if (cell.isLand) {
-                            var isUnique = false; //default this to false, set to true if our name we generate is indeed unique
-                            while (!isUnique) {
-                                newName = countries.names[Math.floor(Math.random() * countries.names.length)];
-                                if (Math.random() > 0.7) {
-                                    newName = countries.prefs[Math.floor(Math.random() * countries.prefs.length)] + ' ' + newName;
-                                }
-                                //Now check if we already have this name
-                                isUnique = this.countryNames.indexOf(newName) < 0;
-                            }
-                            this.countryNames.push(newName);
-                            console.log('creating country ',newName)
-                            var textBoxWid = ctx.measureText(newName).width+4;
+                        if (cell.name && cell.isLand) {
+                            this.countryNames.push(cell.name);
+                            console.log('creating country ', cell.name)
+                            var textBoxWid = ctx.measureText(cell.name).width + 4;
                             ctx.fillStyle = '#fed';
-                            console.log('CELL LABEL DIMS FOR CELL',n,':',Math.floor(cell.site.x-(textBoxWid / 2)-2),Math.floor(cell.site.y-13),textBoxWid,13,' NAME WID:',textBoxWid)
-                            ctx.fillRect(Math.floor(cell.site.x-(textBoxWid / 2)-2),Math.floor(cell.site.y-13),textBoxWid,13);//country label background
+                            console.log('CELL LABEL DIMS FOR CELL', n, ':', Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13, ' NAME WID:', textBoxWid)
+                            ctx.fillRect(Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13); //country label background
                             ctx.fillStyle = '#000'
                             ctx.font = '10px Arial';
-                            ctx.fillText(newName, cell.site.x - (textBoxWid / 2), cell.site.y-2)
-                            cell.country = newName;
+                            ctx.fillText(cell.name, cell.site.x - (textBoxWid / 2), cell.site.y - 2)
+                            cell.country = cell.name;
                         }
                     }
 

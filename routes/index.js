@@ -1,10 +1,11 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express'),
+    router = express.Router(),
+    path = require('path'),
+    models = require('../models/'),
+    session = require('client-sessions');
 
-router.get('/',function(req,res,next){
-	res.sendFile('index.html',{"root":'./views'});
+router.get('/', function(req, res, next) {
+    res.sendFile('index.html', { "root": './views' });
 });
-router.get('/m',function(req,res,next){
-	res.sendFile('mobile.html',{"root":'./views'});
-});
-module.exports=router;
+
+module.exports = router;
