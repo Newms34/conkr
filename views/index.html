@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Conkr!</title>
+    <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+
+<body ng-app='conkr' ng-controller='conkrcon' ng-cloak>
+<label for='numCouns'>Average number of countries:</label> <input type="number" name='numCouns' ng-model='numCountries' ng-change='newMap()'><hr/>
+<label for='smoothing'>Smoothing:</label> <input type="range" min=0 max=100 name='smoothing' ng-model='smoothing' ng-change='newMap()'><hr/>
+<canvas width="{{win.w}}" height="{{win.h}}"></canvas>
+
+    <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/bootbox.js/bootbox.js"></script>
+    <script src="/angular/angular.min.js"></script>
+    <script src="/socket.io-client/dist/socket.io.js"></script>
+    <script src="./js/all.js"></script>
+</body>
+
+</html>
