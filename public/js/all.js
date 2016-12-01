@@ -2127,22 +2127,22 @@ Voronoi.prototype.compute = function(sites, bbox) {
     };
 var app = angular.module('conkr', []).controller('conkrcon', function($scope, chatFact,mapFact) {
     $scope.win = {
-        w: $(window).width() * .95,
-        h: $(window).height() * .95
-    }
+        w: $(window).width() * 0.95,
+        h: $(window).height() * 0.95
+    };
     $scope.gameCreateLoad = true;
     $scope.gameSettingsPanel = 0;
     $scope.numCountries = 20;
     $scope.map = mapFact.GetVoronoi($scope.win.h,$scope.win.w,$scope.numCountries);
     $scope.newMap = function(){
-        var smootz =101-$scope.smoothing,numZones = Math.round($scope.numCountries/.3);
+        var smootz =101-$scope.smoothing,numZones = Math.round($scope.numCountries/0.3);
         $scope.map = mapFact.GetVoronoi($scope.win.h,$scope.win.w,numZones,smootz);
         $scope.map.init();
         $scope.gameCreateLoad = false;
-    }
+    };
     $scope.avgCounInfo = function(){
-        bootbox.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.')
-    }
+        bootbox.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
+    };
 });
 
 app.factory('chatFact', function($rootScope) {
@@ -2333,7 +2333,15 @@ app.factory('mapFact', function($rootScope) {
                         }
                     }
                 },
-
+                clearMap: function() {
+                    //to blank a map if necessary
+                    var ctx = this.canvas.getContext('2d');
+                    // background
+                    ctx.globalAlpha = 1;
+                    ctx.rect(0, 0, this.canvas.width, this.canvas.height);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                },
                 render: function() {
                     var ctx = this.canvas.getContext('2d');
                     // background
@@ -2401,8 +2409,6 @@ app.factory('mapFact', function($rootScope) {
                             start: '#35a',
                             end: '#35a'
                         },
-                        // source = this.diagram.cells[this.cellIdFromPoint(e.lSite.x, e.lSite.y)],
-                        // dest = this.diagram.cells[this.cellIdFromPoint(e.rSite.x, e.rSite.y)],
                         source = this.findCell(e.lSite.x, e.lSite.y),
                         dest = this.findCell(e.rSite.x, e.rSite.y),
                         ang = Math.atan((e.rSite.y - e.lSite.y) / (e.rSite.x - e.lSite.x)) + (0 * Math.PI / 2),
@@ -2432,14 +2438,14 @@ app.factory('mapFact', function($rootScope) {
                         var cell = this.diagram.cells[n];
                         if (cell.name && cell.isLand) {
                             this.countryNames.push(cell.name);
-                            console.log('creating country ', cell.name)
+                            console.log('creating country ', cell.name);
                             var textBoxWid = ctx.measureText(cell.name).width + 4;
                             ctx.fillStyle = '#fed';
-                            console.log('CELL LABEL DIMS FOR CELL', n, ':', Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13, ' NAME WID:', textBoxWid)
+                            console.log('CELL LABEL DIMS FOR CELL', n, ':', Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13, ' NAME WID:', textBoxWid);
                             ctx.fillRect(Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13); //country label background
-                            ctx.fillStyle = '#000'
+                            ctx.fillStyle = '#000';
                             ctx.font = '10px Arial';
-                            ctx.fillText(cell.name, cell.site.x - (textBoxWid / 2), cell.site.y - 2)
+                            ctx.fillText(cell.name, cell.site.x - (textBoxWid / 2), cell.site.y - 2);
                             cell.country = cell.name;
                         }
                     }
@@ -2479,7 +2485,7 @@ app.factory('mapFact', function($rootScope) {
                     var items = this.treemap.retrieve({ x: x, y: y }),
                         iItem = items.length,
                         cells = this.diagram.cells,
-                        cell, cellid;
+                        cell, cellid, cellNums = this.diagram.cells.length;
                     while (iItem--) {
                         cellid = items[iItem].cellid;
                         cell = cells[cellid];
@@ -2489,7 +2495,16 @@ app.factory('mapFact', function($rootScope) {
                     }
                     return undefined;
                 },
-
+                cellByPoint: function(x, y) {
+                    var cells = this.diagram.cells,
+                        cell, cellNum = this.diagram.cells.length;
+                    while (--cellNum) {
+                        cell = cells[cellNum];
+                        if (cell.pointIntersection(x, y) > 0) {
+                            return cellNum;
+                        }
+                    }
+                },
                 renderCell: function(id, fillStyle, strokeStyle) {
                     if (id === undefined) {
                         return;
@@ -2538,8 +2553,74 @@ app.factory('mapFact', function($rootScope) {
                             col = '#35a';
                             eCol = '#92a8c8';
                         }
-                        this.renderCell(n, col, eCol)
+                        this.renderCell(n, col, eCol);
                     }
+                },
+                getContinents : function() {
+                    for (var i = 0; i < this.diagram.cells.length; i++) {
+                        this.findNeighbors(i, true);
+                    }
+                    return this.allConts;
+                },
+                doneCouns : [], //if a country's in here, don't re-add it.
+                currCont : [],
+                allConts : [],
+                findNeighbors : function(c, mode) {
+                    if (mode) {
+                        if (this.currCont && this.currCont.length) this.allConts.push(this.currCont);
+                        this.currCont = [];
+                    }
+                    m = false;
+                    var names = [this.diagram.cells[c].name];
+                    console.log('for cell', c, 'names starts as', names);
+                    if (!this.diagram.cells[c].name) {
+                        return;
+                    }
+                    if (this.doneCouns.indexOf(this.diagram.cells[c].name) > -1) {
+                        console.log('cell', this.diagram.cells[c].name, 'already recorded.', this.doneCouns);
+                        return names;
+                    }
+                    this.doneCouns.push(this.diagram.cells[c].name);
+                    this.currCont.push(this.diagram.cells[c].name);
+                        // for any cell with id c, find the neighbors. For each neighbor, find THAT cell's neighbors. If said neighbor is already in this.doneCouns, ignore
+                        //first, short-circuit if cell is already recorded;
+                    var kids = [];
+                    for (var i = 0; i < this.diagram.cells[c].halfedges.length; i++) {
+                        if (!this.diagram.cells[c].halfedges[i].edge.rSite || !this.diagram.cells[c].halfedges[i].edge.lSite) {
+                            //either left or right side is not defined. Cannot parse
+                            continue;
+                        }
+                        var neighborNum = this.cellByPoint(this.diagram.cells[c].halfedges[i].edge.rSite.x, this.diagram.cells[c].halfedges[i].edge.rSite.y);
+                        if (this.diagram.cells[neighborNum] && this.diagram.cells[c].name == this.diagram.cells[neighborNum].name) {
+                            //switch neighbor dir
+                            neighborNum = this.cellByPoint(this.diagram.cells[c].halfedges[i].edge.lSite.x, this.diagram.cells[c].halfedges[i].edge.lSite.y);
+                        }
+                        if (typeof neighborNum == 'undefined' || !this.diagram.cells[neighborNum]) {
+                            //for whatever reason, neighborNum is invalid
+                            continue;
+                        }
+                        if (this.diagram.cells[neighborNum].name && this.doneCouns.indexOf(this.diagram.cells[neighborNum].name) == -1) {
+                            kids.push(neighborNum);
+                        }
+                    }
+                    if (kids.length) {
+                        console.log('cell', c, 'has neighbors ("kids")', kids);
+                    } else {
+                        console.log('cell', c, 'has NO kids');
+                    }
+                    var me = this;
+                    kids.forEach(function(k) {
+                        var naybz = me.findNeighbors(k);
+                        naybz.forEach(function(n) {
+                            if (me.doneCouns.indexOf(n) == -1) {
+                                names.push(n);
+                            }
+                        });
+                    });
+                    return names;
+                },
+                findNaybz:function(c,m){
+                    return findNeighbors(c,m);
                 }
             };
             return newVor;
