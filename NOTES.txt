@@ -132,4 +132,6 @@ move name generation into initial cell generation, and separate name generation 
 write way to determine if cell A & B are neighbors (will be used for attacks.)
 begin Mongo stuffs.
 Move battle calculations to the BACK end for somewhat more secure game
+RE-Add socket.io (for chat!)
+Should user be able to do multiple games concordantly?
 */

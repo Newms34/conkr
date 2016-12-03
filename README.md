@@ -14,7 +14,7 @@ It's multiplayer Risk™! With random country generation! Or at least it will be
 For now, just look at the pretty countries. Soon there'll actually be stuff to do.
 
 ##Server
-The server runs on a full JavaScript stack. As of right now, it does *not* use a database, but I'll probably use that eventually to store games in progress
+The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.
 
 ##Technical Stuff
 Conkr uses (or *will* use) the following technologies:
@@ -24,6 +24,7 @@ Conkr uses (or *will* use) the following technologies:
  - Websockets, via socket.io, to allow quick communication between the server, phones, and game.
  - HTML5's Canvas.
  - The map itself is generated with something called a [Voronoi Diagram](https://en.wikipedia.org/wiki/Voronoi_diagram). I'm not completely sure how this works, but suffice it to say it produces nice, random shapes.
+ - Socket.io for quick chat communication.
  - MongoDB for storing currently in-progress games.
 
 ##Credits
