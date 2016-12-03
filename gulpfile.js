@@ -3,11 +3,7 @@ Gulp is a node package that concatenates your files. It basically can convert a 
 More importantly, it also means our user's browser only needs to fetch ONE file (all.min.js), instead of... however many i create. 
 */
 
-
-// First, we'll just include gulp itself.
 var gulp = require('gulp');
-
-// Include Our Plugins
 var jshint = require('gulp-jshint');
 var sass = require('gulp-sass');
 var concat = require('gulp-concat');
@@ -17,6 +13,7 @@ var kid = require('child_process');
 var ps = require('ps-node');
 var gutil = require('gulp-util');
 var cleany = require('gulp-clean-css')
+var babel = require('gulp-babel');
 // Lint Task
 gulp.task('lint', function() {
     return gulp.src(['build/js/controllers/*.js','build/js/factories/*.js'])
@@ -38,6 +35,7 @@ gulp.task('scripts', function() {
         .pipe(concat('all.js'))
         .pipe(gulp.dest('public/js'))
         .pipe(rename('all.min.js'))
+        .pipe(babel({presets: ['es2015']}))
         .pipe(uglify({ mangle: false }).on('error', gutil.log))
         .pipe(gulp.dest('public/js'));
 });

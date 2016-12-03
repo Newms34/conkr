@@ -30,5 +30,3 @@ Conkr uses (or *will* use) the following technologies:
  - Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.
  - Conkr was written by me, [Dave](https://github.com/Newms34). 
  - Other various libraries/technologies are from their respective creators. I'm just usin em.
-
-TO DO: move name generation into initial cell generation, and separate name generation and placing. Will help when we create stuff to redraw in-progress map

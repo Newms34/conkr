@@ -293,9 +293,11 @@ app.factory('mapFact', function($rootScope) {
                             ctx.fillText(cell.name, cell.site.x - (textBoxWid / 2), cell.site.y - 2);
                             cell.country = cell.name;
                         }
+                        cell.army = {
+                            num: 0,
+                            usr: null
+                        };
                     }
-
-
                 },
                 findCell: function(x, y) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
@@ -401,16 +403,24 @@ app.factory('mapFact', function($rootScope) {
                         this.renderCell(n, col, eCol);
                     }
                 },
-                getContinents : function() {
+                getCellByName:function(n){
+                    for (var i=0;i<this.diagram.cells.length;i++){
+                        if(this.diagram.cells[i].name == n) return this.diagram.cells[i];
+                    }
+                    return false;
+                },
+                getContinents: function() {
+                    this.doneCouns = [];
+                    this.allConts = [];
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         this.findNeighbors(i, true);
                     }
                     return this.allConts;
                 },
-                doneCouns : [], //if a country's in here, don't re-add it.
-                currCont : [],
-                allConts : [],
-                findNeighbors : function(c, mode) {
+                doneCouns: [], //if a country's in here, don't re-add it.
+                currCont: [],
+                allConts: [],
+                findNeighbors: function(c, mode) {
                     if (mode) {
                         if (this.currCont && this.currCont.length) this.allConts.push(this.currCont);
                         this.currCont = [];
@@ -427,8 +437,8 @@ app.factory('mapFact', function($rootScope) {
                     }
                     this.doneCouns.push(this.diagram.cells[c].name);
                     this.currCont.push(this.diagram.cells[c].name);
-                        // for any cell with id c, find the neighbors. For each neighbor, find THAT cell's neighbors. If said neighbor is already in this.doneCouns, ignore
-                        //first, short-circuit if cell is already recorded;
+                    // for any cell with id c, find the neighbors. For each neighbor, find THAT cell's neighbors. If said neighbor is already in this.doneCouns, ignore
+                    //first, short-circuit if cell is already recorded;
                     var kids = [];
                     for (var i = 0; i < this.diagram.cells[c].halfedges.length; i++) {
                         if (!this.diagram.cells[c].halfedges[i].edge.rSite || !this.diagram.cells[c].halfedges[i].edge.lSite) {
@@ -464,8 +474,8 @@ app.factory('mapFact', function($rootScope) {
                     });
                     return names;
                 },
-                findNaybz:function(c,m){
-                    return findNeighbors(c,m);
+                findNaybz: function(c, m) {
+                    return findNeighbors(c, m);
                 }
             };
             return newVor;

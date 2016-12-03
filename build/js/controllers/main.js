@@ -1,4 +1,4 @@
-var app = angular.module('conkr', []).controller('conkrcon', function($scope, chatFact,mapFact) {
+var app = angular.module('conkr', []).controller('conkrcon', function($scope, fightFact,mapFact) {
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
