@@ -10,47 +10,80 @@
 <body ng-app='conkr' ng-controller='conkrcon' ng-cloak>
     <div class='panel panel-primary col-md-4 col-md-offset-4' ng-show='gameCreateLoad'>
         <div class='panel-heading'>
-            <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click = 'gameSettingsPanel=0'>
+            <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click='gameSettingsPanel=0'>
                 <h3>New Game</h3></div>
-            <div class='tab' ng-class="{'tab-inact':gameSettingsPanel!=1}" ng-click = 'gameSettingsPanel=1'>
+            <div class='tab' ng-class="{'tab-inact':gameSettingsPanel!=1}" ng-click='gameSettingsPanel=1'>
                 <h3>Load Game</h3></div>
-            <div class='tab tab-right' ng-class="{'tab-inact':gameSettingsPanel!=2}" ng-click = 'gameSettingsPanel=2'>
+            <div class='tab tab-right' ng-class="{'tab-inact':gameSettingsPanel!=2}" ng-click='gameSettingsPanel=2'>
                 <h3>Save Game</h3></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
-            <h4>Create a new game:</h4>
-            <div class='row form-group'>
-                <label for='numCouns'>Average number of countries: </label>
-                <input type="number" name='numCouns' ng-model='numCountries'><button class='btn btn-sm btn-danger' ng-click='avgCounInfo()'>?</button>
+            <div class='col-md-12 no-room'>
+                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode()'>Make new map</div>
+                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode()'>Load map</div>
             </div>
-            <hr/>
-            <div class='row form-group'>
-                <label for='smoothing'>Smoothing:</label>
-                <input type="range" min=0 max=100 name='smoothing' ng-model='smoothing'>
-            </div>
+            <hr>
+            <div ng-show='newNew' class='panel panel-info panel-body'>
+                <div class='row form-group'>
+                    <div class='col-md-3'>
+                        <label for='numCouns'>Average number of countries: </label>
+                    </div>
+                    <div class='col-md-7'>
+                        <input type="number" name='numCouns' ng-model='numCountries'>
+                    </div>
+                    <div class='col-md-2'>
+                        <button class='btn btn-sm btn-danger' ng-click='avgCounInfo()'>?</button>
+                    </div>
+                </div>
                 <hr/>
-            <div class='row form-group col-md-4 col-md-offset-4'>
-                <button ng-click='newMap()' class='btn btn-primary'>Do it!</button>
+                <div class='row form-group'>
+                    <div class='col-md-3'>
+                        <label for='smoothing'>Smoothing:</label>
+                    </div>
+                    <div class='col-md-7'>
+                        <input type="range" min=0 max=100 name='smoothing' ng-model='smoothing'>
+                    </div>
+                    <div class='col-md-2'>
+                        <button class='btn btn-sm btn-danger' ng-click='smoothInfo()'>?</button>
+                    </div>
+                </div>
+                <hr/>
+                <div class='row form-group col-md-4 col-md-offset-4'>
+                    <button ng-click='newMap()' class='btn btn-primary'>Do it!</button>
+                </div>
+            </div>
+            <div ng-show='!newNew' class='panel panel-info panel-body'>
+                <table class='table table-striped load-map-table'>
+                    <thead>
+                        <tr class='info'>
+                            <th>Map Id</th><th>Countries</th><th># of Countries</th><th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody ng-show='potentialMaps!="BLANK"'>
+                        <tr  ng-repeat = 'm in potentialMaps'>
+                            <td>{{m.id}}</td><td>{{m.mapData.countryNames.join(', ')}}</td><td>{{m.mapData.countryNames.length}}</td><td><button class='btn btn-primary' ng-click='pickMap(m.mapData)'>Load</button></td>
+                        </tr>
+                    </tbody>
+                    <tbody ng-show='potentialMaps=="BLANK"'>
+                        <h4>No maps yet!</h4>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==1'>
             <h4>Load a game:</h4>
             <div class='row form-group'>
-    
             </div>
             <hr/>
             <div class='row form-group'>
-
             </div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
             <h4>Save a new game:</h4>
             <div class='row form-group'>
-
             </div>
             <hr/>
             <div class='row form-group'>
-
             </div>
         </div>
     </div>

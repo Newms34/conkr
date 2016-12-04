@@ -127,3 +127,4 @@ router.get('/logout', function(req, res, next) {
     req.session.reset();
     res.send('logged')
 })
+

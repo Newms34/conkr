@@ -3,8 +3,8 @@ var mongoose = require('mongoose');
 var skillSchema = new mongoose.Schema({
     mapId: String, //which map this applies to
     armies: [{
-        user: String,
-        country: Number,//country as number
+        user: String,//userId
+        country: Number,//country as number (really, the cell id)
         num:Number,//number (i.e., strength) of army
     }]
 }, { collection: 'Game' });

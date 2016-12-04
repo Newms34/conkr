@@ -134,4 +134,8 @@ begin Mongo stuffs.
 Move battle calculations to the BACK end for somewhat more secure game
 RE-Add socket.io (for chat!)
 Should user be able to do multiple games concordantly?
+
+where do we actually want to store cell data? in game or map model? and how?
+store 'blank' version of map in map, then store just army info in game?
+need TWO separate load fns: 1 to load a blank map, 1 to load game-in-progress
 */

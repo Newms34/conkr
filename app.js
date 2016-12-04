@@ -12,17 +12,21 @@ app.set('view engine', 'html');
 
 //use stuff
 app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({
-    extended: false
+    extended: false,
+    limit:'50mb'
 }));
+// app.use(express.json({limit: '50mb'}));
+// app.use(express.urlencoded({limit: '50mb'}));
+// app.use(bodyParser({limit: '50mb'}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'node_modules')));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(session({
     cookieName: 'session', // cookie name dictates the key name added to the request object
-    secret: 'scriptrix musica optima ut ei marcescem et eam felicem esse spero', // should be a large unguessable string
+    secret: 'doctrix musica optima ut ei marcescem et eam felicem esse spero', // should be a large unguessable string
     duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
     ephemeral: false, // when true, cookie expires when the browser closes
     httpOnly: true, // when true, cookie is not accessible from javascript

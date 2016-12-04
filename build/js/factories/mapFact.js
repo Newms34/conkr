@@ -1,4 +1,4 @@
-app.factory('mapFact', function($rootScope) {
+app.factory('mapFact', function($rootScope, $http) {
     var smoothAmt = 100,
         countries = {
             names: ['Nasteaburg', 'Dutralor', 'Eslos', 'Oglyae', 'Cruiria', 'Whuadal', 'Ethua', 'Estaria', 'Shiod', 'Skesh', 'Froe', 'Glen', 'Yacluoria', 'Desmayyae', 'Oskana', 'Echea', 'Pleiles', 'Ploussau', 'Usnea', 'Oprijan', 'Fleol', 'Spijan', 'Flie Stril', 'Iecheidal', 'Beplayburg', 'Raprana', 'Qescyae', 'Smeuqua', 'Tresil', 'Ospary', 'Eflary', 'Bloek', 'Pral', 'Cluyx Smea', 'Cegriydal', 'Ethoeque', 'Pacril', 'Justril', 'Stoynga', 'Swuyque', 'Osnyae', 'Estron', 'Flauh', 'Clyae', 'Theul Plar', 'Osmoirus', 'Osliuji', 'Qetrington', 'Cuflus', 'Brioca', 'Skuocia', 'Ashad', 'Ecrar', 'Snoyg', 'Drington', 'Cresh', 'Cutraynia', 'Qechiavania', 'Pechary', 'Jadrar', 'Striurus', 'Smoiburg', 'Aspil', 'Ascington', 'Thain', 'Brex', 'Prax', 'Gusmaonga', 'Jestruibia', 'Woscyae', 'Vascea', 'Dreyssau', 'Flecia', 'Aglos', 'Estyae', 'Shiyk', 'Thesh', 'Glaeq', 'Slea', 'Fasmiulia', 'Pagluorhiel', 'Wachil', 'Wegrya', 'Snobar', 'Smeobar', 'Athana', 'Ogresh', 'Smait', 'Whus', 'Zusleuland', 'Ofleilor', 'Beflington', 'Cusmyae', 'Swobia', 'Thiostan', 'Uclain', 'Adryae', 'Frio', 'Spington', 'Gloir', 'Star', 'Fustredor', 'Pucrourhiel', 'Quplana', 'Tasnye', 'Spoubia', 'Griycia', 'Uchos', 'Achyae', 'Gruoz', 'Smijan', 'Swiur', 'Crary'],
@@ -6,6 +6,17 @@ app.factory('mapFact', function($rootScope) {
         };
 
     return {
+        loadMaps: function() {
+            // load all maps so we can pick one.
+            return $http.get('/map/loadMaps').then(function(r) {
+                return r;
+            })
+        },
+        loadGame: function() {
+            return $http.get('/game/loadGame').then(function(r) {
+                return r;
+            })
+        },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
                 voronoi: new Voronoi(),
@@ -15,6 +26,7 @@ app.factory('mapFact', function($rootScope) {
                 bbox: { xl: 0, xr: wid, yt: 0, yb: hi },
                 sites: [],
                 countryNames: [],
+                cellCenters: [],
                 timeoutDelay: 30,
                 numsRelaxed: 100,
 
@@ -22,7 +34,23 @@ app.factory('mapFact', function($rootScope) {
                     this.canvas = document.querySelector('canvas');
                     this.randomSites(numCells, true);
                 },
-
+                save: function() {
+                    var mapData = {
+                        countryNames: this.countryNames,
+                        bbox: this.bbox,
+                        sites: this.sites,
+                        numsRelaxed: this.numsRelaxed,
+                        diagram: this.diagram,
+                        doneCouns: this.doneCouns,
+                        currCont: this.currCont,
+                        cellCenters: this.cellCenters,
+                        img: this.canvas.toDataURL()
+                    }
+                    console.log('TO SAVE:', mapData)
+                    $http.post('/map/newGame', mapData).then(function(r) {
+                        console.log(r);
+                    })
+                },
                 clearSites: function() {
                     this.compute([]);
                 },
@@ -102,7 +130,44 @@ app.factory('mapFact', function($rootScope) {
                         this.render();
                         this.makeCellNames();
                         this.getCellNames();
+                        this.doCellSites();
                     }
+                },
+                doCellSites: function() {
+                    this.diagram.cells.forEach((c) => {
+                        if (c.name || c.country) {
+                            this.cellCenters.push({
+                                x: c.site.x,
+                                y: c.site.y,
+                                name: c.name || c.country
+                            })
+                        }
+                    })
+                },
+                initLoad: function(im) {
+                    this.canvas = document.querySelector('canvas');
+                    this.clearMap();
+                    console.log('DATA URL', img)
+                        // for (var i = 0; i < this.diagram.cells.length; i++) {
+                        //     for (j = 0; j < this.diagram.cells[i].halfedges.length; j++) {
+                        //         this.diagram.cells[i].halfedges[j].getStartpoint = function() {
+                        //             return this.edge.lSite === this.site ? this.edge.va : this.edge.vb;
+                        //         };
+                        //         this.diagram.cells[i].halfedges[j].getEndpoint = function() {
+                        //             return this.edge.lSite === this.site ? this.edge.vb : this.edge.va;
+                        //         };
+                        //     }
+                        // }
+                        // this.doAllCells();
+                        // this.render();
+                        // this.getCellNames();
+                    
+                    var ctx = this.canvas.getContext('2d');
+                    var img = new Image;
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0); // Or at whatever offset you like
+                    };
+                    img.src = im;
                 },
                 makeCellNames: function() {
                     for (var n = 0; n < this.diagram.cells.length; n++) {
@@ -112,6 +177,7 @@ app.factory('mapFact', function($rootScope) {
                             var isUnique = false;
                             while (!isUnique) {
                                 newName = countries.names[Math.floor(Math.random() * countries.names.length)];
+                                // optional chance for country "prefix"
                                 if (Math.random() > 0.7) {
                                     newName = countries.prefs[Math.floor(Math.random() * countries.prefs.length)] + ' ' + newName;
                                 }
@@ -264,7 +330,7 @@ app.factory('mapFact', function($rootScope) {
                         ang = Math.PI - ang;
                     }
                     ang = 0 - ang;
-                    console.log('SOURCE', source, 'DEST', dest, 'src', this.cellIdFromPoint(e.lSite.x, e.lSite.y), 'd', this.cellIdFromPoint(e.rSite.x, e.rSite.y), 'full input', e);
+                    // console.log('SOURCE', source, 'DEST', dest, 'src', this.cellIdFromPoint(e.lSite.x, e.lSite.y), 'd', this.cellIdFromPoint(e.rSite.x, e.rSite.y), 'full input', e);
                     grad.xi = midPt.x - dw;
                     grad.xf = midPt.x + dw;
                     grad.yi = midPt.y - dh;
@@ -282,7 +348,6 @@ app.factory('mapFact', function($rootScope) {
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
                         if (cell.name && cell.isLand) {
-                            this.countryNames.push(cell.name);
                             console.log('creating country ', cell.name);
                             var textBoxWid = ctx.measureText(cell.name).width + 4;
                             ctx.fillStyle = '#fed';
@@ -371,6 +436,7 @@ app.factory('mapFact', function($rootScope) {
                         nHalfedges = halfedges.length,
                         v = halfedges[0].getStartpoint();
                     ctx.moveTo(v.x, v.y);
+
                     for (var iHalfedge = 0; iHalfedge < nHalfedges; iHalfedge++) {
                         v = halfedges[iHalfedge].getEndpoint();
                         ctx.lineTo(v.x, v.y);
@@ -403,9 +469,9 @@ app.factory('mapFact', function($rootScope) {
                         this.renderCell(n, col, eCol);
                     }
                 },
-                getCellByName:function(n){
-                    for (var i=0;i<this.diagram.cells.length;i++){
-                        if(this.diagram.cells[i].name == n) return this.diagram.cells[i];
+                getCellByName: function(n) {
+                    for (var i = 0; i < this.diagram.cells.length; i++) {
+                        if (this.diagram.cells[i].name == n) return this.diagram.cells[i];
                     }
                     return false;
                 },

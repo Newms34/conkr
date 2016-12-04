@@ -51,3 +51,44 @@ router.post('/newArmies', function(req, res, next) {
     })
     res.send(req.body);
 });
+router.post('/doFight', function(req, res, next) {
+    var ca = req.body.ca,
+        cd = req.body.cd,
+        ra = req.body.ra,
+        rd = req.body.rd,
+        aRolls = [],
+        dRolls = [],
+        conflicts,
+        results;
+    for (var i = 0; i < ra; i++) {
+        //roll attacker
+        aRolls.push(Math.ceil(Math.floor() * 6));
+    }
+    aRolls.sort((a, b) => {
+        return a > b
+    });
+    if (aRolls.length > 2) aRolls.pop(); //for attacker, only first two die count. Pop off the lowest one if it's included.
+    for (i = 0; i < rd; i++) {
+        //roll defender
+        dRolls.push(Math.ceil(Math.floor() * 6));
+    }
+    dRolls.sort((a, b) => {
+        return a > b
+    });
+    //number of 'conflicts' (i.e., one A army vs 1 D army is determined by min number of aRolls and dRolls.length)
+    conflicts = (Math.min(aRolls.length, dRolls.length));
+    for (i = 0; i < conflicts; i++) {
+        results.push(aRolls[i] > dRolls[i]); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
+    }
+    results.forEach((r) => {
+        return r ? cd.army.num-- : ca.army.num--
+    });
+    if (!cd.army.num) {
+        //zone 'conquered'
+        cd.army.usr = ca.army.usr;
+    }
+    return {
+        ca: ca,
+        cd: cd
+    }
+})
