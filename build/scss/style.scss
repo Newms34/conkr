@@ -121,8 +121,50 @@ body {
     background:#f00;
     border-radius:50%;
 }
-.cornerbuttz{
+.log-butt{
     position:fixed;
     top:5px;
     right:5px;
+    z-index:100;
+}
+.chat-butt{
+    position:fixed;
+    left:38%;
+    bottom:5px;
+    z-index:100;
+}
+.chat-win{
+    position:fixed;
+    bottom:0px;
+    left:0px;
+    width: 40%;
+    height:200px;
+    background:rgba(0,0,0,.5);
+    z-index:50;
+}
+.talk-table{
+    height: 95%;
+    background:rgba(0,0,0,.5);
+    // overflow-y:scroll;
+    color:#fff;
+    width:100%;
+    & .input-cont{
+        color:#000;
+        bottom:0px;
+        width:100%;
+        position:absolute;
+    }
+}
+.chat-cont{
+    overflow-y: scroll;
+    height:80%;
+}
+
+.inv-chat{
+    background:rgba(255,255,255,.5);
+    color:#000;
+}
+.sys-msg{
+    color:#c00;
+    background:#eee;
 }

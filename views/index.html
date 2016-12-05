@@ -8,7 +8,11 @@
 </head>
 
 <body id='main-bod' ng-app='conkr' ng-controller='conkrcon' ng-cloak>
-    <button class='btn btn-danger cornerbuttz' ng-click='logout()'>logout</button>
+    <button class='btn btn-success chat-butt' ng-click='showChat = !showChat'>&#128172;</button>
+    <button class='btn btn-danger log-butt' ng-click='logout()'>logout</button>
+    <div class='chat-win' ng-show='showChat'>
+        <div ng-include="'chat.html'" style='width:100%;height:100%;'></div>
+    </div>
     <div class='panel panel-primary col-md-4 col-md-offset-4' ng-show='gameCreateLoad'>
         <div class='panel-heading'>
             <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click='gameSettingsPanel=0'>
