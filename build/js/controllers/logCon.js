@@ -93,7 +93,9 @@ app.controller('loginCont', function($scope, miscFact) {
                     if (d.data == 'no') {
                         bootbox.alert('Login error: please check your username and/or password');
                     } else {
-                        bootbox.alert('Welcome back!')
+                        bootbox.alert('Welcome back!', function(p) {
+                            window.location.assign('../');
+                        })
                     }
                 })
             }
@@ -104,7 +106,9 @@ app.controller('loginCont', function($scope, miscFact) {
             if (d.data == 'no') {
                 bootbox.alert('Login error: please check your username and/or password');
             } else {
-                window.location.assign('../')
+                bootbox.alert('Welcome back!', function(p) {
+                    window.location.assign('../');
+                })
             }
         })
     }
