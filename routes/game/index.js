@@ -92,3 +92,21 @@ router.post('/doFight', function(req, res, next) {
         cd: cd
     }
 })
+router.get('/loadGame/gameid', function(req, res, next) {
+    mongoose.model('Game').find({ 'gameId': req.params.gameid }, function(err, res) {
+        if (err) res.send('ERR' + err);
+        if (!res || !res.length) res.send('Not found!');
+        mongoose.model('Map').find({ 'id': res[0].mapId }, function(errm, resm) {
+            res.send({
+                game: res,
+                map: resm
+            })
+        })
+    })
+})
+router.post('/saveGame', function(req, res, next) {
+    mongoose.model('Game').findOneAndUpdate({ 'gameId': req.body.gameId }, req.body.data, { upsert: true }, function(err, doc) {
+        if (err) return res.send(500, { error: err });
+        return res.send("succesfully saved");
+    });
+})

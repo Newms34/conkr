@@ -2125,18 +2125,164 @@ Voronoi.prototype.compute = function(sites, bbox) {
 
     return diagram;
     };
-var app = angular.module('conkr', []).controller('conkrcon', function($scope, fightFact, mapFact) {
+var app = angular.module('conkr', []).controller('chatController',function($scope,mapFact){
+	$scope.msgs = [];
+	$scope.user = null;
+	$scope.msgInp = '';
+	miscFact.getUsr().then(function(r){
+		if(!r.data||r.data=='none'){
+			throw new Error('User not found or not logged in!')
+		}else{
+			$scope.user = r.data;
+		}
+	})
+	socket.on('newMsg',function(msg){
+		if($scope.msgs.length>10){
+			$scope.msgs.shift();
+		}
+		$scope.msgs.push(msg)
+	})
+	$scope.sendMsg = function(){
+		socket.emit('sendMsg',{msg:$scope.msgInp,usr:$scope.user});
+	}
+})
+app.controller('loginCont', function($scope, miscFact) {
+    $scope.logMode = true;
+    $scope.pwdStren = 0;
+    $scope.passGud = {
+        len: 0,
+        caps: false,
+        lower: false,
+        num: false,
+        symb: false,
+        badWrd: false,
+        sameUn: false
+    };
+    $scope.dupUn = false;
+    $scope.checkDupUn = function() {
+        if (!$scope.regUser) return false;
+        miscFact.checkUnDup($scope.regUser).then(function(r) {
+            $scope.dupUn = r.data == 'bad';
+        });
+    }
+    $scope.getPwdStren = function() {
+        //how stronk is pwrd?
+        var str = 0,
+            pwd = $scope.regPwdOne,
+            badWrds = ['password', 'pass', '123', 'abc', 'admin'];
+        $scope.passGud = {
+            len: 0,
+            caps: false,
+            lower: false,
+            num: false,
+            symb: false,
+            badWrd: false,
+            sameUn: false
+        };
+        if (pwd.length > 16) {
+            str += 8;
+            $scope.passGud.len = 16;
+        } else if (pwd.length > 12) {
+            str += 6;
+            $scope.passGud.len = 12;
+        } else if (pwd.length > 8) {
+            str += 4;
+            $scope.passGud.len = 8;
+        } else if (pwd.length > 4) {
+            str += 2;
+            $scope.passGud.len = 4;
+        } else {
+            $scope.passGud.len = false;
+        }
+        //now particular symbols
+        if (pwd.match(/[A-Z]/)) {
+            str += 1;
+            $scope.passGud.caps = true;
+        }
+        if (pwd.match(/[a-z]/)) {
+            str += 1;
+            $scope.passGud.lower = true;
+        }
+        if (pwd.match(/[0-9]/)) {
+            str += 1;
+            $scope.passGud.num = true;
+        }
+        if (pwd.match(/!|@|#|\$|%|\/|\\|\^|&|\*|-|_/)) {
+            str += 1;
+            $scope.passGud.symb = true;
+        }
+        badWrds.forEach((w) => {
+            if (str > 1 && pwd.indexOf(w) > -1) {
+                //penalty for really common words.
+                str -= 2;
+                $scope.passGud.badWrd = true;
+            }
+        });
+        if ($scope.regUser == pwd && str > 2) {
+            str -= 3;
+            $scope.passGud.sameUn = true;
+        }
+        console.log(pwd, str, 'out of 12 is ', 100 * str / 12)
+        $scope.pwdStren = str;
+        console.log('ang var now', $scope.pwdStren)
+    }
+
+    // ${$scope.passGud.len>3?'&#10003;':'&#10007;'}
+    $scope.explPwd = function() {
+        bootbox.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
+    };
+    $scope.newUsr = function() {
+        miscFact.regNewUsr($scope.regUser, $scope.regPwdOne).then(function(r) {
+            if (r.data == 'DUPLICATE') {
+                bootbox.alert('Uh oh! Something went horribly wrong!');
+            } else {
+                //auto-login;
+                miscFact.login($scope.regUser, $scope.regPwdOne).then(function(d) {
+                    if (d.data == 'no') {
+                        bootbox.alert('Login error: please check your username and/or password');
+                    } else {
+                        bootbox.alert('Welcome back!')
+                    }
+                })
+            }
+        })
+    }
+    $scope.log = function() {
+        miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
+            if (d.data == 'no') {
+                bootbox.alert('Login error: please check your username and/or password');
+            } else {
+                window.location.assign('../')
+            }
+        })
+    }
+})
+
+var socket = io();
+app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
+    //before anything, check to see if we're logged in!
+    miscFact.chkLoggedStatus().then(function(r){
+        console.log('DATA',r)
+        if (!r.data) window.location.assign('./login');
+    })
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
     };
+    $scope.logout=function(){
+        miscFact.logout().then(function(){
+            window.location.assign('./login');
+        })
+    }
     $scope.gameCreateLoad = true;
     $scope.gameSettingsPanel = 0;
     $scope.newNew = true; //for new game creation, create a completely new map? 
     $scope.numCountries = 20;
     $scope.map = null;
+    $scope.gameId = null;
     $scope.potentialMaps = [];
     $scope.loadedMapImg = null;
+    $scope.user = null;
     $scope.newMap = function() {
         var smootz = 101 - $scope.smoothing,
             numZones = Math.round($scope.numCountries / 0.3);
@@ -2152,7 +2298,7 @@ var app = angular.module('conkr', []).controller('conkrcon', function($scope, fi
                 $scope.gameCreateLoad = true;
                 $scope.$digest();
             }
-        })
+        });
     };
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
@@ -2193,45 +2339,12 @@ app.factory('fightFact', function($rootScope, $http) {
             return Math.floor(c.army.num - attackPenalty);
         },
         doFight: function(ca, cd, ra, rd) {
-            //this will only run if the cells are adjacent (via a test in mapFact)
-            //ca: attacking cell; cd: defending cell; ra: rolls for attacker (army num - 1  max); rd: rolls for defender (army num)
-            // var aRolls = [],
-            //     dRolls = [],
-            //     conflicts,
-            //     results;
-            // for (var i = 0; i < ra; i++) {
-            //     //roll attacker
-            //     aRolls.push(Math.ceil(Math.floor() * 6));
-            // }
-            // aRolls.sort((a, b) => {
-            //     return a > b
-            // });
-            // if (aRolls.length > 2) aRolls.pop(); //for attacker, only first two die count. Pop off the lowest one if it's included.
-            // for (i = 0; i < rd; i++) {
-            //     //roll defender
-            //     dRolls.push(Math.ceil(Math.floor() * 6));
-            // }
-            // dRolls.sort((a, b) => {
-            //     return a > b
-            // });
-            // //number of 'conflicts' (i.e., one A army vs 1 D army is determined by min number of aRolls and dRolls.length)
-            // conflicts = (Math.min(aRolls.length, dRolls.length));
-            // for (i = 0; i < conflicts; i++) {
-            //     results.push(aRolls[i] > dRolls[i]); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
-            // }
-            // results.forEach((r) => {
-            //     return r ? cd.army.num-- : ca.army.num--
-            // });
-            // if (!cd.army.num) {
-            //     //zone 'conquered'
-            //     cd.army.usr = ca.army.usr;
-            // }
             $http.post('/game/doFight', {
                 ca: ca,
                 cd: cd,
                 ra: ra,
                 rd: rd
-            }).then(function(res){
+            }).then(function(res) {
                 ca = res.data.ca;
                 cd = res.data.cd;
             })
@@ -2248,6 +2361,29 @@ app.factory('fightFact', function($rootScope, $http) {
             $http.post('/game/newArmies', { map: map, usrs: usrs }).then(function(resp) {
                 usrs = resp.data.usrs;
             })
+        },
+        saveGame: function(id,map) {
+            if (!id) {
+                bootbox.alert('Map save error: no map id!', function() {
+                    return false;
+                })
+            }else{
+                var gameData = {
+                    gameId:id,
+                    armies:[],
+                    mapId:map.id
+                }
+                map.diagram.cells.forEach((c,i)=>{
+                    if(c.name){
+                        gameData.armies.push({
+                            user:c.army.usr,
+                            country:c.name,
+                            num:c.army.num
+                        })
+                    }
+                });
+                return $http.post('/game/saveGame',gameData)
+            }
         }
     };
 });
@@ -2289,6 +2425,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.randomSites(numCells, true);
                 },
                 save: function() {
+                    // note: this function is for saving a map. it is NOT for saving a game!
                     var mapData = {
                         countryNames: this.countryNames,
                         bbox: this.bbox,
@@ -2402,19 +2539,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
                     console.log('DATA URL', img)
-                        // for (var i = 0; i < this.diagram.cells.length; i++) {
-                        //     for (j = 0; j < this.diagram.cells[i].halfedges.length; j++) {
-                        //         this.diagram.cells[i].halfedges[j].getStartpoint = function() {
-                        //             return this.edge.lSite === this.site ? this.edge.va : this.edge.vb;
-                        //         };
-                        //         this.diagram.cells[i].halfedges[j].getEndpoint = function() {
-                        //             return this.edge.lSite === this.site ? this.edge.vb : this.edge.va;
-                        //         };
-                        //     }
-                        // }
-                        // this.doAllCells();
-                        // this.render();
-                        // this.getCellNames();
+                    this.getCellNames();
                     
                     var ctx = this.canvas.getContext('2d');
                     var img = new Image;
@@ -2801,4 +2926,65 @@ app.factory('mapFact', function($rootScope, $http) {
             return newVor;
         }
     };
+});
+
+app.factory('miscFact', function($rootScope, $http) {
+    return {
+        getUsr: function() {
+            return $http.get('/user/currUsrData').then(function(r){
+            	return r;
+            })
+        },
+        chkLoggedStatus:function(){
+        	return $http.get('/user/chkLog').then(function(r){
+            	return r;
+            })
+        },
+        checkUnDup: function(u){
+        	return $http.get('/user/nameOkay/'+u).then(function(r){
+        		return r;
+        	})
+        },
+        regNewUsr:function(u,p){
+        	return $http.post('/user/new',{user:u,password:p}).then(function(r){
+        		return r;
+        	})
+        },
+        login:function(u,p){
+        	return $http.post('/user/login',{user:u,password:p}).then(function(r){
+        		return r;
+        	})
+        },
+        logout:function(u,p){
+        	return $http.get('/user/logout',{user:u,password:p}).then(function(r){
+        		return r;
+        	})
+        }
+    };
+});
+
+app.factory('socket', function ($rootScope) {
+  console.log('socket factory!');
+  var socket = io.connect();
+  console.log('socket factory!');
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      });
+    }
+  };
 });

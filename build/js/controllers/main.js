@@ -1,15 +1,28 @@
-var app = angular.module('conkr', []).controller('conkrcon', function($scope, fightFact, mapFact) {
+var socket = io();
+app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
+    //before anything, check to see if we're logged in!
+    miscFact.chkLoggedStatus().then(function(r){
+        console.log('DATA',r)
+        if (!r.data) window.location.assign('./login');
+    })
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
     };
+    $scope.logout=function(){
+        miscFact.logout().then(function(){
+            window.location.assign('./login');
+        })
+    }
     $scope.gameCreateLoad = true;
     $scope.gameSettingsPanel = 0;
     $scope.newNew = true; //for new game creation, create a completely new map? 
     $scope.numCountries = 20;
     $scope.map = null;
+    $scope.gameId = null;
     $scope.potentialMaps = [];
     $scope.loadedMapImg = null;
+    $scope.user = null;
     $scope.newMap = function() {
         var smootz = 101 - $scope.smoothing,
             numZones = Math.round($scope.numCountries / 0.3);
@@ -25,7 +38,7 @@ var app = angular.module('conkr', []).controller('conkrcon', function($scope, fi
                 $scope.gameCreateLoad = true;
                 $scope.$digest();
             }
-        })
+        });
     };
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!

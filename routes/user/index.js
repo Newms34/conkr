@@ -83,8 +83,7 @@ router.post('/new', function(req, res, next) {
 router.get('/nameOkay/:name', function(req, res, next) {
     mongoose.model('User').find({ 'name': req.params.name }, function(err, user) {
         if (!user.length) {
-            //this user does not exist yet, so 
-            //go ahead and record their un and pwd
+            //this user does not exist yet. send okay to frontend
             res.send('okay');
         } else {
             res.send('bad');
@@ -92,13 +91,12 @@ router.get('/nameOkay/:name', function(req, res, next) {
     });
 });
 router.post('/login', function(req, res, next) {
-    //notice how there are TWO routes that go to /login. This is OKAY, as long as they're different request types (the other one's GET, this is POST)
-    mongoose.model('User').findOne({ 'name': req.body.name }, function(err, usr) {
+    mongoose.model('User').findOne({ 'name': req.body.user }, function(err, usr) {
         console.log('USER FROM LOGIN:', usr)
         if (err || !usr || usr == null) {
             //most likely, this user doesn't exist.
             res.send('no');
-        } else if (usr.correctPassword(req.body.pwd)) {
+        } else if (usr.correctPassword(req.body.password)) {
             //woohoo! correct user!
             //important note here: we must set all this session stuff, etc BEFORE
             //we send the response. As soon as we send the response, the server considers us "done"!

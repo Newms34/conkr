@@ -7,7 +7,8 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 
-<body ng-app='conkr' ng-controller='conkrcon' ng-cloak>
+<body id='main-bod' ng-app='conkr' ng-controller='conkrcon' ng-cloak>
+    <button class='btn btn-danger cornerbuttz' ng-click='logout()'>logout</button>
     <div class='panel panel-primary col-md-4 col-md-offset-4' ng-show='gameCreateLoad'>
         <div class='panel-heading'>
             <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click='gameSettingsPanel=0'>
@@ -56,7 +57,7 @@
                 <table class='table table-striped load-map-table'>
                     <thead>
                         <tr class='info'>
-                            <th>Map Id</th><th>Countries</th><th># of Countries</th><th>&nbsp;</th>
+                            <th>Map Id</th><th>Countries</th><th>Number of Countries</th><th>&nbsp;</th>
                         </tr>
                     </thead>
                     <tbody ng-show='potentialMaps!="BLANK"'>
@@ -88,10 +89,12 @@
         </div>
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameCreateLoad'></canvas>
+    <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/bootbox.js/bootbox.js"></script>
     <script src="/angular/angular.min.js"></script>
+    <script src="/socket.io-client/dist/socket.io.js"></script>
     <script src="./js/all.js"></script>
 </body>
 

@@ -35,6 +35,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.randomSites(numCells, true);
                 },
                 save: function() {
+                    // note: this function is for saving a map. it is NOT for saving a game!
                     var mapData = {
                         countryNames: this.countryNames,
                         bbox: this.bbox,
@@ -148,19 +149,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
                     console.log('DATA URL', img)
-                        // for (var i = 0; i < this.diagram.cells.length; i++) {
-                        //     for (j = 0; j < this.diagram.cells[i].halfedges.length; j++) {
-                        //         this.diagram.cells[i].halfedges[j].getStartpoint = function() {
-                        //             return this.edge.lSite === this.site ? this.edge.va : this.edge.vb;
-                        //         };
-                        //         this.diagram.cells[i].halfedges[j].getEndpoint = function() {
-                        //             return this.edge.lSite === this.site ? this.edge.vb : this.edge.va;
-                        //         };
-                        //     }
-                        // }
-                        // this.doAllCells();
-                        // this.render();
-                        // this.getCellNames();
+                    this.getCellNames();
                     
                     var ctx = this.canvas.getContext('2d');
                     var img = new Image;

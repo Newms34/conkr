@@ -36,7 +36,16 @@ app.use('/', routes);
 
 
 var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
+io.on('connection', function(socket) {
+    socket.on('sendMsg', function(m) {
+        io.emit('newMsg',m)
+    });
+});
+io.on('error', function(err) {
+    console.log("SocketIO error was", err)
+});
 //set port, or process.env if not local
 http.listen(process.env.PORT || 9264);
 

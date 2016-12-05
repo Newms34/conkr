@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Conkr! - Login</title>
+    <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+
+<body id='log-bod' ng-app='conkr' ng-controller='loginCont'>
+    <div class='col-md-6 col-md-offset-3 panel panel-primary'>
+        <div class='panel-heading'>
+            <div class='new-tab n-t-left' ng-class="{'tab-inact':!logMode}" ng-click='logMode=true'>
+                <h4>Login</h4></div>
+            <div class='new-tab n-t-right' ng-class="{'tab-inact':logMode}" ng-click='logMode=false'>
+                <h4>Register</h4></div>
+        </div>
+        <div class='panel-body' ng-show='logMode'>
+            <div class='form-group row'>
+                <div class='col-md-3'>
+                    <label for='usrNameLog'>Username</label>
+                </div>
+                <div class='col-md-4'>
+                    <input type="text" name="usrNameLog" ng-model='logUsr'>
+                </div>
+            </div>
+            <div class='form-group row'>
+                <div class='col-md-3'>
+                    <label for='pwdLog'>Password</label>
+                </div>
+                <div class='col-md-4'>
+                    <input type="password" name="pwdLog" ng-model='logPwd'>
+                </div>
+            </div>
+            <div class='form-group row'>
+            	<button class='btn btn-primary col-md-2 col-md-offset-5' ng-click='log()'>&#128275; Login</button>
+            </div>
+        </div>
+        <div class='panel-body' ng-show='!logMode'>
+            <div class='form-group row'>
+                <div class='col-md-3'>
+                    <label for='usrNameReg'>Username</label>
+                </div>
+                <div class='col-md-4'>
+                    <input type="text" name="usrNameReg" ng-model='regUser' ng-change='checkDupUn();'>
+                </div>
+                <div class='col-md-3 alert-danger pull-left' ng-show='dupUn'><span style='font-size: xx-large'>!</span>Someone's already using this username!</div>
+            </div>
+            <div class='form-group row'>
+                <div class='col-md-3'>
+                    <label for='regPwdOne'>Password</label>
+                </div>
+                <div class='col-md-4'>
+                    <input type="password" name="regPwdOne" ng-model='regPwdOne' ng-change='getPwdStren()'>
+                </div>
+                {{regPwdOne}}
+                <div class='col-md-3' title='Password strength: {{pwdStren}}'>
+
+                	<div class='stronkmeter'>
+                		<div class='stronkchannel'>
+                			<div class='stronkbar' style='width:{{100*pwdStren/12}}%'></div>
+                		</div>
+                	</div>
+                	<button class='btn btn-xs btn-danger' ng-click='explPwd()'>?</button>
+                </div>
+            </div>
+            <div class='form-group row'>
+                <div class='col-md-3'>
+                    <label for='regPwdTwo'>Repeat password</label>
+                </div>
+                <div class='col-md-4'>
+                    <input type="password" name="regPwdTwo" ng-model='regPwdTwo' ng-class='{"pass-mismatch":regPwdTwo && regPwdOne!==regPwdTwo}'>
+                </div>
+                <div class='col-md-3 alert-danger pull-left' ng-show='regPwdTwo && regPwdOne!==regPwdTwo'><span style='font-size: xx-large'>!</span>Your passwords don't match!</div>
+            </div>
+            <div class='form-group row'>
+            	<button class='btn btn-primary col-md-2 col-md-offset-5' ng-disabled='!regUser || !regPwdOne || (regPwdOne && regPwdOne!=regPwdTwo)' ng-click='newUsr()'>&#9997; Register</button>
+            </div>
+        </div>
+    </div>
+    <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/bootbox.js/bootbox.js"></script>
+    <script src="/angular/angular.min.js"></script>
+    <script src="/socket.io-client/dist/socket.io.js"></script>
+    <script src="./js/all.js"></script>
+</body>
+
+</html>
