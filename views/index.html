@@ -61,16 +61,26 @@
                 <table class='table table-striped load-map-table'>
                     <thead>
                         <tr class='info'>
-                            <th>Map Id</th><th>Countries</th><th>Number of Countries</th><th>&nbsp;</th>
+                            <th>Map Id</th>
+                            <th>Countries</th>
+                            <th>Number of Countries</th>
+                            <th>&nbsp;</th>
                         </tr>
                     </thead>
-                    <tbody ng-show='potentialMaps!="BLANK"'>
-                        <tr  ng-repeat = 'm in potentialMaps'>
-                            <td>{{m.id}}</td><td>{{m.mapData.countryNames.join(', ')}}</td><td>{{m.mapData.countryNames.length}}</td><td><button class='btn btn-primary' ng-click='pickMap(m.mapData,m.id)'>Load</button></td>
+                    <tbody>
+                        <tr>
+                            <td ng-show='potentialMaps.length===0'>
+                            No maps yet!
+                            </td>
                         </tr>
-                    </tbody>
-                    <tbody ng-show='potentialMaps=="BLANK"'>
-                        <h4>No maps yet!</h4>
+                        <tr ng-repeat='m in potentialMaps'>
+                            <td>{{m.id}}</td>
+                            <td>{{m.mapData.countryNames.join(', ')}}</td>
+                            <td>{{m.mapData.countryNames.length}}</td>
+                            <td>
+                                <button class='btn btn-primary' ng-click='pickMap(m.mapData,m.id)'>Load</button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -80,12 +90,22 @@
             <table class='table table-striped'>
                 <thead>
                     <tr>
-                        <th>Game ID</th><th>Map ID</th><th>Players</th><th>Joinable</th><th>Join</th>
+                        <th>Game ID</th>
+                        <th>Map ID</th>
+                        <th>Players</th>
+                        <th>Joinable</th>
+                        <th>Join</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat='p in allGames'>
-                        <td>{{p.gameId}}</td><td>{{p.mapId}}</td><td>{{p.players.join(', ')}}</td><td><span ng-if='p.inPlay'>no</span><span ng-if='!p.inPlay'>yes</span></td><td><button class='btn btn-success' ng-disabled='p.inPlay' ng-click='joinGame(p.gameId)'>Join Game</button></td>
+                        <td>{{p.gameId}}</td>
+                        <td>{{p.mapId}}</td>
+                        <td>{{p.players.join(', ')}}</td>
+                        <td><span ng-if='p.inPlay'>no</span><span ng-if='!p.inPlay'>yes</span></td>
+                        <td>
+                            <button class='btn btn-success' ng-disabled='p.inPlay' ng-click='joinGame(p.gameId)'>Join Game</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>

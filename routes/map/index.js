@@ -25,7 +25,7 @@ router.get('/loadMaps', function(req,res,next) {
         if (err) {
             res.send(err)
         } else if(!data.length){
-        	res.send('BLANK')
+        	res.send([])
         }else {
             res.send(data);
         }
