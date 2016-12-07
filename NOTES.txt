@@ -138,4 +138,20 @@ Should user be able to do multiple games concordantly?
 where do we actually want to store cell data? in game or map model? and how?
 store 'blank' version of map in map, then store just army info in game?
 need TWO separate load fns: 1 to load a blank map, 1 to load game-in-progress
+put each active game as it's being played in its own socketio namespace:
+socket.join(mapName),
+io.to(mapName).emit(someEvent)
+Will need to rewrite ALL of the fight routes (i.e., cell vs cell, etc.) to use socketio namespaces.
+
+restructed game data:
+(for any particular game)
+var gameData = {
+    mapId:123abc;//id of map used
+    armies:[{
+        user: dave,//user's name
+        country: daveland,//country name
+        num:4,//number (i.e., strength) of army
+    }],//data for all cells that are countries.
+    gameId:abcd3f6;//rando-generated id of game
+}
 */

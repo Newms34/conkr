@@ -12,11 +12,6 @@ app.factory('mapFact', function($rootScope, $http) {
                 return r;
             })
         },
-        loadGame: function() {
-            return $http.get('/game/loadGame').then(function(r) {
-                return r;
-            })
-        },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
                 voronoi: new Voronoi(),
@@ -48,8 +43,8 @@ app.factory('mapFact', function($rootScope, $http) {
                         img: this.canvas.toDataURL()
                     }
                     console.log('TO SAVE:', mapData)
-                    $http.post('/map/newGame', mapData).then(function(r) {
-                        console.log(r);
+                    return $http.post('/map/newMap', mapData).then(function(r) {
+                        return r;
                     })
                 },
                 clearSites: function() {

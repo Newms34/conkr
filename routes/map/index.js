@@ -6,11 +6,7 @@ var router = express.Router(),
     mongoose = require('mongoose'),
     session = require('client-sessions');
 module.exports = router;
-router.get('/sample', function(req, res, next) {
-
-    res.send('done');
-});
-router.post('/newGame', function(req,res,next) {
+router.post('/newMap', function(req,res,next) {
     //create a new game!
     var mapId = Math.floor(Math.random() * 99999999999).toString(32),
         map = req.body;
@@ -18,7 +14,7 @@ router.post('/newGame', function(req,res,next) {
         if (err) {
             res.send(err)
         } else {
-            res.send(data);
+            res.send({id:mapId});
         }
     });
 })

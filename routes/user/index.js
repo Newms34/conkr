@@ -110,7 +110,7 @@ router.post('/login', function(req, res, next) {
 router.get('/chkLog', function(req, res, next) {
     console.log('checking login', req.session)
     if (req.session.user) {
-        res.send(true);
+        res.send({result:true,name:req.session.user.name});
     } else {
         res.send(false);
     }

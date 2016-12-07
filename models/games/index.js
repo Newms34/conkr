@@ -5,9 +5,13 @@ var skillSchema = new mongoose.Schema({
     armies: [{
         user: String,//userId
         country: String,//country name
-        num:Number,//number (i.e., strength) of army
+        num:Number//number (i.e., strength) of army
     }],
-    gameId:String//ID of game
+    players:[String],//list of players for convenience
+    gameId:String,//ID of game
+    creator:String,//ID of creator
+    inPlay:{type:Boolean, default:false},//if this is true, the game is in play and new players cannot join
+    turn:{type:Number,default:0}//whose turn is it?
 }, { collection: 'Game' });
 
 mongoose.model('Game', skillSchema);

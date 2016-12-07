@@ -2157,7 +2157,9 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
             $scope.timeStamp = !$scope.timeStamp;
         } else if ($scope.msgInp == '/inv') {
         	$scope.invCol = !$scope.invCol;
-        } else {
+        } else if($scope.msgInp==''){
+            return false;
+        }else {
             socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user });
         }
         $scope.prevSent.push($scope.msgInp);
@@ -2165,7 +2167,7 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
         $scope.msgInp = '';
         $('#msgInp').focus();
     }
-    document.querySelector('#msgInp').addEventListener('keydown',function(e){
+    document.querySelector('#msgInp').addEventListener('keyup',function(e){
     	//38 == up, 40==down
     	if (e.which==38){
     		e.preventDefault();
@@ -2285,7 +2287,9 @@ app.controller('loginCont', function($scope, miscFact) {
                     if (d.data == 'no') {
                         bootbox.alert('Login error: please check your username and/or password');
                     } else {
-                        bootbox.alert('Welcome back!')
+                        bootbox.alert('Welcome back!', function(p) {
+                            window.location.assign('../');
+                        })
                     }
                 })
             }
@@ -2296,27 +2300,40 @@ app.controller('loginCont', function($scope, miscFact) {
             if (d.data == 'no') {
                 bootbox.alert('Login error: please check your username and/or password');
             } else {
-                window.location.assign('../')
+                bootbox.alert('Welcome back!', function(p) {
+                    window.location.assign('../');
+                })
             }
         })
     }
 })
 
-var socket = io();
-app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
+var socket = io(),
+    socketRoom = null;
+app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
     //before anything, check to see if we're logged in!
-    miscFact.chkLoggedStatus().then(function(r){
-        console.log('DATA',r)
-        if (!r.data) window.location.assign('./login');
+    miscFact.chkLoggedStatus().then(function(r) {
+        console.log('DATA', r.data)
+        if (!r.data.result) window.location.assign('./login');
+        $scope.user = r.data.name;
     })
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
     };
-    $scope.logout=function(){
-        miscFact.logout().then(function(){
+    $scope.logout = function() {
+        miscFact.logout().then(function() {
             window.location.assign('./login');
         })
+    }
+    window.onkeyup = function(e) {
+        if (e.which == 13 && $scope.showChat) {
+            $('#msgInp').focus();
+        } else if (e.which == 191) {
+            $scope.showChat = true;
+            $scope.$digest();
+            $('#msgInp').focus();
+        }
     }
     $scope.gameCreateLoad = true;
     $scope.gameSettingsPanel = 0;
@@ -2334,35 +2351,60 @@ app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
         $scope.map.init();
         $scope.gameCreateLoad = false;
         bootbox.confirm("Map okay?", function(r) {
-            if (r && r != null) {
-                $scope.map.save();
+            if (r) {
+                $scope.map.save().then(function(sr) {
+                    //got id back from mapsave. Put player in this game.
+                    bootbox.confirm("Do you want to start a new game with this map ("+sr.data.id+")?", function(play) {
+                        if (play) {
+                            //use sr.id to make a new game.
+                            fightFact.newGame(sr.data.id, $scope.user).then((g)=>{
+                                console.log('Done! Game made!')
+                                socket.emit('getGames', { x: null });
+                            });
+                        }
+                    })
+                });
             } else {
-                //user doesnt like this map. reset
+                //user doesnt like this map(D:). reset
                 $scope.map = null;
                 $scope.gameCreateLoad = true;
                 $scope.$digest();
             }
         });
     };
+    socket.emit('getGames', { x: null });
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
         mapFact.loadMaps().then(function(r) {
-            console.log('MAPS',r);
+            console.log('MAPS', r);
             $scope.potentialMaps = r.data;
         })
     }
-    $scope.pickMap = function(m){    
+    socket.on('allGames', function(g) {
+        console.log('FROM ALL GAMES', g)
+        $scope.allGames = g;
+    })
+    $scope.joinGame = function(g) {
+        fightFact.joinGame(g,$scope.user).then(function(r){
+            console.log('JOINED GAME:',r)
+        })
+    }
+    $scope.pickMap = function(m, n) {
+        //load an OLD map for a NEW game
+        //map is a new map created just now
         $scope.map = mapFact.GetVoronoi(m.bbox.yb, m.bbox.xr, m.countryNames.length, 20);
-        console.log($scope.map)
-        for (var p in m){
+        for (var p in m) {
             $scope.map[p] = m[p];
         }
         $scope.map.initLoad(m.img);
         $scope.gameCreateLoad = false;
+        fightFact.newGame(n, $scope.user).then((x)=>{
+            socket.emit('getGames', { x: null });
+        });
     }
-    $scope.toggleNewMode = function(){
+    $scope.toggleNewMode = function() {
         $scope.newNew = !$scope.newNew;
-        if (!$scope.newNew){
+        if (!$scope.newNew) {
             $scope.loadMaps();
         }
     }
@@ -2383,50 +2425,61 @@ app.factory('fightFact', function($rootScope, $http) {
             return Math.floor(c.army.num - attackPenalty);
         },
         doFight: function(ca, cd, ra, rd) {
-            $http.post('/game/doFight', {
+            socketRoom.emit('sendDoFight', {
                 ca: ca,
                 cd: cd,
                 ra: ra,
                 rd: rd
-            }).then(function(res) {
-                ca = res.data.ca;
-                cd = res.data.cd;
-            })
-        },
-        getInitArmies: function(map, usrs) {
-            //such creative arg names!
-            map.diagram.cells.forEach(function(c) {
-                c.army.num = 1;
-                c.army.usr = usrs[Math.floor(Math.random() * usrs.length)].name;
             });
         },
-        addArmies: function(map, usrs) {
-            //function to add armies for each user
-            $http.post('/game/newArmies', { map: map, usrs: usrs }).then(function(resp) {
-                usrs = resp.data.usrs;
+        getInitArmies: function(map, usrs) {
+            var armies = [];
+            map.diagram.cells.forEach(function(c) {
+                if (c.name) {
+                    armies.push({
+                        user: usrs[Math.floor(Math.random() * usrs.length)].name,
+                        num: 1,
+                        country: c.name
+                    });
+                }
+            });
+            return armies;
+        },
+        newGame:function(n,p){
+            return $http.post('/game/new/',{id:n,player:p}).then(function(p){
+                return p;
+            });
+        },
+        joinGame:function(m,p){
+            return $http.post('/game/join',{gameId:m,player:p},function(p){
+                return p;
             })
         },
-        saveGame: function(id,map) {
+        addArmies: function(gameData) {
+            //function to add armies for each user
+            socketRoom.emit('sendAddArmies',{gameData:gameData})
+        },
+        saveGame: function(id, map) {
             if (!id) {
                 bootbox.alert('Map save error: no map id!', function() {
                     return false;
                 })
-            }else{
+            } else {
                 var gameData = {
-                    gameId:id,
-                    armies:[],
-                    mapId:map.id
+                    gameId: id,
+                    armies: [],
+                    mapId: map.id
                 }
-                map.diagram.cells.forEach((c,i)=>{
-                    if(c.name){
+                map.diagram.cells.forEach((c, i) => {
+                    if (c.name) {
                         gameData.armies.push({
-                            user:c.army.usr,
-                            country:c.name,
-                            num:c.army.num
+                            user: c.army.usr,
+                            country: c.name,
+                            num: c.army.num
                         })
                     }
                 });
-                return $http.post('/game/saveGame',gameData)
+                return $http.post('/game/saveGame', gameData)
             }
         }
     };
@@ -2443,11 +2496,6 @@ app.factory('mapFact', function($rootScope, $http) {
         loadMaps: function() {
             // load all maps so we can pick one.
             return $http.get('/map/loadMaps').then(function(r) {
-                return r;
-            })
-        },
-        loadGame: function() {
-            return $http.get('/game/loadGame').then(function(r) {
                 return r;
             })
         },
@@ -2482,8 +2530,8 @@ app.factory('mapFact', function($rootScope, $http) {
                         img: this.canvas.toDataURL()
                     }
                     console.log('TO SAVE:', mapData)
-                    $http.post('/map/newGame', mapData).then(function(r) {
-                        console.log(r);
+                    return $http.post('/map/newMap', mapData).then(function(r) {
+                        return r;
                     })
                 },
                 clearSites: function() {

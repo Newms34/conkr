@@ -1,18 +1,29 @@
-var socket = io();
-app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
+var socket = io(),
+    socketRoom = null;
+app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
     //before anything, check to see if we're logged in!
-    miscFact.chkLoggedStatus().then(function(r){
-        console.log('DATA',r)
-        if (!r.data) window.location.assign('./login');
+    miscFact.chkLoggedStatus().then(function(r) {
+        console.log('DATA', r.data)
+        if (!r.data.result) window.location.assign('./login');
+        $scope.user = r.data.name;
     })
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
     };
-    $scope.logout=function(){
-        miscFact.logout().then(function(){
+    $scope.logout = function() {
+        miscFact.logout().then(function() {
             window.location.assign('./login');
         })
+    }
+    window.onkeyup = function(e) {
+        if (e.which == 13 && $scope.showChat) {
+            $('#msgInp').focus();
+        } else if (e.which == 191) {
+            $scope.showChat = true;
+            $scope.$digest();
+            $('#msgInp').focus();
+        }
     }
     $scope.gameCreateLoad = true;
     $scope.gameSettingsPanel = 0;
@@ -30,35 +41,60 @@ app.controller('conkrcon', function($scope, fightFact, mapFact,miscFact) {
         $scope.map.init();
         $scope.gameCreateLoad = false;
         bootbox.confirm("Map okay?", function(r) {
-            if (r && r != null) {
-                $scope.map.save();
+            if (r) {
+                $scope.map.save().then(function(sr) {
+                    //got id back from mapsave. Put player in this game.
+                    bootbox.confirm("Do you want to start a new game with this map ("+sr.data.id+")?", function(play) {
+                        if (play) {
+                            //use sr.id to make a new game.
+                            fightFact.newGame(sr.data.id, $scope.user).then((g)=>{
+                                console.log('Done! Game made!')
+                                socket.emit('getGames', { x: null });
+                            });
+                        }
+                    })
+                });
             } else {
-                //user doesnt like this map. reset
+                //user doesnt like this map(D:). reset
                 $scope.map = null;
                 $scope.gameCreateLoad = true;
                 $scope.$digest();
             }
         });
     };
+    socket.emit('getGames', { x: null });
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
         mapFact.loadMaps().then(function(r) {
-            console.log('MAPS',r);
+            console.log('MAPS', r);
             $scope.potentialMaps = r.data;
         })
     }
-    $scope.pickMap = function(m){    
+    socket.on('allGames', function(g) {
+        console.log('FROM ALL GAMES', g)
+        $scope.allGames = g;
+    })
+    $scope.joinGame = function(g) {
+        fightFact.joinGame(g,$scope.user).then(function(r){
+            console.log('JOINED GAME:',r)
+        })
+    }
+    $scope.pickMap = function(m, n) {
+        //load an OLD map for a NEW game
+        //map is a new map created just now
         $scope.map = mapFact.GetVoronoi(m.bbox.yb, m.bbox.xr, m.countryNames.length, 20);
-        console.log($scope.map)
-        for (var p in m){
+        for (var p in m) {
             $scope.map[p] = m[p];
         }
         $scope.map.initLoad(m.img);
         $scope.gameCreateLoad = false;
+        fightFact.newGame(n, $scope.user).then((x)=>{
+            socket.emit('getGames', { x: null });
+        });
     }
-    $scope.toggleNewMode = function(){
+    $scope.toggleNewMode = function() {
         $scope.newNew = !$scope.newNew;
-        if (!$scope.newNew){
+        if (!$scope.newNew) {
             $scope.loadMaps();
         }
     }

@@ -7,50 +7,61 @@ app.factory('fightFact', function($rootScope, $http) {
             return Math.floor(c.army.num - attackPenalty);
         },
         doFight: function(ca, cd, ra, rd) {
-            $http.post('/game/doFight', {
+            socketRoom.emit('sendDoFight', {
                 ca: ca,
                 cd: cd,
                 ra: ra,
                 rd: rd
-            }).then(function(res) {
-                ca = res.data.ca;
-                cd = res.data.cd;
-            })
-        },
-        getInitArmies: function(map, usrs) {
-            //such creative arg names!
-            map.diagram.cells.forEach(function(c) {
-                c.army.num = 1;
-                c.army.usr = usrs[Math.floor(Math.random() * usrs.length)].name;
             });
         },
-        addArmies: function(map, usrs) {
-            //function to add armies for each user
-            $http.post('/game/newArmies', { map: map, usrs: usrs }).then(function(resp) {
-                usrs = resp.data.usrs;
+        getInitArmies: function(map, usrs) {
+            var armies = [];
+            map.diagram.cells.forEach(function(c) {
+                if (c.name) {
+                    armies.push({
+                        user: usrs[Math.floor(Math.random() * usrs.length)].name,
+                        num: 1,
+                        country: c.name
+                    });
+                }
+            });
+            return armies;
+        },
+        newGame:function(n,p){
+            return $http.post('/game/new/',{id:n,player:p}).then(function(p){
+                return p;
+            });
+        },
+        joinGame:function(m,p){
+            return $http.post('/game/join',{gameId:m,player:p},function(p){
+                return p;
             })
         },
-        saveGame: function(id,map) {
+        addArmies: function(gameData) {
+            //function to add armies for each user
+            socketRoom.emit('sendAddArmies',{gameData:gameData})
+        },
+        saveGame: function(id, map) {
             if (!id) {
                 bootbox.alert('Map save error: no map id!', function() {
                     return false;
                 })
-            }else{
+            } else {
                 var gameData = {
-                    gameId:id,
-                    armies:[],
-                    mapId:map.id
+                    gameId: id,
+                    armies: [],
+                    mapId: map.id
                 }
-                map.diagram.cells.forEach((c,i)=>{
-                    if(c.name){
+                map.diagram.cells.forEach((c, i) => {
+                    if (c.name) {
                         gameData.armies.push({
-                            user:c.army.usr,
-                            country:c.name,
-                            num:c.army.num
+                            user: c.army.usr,
+                            country: c.name,
+                            num: c.army.num
                         })
                     }
                 });
-                return $http.post('/game/saveGame',gameData)
+                return $http.post('/game/saveGame', gameData)
             }
         }
     };

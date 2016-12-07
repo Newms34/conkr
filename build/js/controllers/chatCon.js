@@ -30,7 +30,9 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
             $scope.timeStamp = !$scope.timeStamp;
         } else if ($scope.msgInp == '/inv') {
         	$scope.invCol = !$scope.invCol;
-        } else {
+        } else if($scope.msgInp==''){
+            return false;
+        }else {
             socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user });
         }
         $scope.prevSent.push($scope.msgInp);
@@ -38,7 +40,7 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
         $scope.msgInp = '';
         $('#msgInp').focus();
     }
-    document.querySelector('#msgInp').addEventListener('keydown',function(e){
+    document.querySelector('#msgInp').addEventListener('keyup',function(e){
     	//38 == up, 40==down
     	if (e.which==38){
     		e.preventDefault();

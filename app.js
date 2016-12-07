@@ -4,7 +4,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     routes = require('./routes'),
     config = require('./.config'),
-    session = require('client-sessions');
+    session = require('client-sessions'),
+    sockmod = require('./socketmodules');
 var app = express();
 
 app.set('views', path.join(__dirname, 'views'));
@@ -12,14 +13,12 @@ app.set('view engine', 'html');
 
 //use stuff
 app.use(logger('dev'));
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({
     extended: false,
-    limit:'50mb'
+    limit: '50mb'
 }));
-// app.use(express.json({limit: '50mb'}));
-// app.use(express.urlencoded({limit: '50mb'}));
-// app.use(bodyParser({limit: '50mb'}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'node_modules')));
@@ -39,9 +38,39 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 io.on('connection', function(socket) {
+    //default socket stuff for just message sending.
+    //this does not get put in separate rooms.
     socket.on('sendMsg', function(m) {
-        io.emit('newMsg',m)
+        io.emit('newMsg', m)
     });
+    //get a room!
+    socket.on('newRoom', function(d) {
+        sockmod.getAllGames().then(function(r) {
+            socket.emit('allGames', r);
+        })
+    })
+    socket.on('joinGame', function(d) {
+        sockmod.getAllGames().then(function(r) {
+            socket.emit('allGames', r);
+        })
+    })
+    socket.on('getGames', function(d) {
+        sockmod.getAllGames().then(function(r) {
+            socket.emit('allGames', r);
+        })
+    })
+    socket.on('sendDoFight', function(d) {
+        var cellChanges = sockmod.doFight(d);
+        io.sockets.in(socket.room).emit('rcvDoFight', cellChange);
+    })
+    socket.on('sendAddArmies', function(d) {
+        var armyChanges = sockmod.newArmies;
+        io.sockets.in(socket.room).emit('rcvAddArmies', armyChanges)
+    })
+    socket.on('testRoom', function(t) {
+        console.log('TEST ROOM', t)
+        io.sockets.in(socket.room).emit('roomTestCli', { t: t, msg: 'hi from server!' + socket.room })
+    })
 });
 io.on('error', function(err) {
     console.log("SocketIO error was", err)
