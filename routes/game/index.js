@@ -47,7 +47,7 @@ router.post('/saveGame', function(req, res, next) {
 })
 router.get('/startGame/:id',function(req,res,next){
     // basically, this sets a game's 'inPlay' property to true. While a game is in play, players cannot join it (see '/join'). Games cannot be reset to inPlay==false after they're started.
-    mongoose.model('Game').findOne({ 'gameId': req.parms.id },function(err,doc){
+    mongoose.model('Game').findOne({ 'gameId': req.params.id },function(err,doc){
         if (err) return res.send(500, { error: err });
         if (!doc) return 'Game not found!';
         doc.inPlay = true;

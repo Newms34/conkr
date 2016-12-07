@@ -27,19 +27,19 @@ app.factory('fightFact', function($rootScope, $http) {
             });
             return armies;
         },
-        newGame:function(n,p){
-            return $http.post('/game/new/',{id:n,player:p}).then(function(p){
+        newGame: function(n, p) {
+            return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },
-        joinGame:function(m,p){
-            return $http.post('/game/join',{gameId:m,player:p},function(p){
+        joinGame: function(m, p) {
+            return $http.post('/game/join', { gameId: m, player: p }, function(p) {
                 return p;
             })
         },
         addArmies: function(gameData) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies',{gameData:gameData})
+            socketRoom.emit('sendAddArmies', { gameData: gameData })
         },
         saveGame: function(id, map) {
             if (!id) {
@@ -63,6 +63,11 @@ app.factory('fightFact', function($rootScope, $http) {
                 });
                 return $http.post('/game/saveGame', gameData)
             }
+        },
+        startGame: function(id) {
+            return $http.get('/game/startGame/'+id).then(function(r){
+                return r;
+            })
         }
     };
 });

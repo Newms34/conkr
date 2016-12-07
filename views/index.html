@@ -70,7 +70,7 @@
                     <tbody>
                         <tr>
                             <td ng-show='potentialMaps.length===0'>
-                            No maps yet!
+                                No maps yet!
                             </td>
                         </tr>
                         <tr ng-repeat='m in potentialMaps'>
@@ -113,11 +113,26 @@
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
             <h4>My Games:</h4>
             <code>this'll be games that you've created (and can thus 'start')</code>
-            <div class='row form-group'>
-            </div>
-            <hr/>
-            <div class='row form-group'>
-            </div>
+            <table class='table table-striped'>
+                <thead>
+                    <tr>
+                        <th>Game ID</th>
+                        <th>Map ID</th>
+                        <th>Players</th>
+                        <th>Start</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat='g in allGames' ng-show='p.creator=user && !inPlay'>
+                        <td>{{g.gameId}}</td>
+                        <td>{{g.mapId}}</td>
+                        <td>{{g.players.join(', ')}}</td>
+                        <td>
+                            <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)'>Start Game</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameCreateLoad'></canvas>

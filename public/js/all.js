@@ -2387,6 +2387,7 @@ app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
     $scope.joinGame = function(g) {
         fightFact.joinGame(g,$scope.user).then(function(r){
             console.log('JOINED GAME:',r)
+            socket.emit('getGames', { x: null });
         })
     }
     $scope.pickMap = function(m, n) {
@@ -2407,6 +2408,15 @@ app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
         if (!$scope.newNew) {
             $scope.loadMaps();
         }
+    }
+    $scope.startGame = function(id){
+        bootbox.confirm(`Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`,function(r){
+            if(r){
+                fightFact.startGame(id).then(function(r){
+                    socket.emit('getGames', { x: null })
+                });
+            }
+        })
     }
     $scope.avgCounInfo = function() {
         bootbox.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
@@ -2445,19 +2455,19 @@ app.factory('fightFact', function($rootScope, $http) {
             });
             return armies;
         },
-        newGame:function(n,p){
-            return $http.post('/game/new/',{id:n,player:p}).then(function(p){
+        newGame: function(n, p) {
+            return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },
-        joinGame:function(m,p){
-            return $http.post('/game/join',{gameId:m,player:p},function(p){
+        joinGame: function(m, p) {
+            return $http.post('/game/join', { gameId: m, player: p }, function(p) {
                 return p;
             })
         },
         addArmies: function(gameData) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies',{gameData:gameData})
+            socketRoom.emit('sendAddArmies', { gameData: gameData })
         },
         saveGame: function(id, map) {
             if (!id) {
@@ -2481,6 +2491,11 @@ app.factory('fightFact', function($rootScope, $http) {
                 });
                 return $http.post('/game/saveGame', gameData)
             }
+        },
+        startGame: function(id) {
+            return $http.get('/game/startGame/'+id).then(function(r){
+                return r;
+            })
         }
     };
 });

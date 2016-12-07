@@ -77,6 +77,7 @@ app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
     $scope.joinGame = function(g) {
         fightFact.joinGame(g,$scope.user).then(function(r){
             console.log('JOINED GAME:',r)
+            socket.emit('getGames', { x: null });
         })
     }
     $scope.pickMap = function(m, n) {
@@ -97,6 +98,15 @@ app.controller('conkrcon', function($scope, fightFact, mapFact, miscFact) {
         if (!$scope.newNew) {
             $scope.loadMaps();
         }
+    }
+    $scope.startGame = function(id){
+        bootbox.confirm(`Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`,function(r){
+            if(r){
+                fightFact.startGame(id).then(function(r){
+                    socket.emit('getGames', { x: null })
+                });
+            }
+        })
     }
     $scope.avgCounInfo = function() {
         bootbox.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
