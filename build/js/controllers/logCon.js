@@ -16,13 +16,13 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
         miscFact.checkUnDup($scope.regUser).then(function(r) {
             $scope.dupUn = r.data == 'bad';
         });
-    }
+    };
     $scope.getAbtHeight = function() {
         $timeout(function() {
             document.querySelector('.abt-bg').style.height = $('#abt-stuff').height()/0.9+'px';
         }, 0, false);
 
-    }
+    };
     $scope.showAbt = false;
     $scope.getPwdStren = function() {
         //how stronk is pwrd?
@@ -81,11 +81,8 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
             str -= 3;
             $scope.passGud.sameUn = true;
         }
-        console.log(pwd, str, 'out of 12 is ', 100 * str / 12)
         $scope.pwdStren = str;
-        console.log('ang var now', $scope.pwdStren)
-    }
-
+    };
     // ${$scope.passGud.len>3?'&#10003;':'&#10007;'}
     $scope.explPwd = function() {
         sandalchest.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
@@ -102,12 +99,12 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
                     } else {
                         sandalchest.alert('Welcome back!', function(p) {
                             window.location.assign('../');
-                        })
+                        });
                     }
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
@@ -115,8 +112,8 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
             } else {
                 sandalchest.alert('Welcome back!', function(p) {
                     window.location.assign('../');
-                })
+                });
             }
-        })
-    }
-})
+        });
+    };
+});

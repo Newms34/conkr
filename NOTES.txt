@@ -154,5 +154,8 @@ var gameData = {
     }],//data for all cells that are countries.
     gameId:abcd3f6;//rando-generated id of game
 }
-use req.session for security! need to add that to most routes, and change socket.emit('getGames') to a regular http route!
+use req.session for security! need to add that to most routes
+
+when a socket connects, we should run getAllGames and see if the player is in any inPlay games, then add them to those rooms.
+per-game chat?
 */

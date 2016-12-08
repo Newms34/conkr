@@ -3,10 +3,10 @@ var socket = io(),
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact) {
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
-        console.log('DATA', r.data)
+        console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
-    })
+    });
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
@@ -14,8 +14,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
     $scope.logout = function() {
         miscFact.logout().then(function() {
             window.location.assign('./login');
-        })
-    }
+        });
+    };
     window.onkeyup = function(e) {
         if (e.which == 13 && $scope.showChat) {
             $('#msgInp').focus();
@@ -24,8 +24,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             $scope.$digest();
             $('#msgInp').focus();
         }
-    }
-    $scope.gameCreateLoad = true;
+    };
+    $scope.gameMenu = true;
     $scope.gameSettingsPanel = 0;
     $scope.newNew = true; //for new game creation, create a completely new map? 
     $scope.numCountries = 20;
@@ -39,7 +39,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             numZones = Math.round($scope.numCountries / 0.3);
         $scope.map = mapFact.GetVoronoi($scope.win.h, $scope.win.w, numZones, smootz);
         $scope.map.init();
-        $scope.gameCreateLoad = false;
+        $scope.gameMenu = false;
         sandalchest.confirm("Map okay?", function(r) {
             if (r) {
                 $scope.map.save().then(function(sr) {
@@ -48,38 +48,38 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
                         if (play) {
                             //use sr.id to make a new game.
                             fightFact.newGame(sr.data.id, $scope.user).then((g) => {
-                                console.log('Done! Game made!')
-                                $http.get('/game/getGames');
+                                console.log('Done! Game made!');
+                                socket.emit('getGames',{x:true})
                             });
                         }
-                    })
+                    });
                 });
             } else {
                 //user doesnt like this map(D:). reset
                 $scope.map = null;
-                $scope.gameCreateLoad = true;
+                $scope.gameMenu = true;
                 $scope.$digest();
             }
         });
     };
-    $http.get('/game/getGames');
+    socket.emit('getGames',{x:true})
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
         mapFact.loadMaps().then(function(r) {
             console.log('MAPS', r);
             $scope.potentialMaps = r.data;
-        })
-    }
+        });
+    };
     socket.on('allGames', function(g) {
-        console.log('FROM ALL GAMES', g)
+        console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
-    })
+    });
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {
-            console.log('JOINED GAME:', r)
-            $http.get('/game/getGames');
-        })
-    }
+            console.log('JOINED GAME:', r);
+            socket.emit('getGames',{x:true})
+        });
+    };
     $scope.pickMap = function(m, n) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -88,26 +88,32 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             $scope.map[p] = m[p];
         }
         $scope.map.initLoad(m.img);
-        $scope.gameCreateLoad = false;
+        $scope.gameMenu = false;
         fightFact.newGame(n, $scope.user).then((x) => {
-            $http.get('/game/getGames');
+            socket.emit('getGames',{x:true})
         });
-    }
+    };
     $scope.toggleNewMode = function() {
         $scope.newNew = !$scope.newNew;
         if (!$scope.newNew) {
             $scope.loadMaps();
         }
-    }
+    };
     $scope.startGame = function(id) {
         sandalchest.confirm(`Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`, function(r) {
             if (r) {
                 fightFact.startGame(id).then(function(r) {
-                    $http.get('/games/getGames')
+                    socket.emit('gameStarted',r)
                 });
             }
-        })
-    }
+        });
+    };
+    socket.on('putInGame',(c)=>{
+        console.log('PUT IN GAME',c)
+        if(c.data.players.indexOf($scope.user)>-1){
+            socket.emit('putInRoom',{id:c.data.gameId})
+        }
+    })
     $scope.avgCounInfo = function() {
         sandalchest.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
     };

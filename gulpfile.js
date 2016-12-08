@@ -17,7 +17,7 @@ var babel = require('gulp-babel');
 // Lint Task
 gulp.task('lint', function() {
     return gulp.src(['build/js/controllers/*.js','build/js/factories/*.js'])
-        .pipe(jshint())
+        .pipe(jshint({esversion:6}))
         .pipe(jshint.reporter('default'));
 });
 

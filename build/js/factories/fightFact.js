@@ -14,60 +14,49 @@ app.factory('fightFact', function($rootScope, $http) {
                 rd: rd
             });
         },
-        getInitArmies: function(map, usrs) {
-            var armies = [];
-            map.diagram.cells.forEach(function(c) {
-                if (c.name) {
-                    armies.push({
-                        user: usrs[Math.floor(Math.random() * usrs.length)].name,
-                        num: 1,
-                        country: c.name
-                    });
-                }
-            });
-            return armies;
-        },
         newGame: function(n, p) {
             return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },
         joinGame: function(m, p) {
+            //join a not-yet-started game;
             return $http.post('/game/join', { gameId: m, player: p }, function(p) {
                 return p;
-            })
+            });
         },
-        addArmies: function(gameData) {
+        addArmies: function(game) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies', { gameData: gameData })
+            socketRoom.emit('sendAddArmies', { game: game });
         },
         saveGame: function(id, map) {
             if (!id) {
                 sandalchest.alert('Map save error: no map id!', function() {
                     return false;
-                })
+                });
             } else {
                 var gameData = {
                     gameId: id,
                     armies: [],
                     mapId: map.id
-                }
+                };
                 map.diagram.cells.forEach((c, i) => {
                     if (c.name) {
                         gameData.armies.push({
                             user: c.army.usr,
                             country: c.name,
                             num: c.army.num
-                        })
+                        });
                     }
                 });
-                return $http.post('/game/saveGame', gameData)
+                return $http.post('/game/saveGame', gameData);
             }
         },
         startGame: function(id) {
+            //creator of a game sets it to started, meaning no more doodz can join.
             return $http.get('/game/startGame/'+id).then(function(r){
                 return r;
-            })
+            });
         }
     };
 });

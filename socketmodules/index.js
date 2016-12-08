@@ -41,9 +41,9 @@ var newArmies = function(usrs, map) {
         u.newArmies = newArmies;
     })
 }
-var doFight = function(ca,cd,ra,rd){
-	//take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
-	var aRolls = [],
+var doFight = function(ca, cd, ra, rd) {
+    //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
+    var aRolls = [],
         dRolls = [],
         conflicts,
         results;
@@ -73,22 +73,29 @@ var doFight = function(ca,cd,ra,rd){
     if (!cd.num) {
         //zone 'conquered'
         cd.user = ca.user;
-        cd.num+=ra;
-        ca.num-=ra;
+        cd.num += ra;
+        ca.num -= ra;
     }
     return {
         ca: ca,
         cd: cd
     }
 }
-var getAllGames = function(){
-    return mongoose.model('Game').find({},function(err,docs){
-        return docs;
-    })
+
+var getInitArmies = function(c, p) {
+    var arr = [];
+    c.forEach((n) => {
+        arr.push({
+            user:p[Math.floor(Math.random()*p.length)],
+            country:n,
+            num:1
+        });
+    });
+    return arr;
 }
 
 module.exports = {
-	fight:doFight,
-	newArmies:newArmies,
-    getAllGames:getAllGames
+    fight: doFight,
+    newArmies: newArmies,
+    getInitArmies: getInitArmies
 };

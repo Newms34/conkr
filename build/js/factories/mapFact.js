@@ -10,7 +10,7 @@ app.factory('mapFact', function($rootScope, $http) {
             // load all maps so we can pick one.
             return $http.get('/map/loadMaps').then(function(r) {
                 return r;
-            })
+            });
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
@@ -41,11 +41,11 @@ app.factory('mapFact', function($rootScope, $http) {
                         currCont: this.currCont,
                         cellCenters: this.cellCenters,
                         img: this.canvas.toDataURL()
-                    }
-                    console.log('TO SAVE:', mapData)
+                    };
+                    console.log('TO SAVE:', mapData);
                     return $http.post('/map/newMap', mapData).then(function(r) {
                         return r;
-                    })
+                    });
                 },
                 clearSites: function() {
                     this.compute([]);
@@ -136,18 +136,18 @@ app.factory('mapFact', function($rootScope, $http) {
                                 x: c.site.x,
                                 y: c.site.y,
                                 name: c.name || c.country
-                            })
+                            });
                         }
-                    })
+                    });
                 },
                 initLoad: function(im) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
-                    console.log('DATA URL', img)
+                    console.log('DATA URL', img);
                     this.getCellNames();
                     
                     var ctx = this.canvas.getContext('2d');
-                    var img = new Image;
+                    var img = new Image();
                     img.onload = function() {
                         ctx.drawImage(img, 0, 0); // Or at whatever offset you like
                     };

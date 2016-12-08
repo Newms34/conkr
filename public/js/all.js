@@ -2136,11 +2136,11 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
     $scope.msgInp = '';
     miscFact.getUsr().then(function(r) {
         if (!r.data || !r.data.name) {
-            throw new Error('User not found or not logged in!')
+            throw new Error('User not found or not logged in!');
         } else {
             $scope.user = r.data.name;
         }
-    })
+    });
     socket.on('newMsg', function(msg) {
         msg.now = new Date().toLocaleTimeString();
         // if ($scope.msgs.length>1 && !$scope.maxMsg)
@@ -2148,16 +2148,16 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
             $scope.msgs.shift();
         }
         $scope.msgs.push(msg);
-        console.log($scope.msgs)
+        console.log($scope.msgs);
         $scope.$digest();
-        $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()))
-    })
+        $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()));
+    });
     $scope.sendMsg = function() {
         if ($scope.msgInp == '/time') {
             $scope.timeStamp = !$scope.timeStamp;
         } else if ($scope.msgInp == '/inv') {
         	$scope.invCol = !$scope.invCol;
-        } else if($scope.msgInp==''){
+        } else if($scope.msgInp===''){
             return false;
         }else {
             socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user });
@@ -2166,7 +2166,7 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
         $scope.currPrevMsg = $scope.prevSent.length;
         $scope.msgInp = '';
         $('#msgInp').focus();
-    }
+    };
     document.querySelector('#msgInp').addEventListener('keyup',function(e){
     	//38 == up, 40==down
     	if (e.which==38){
@@ -2189,9 +2189,8 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
     		$scope.msgInp = '';
     		$scope.$digest();
     	}
-    })
-})
-
+    });
+});
 app.controller('loginCont', function($scope, miscFact,$timeout) {
     $scope.logMode = true;
     $scope.pwdStren = 0;
@@ -2210,13 +2209,13 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
         miscFact.checkUnDup($scope.regUser).then(function(r) {
             $scope.dupUn = r.data == 'bad';
         });
-    }
+    };
     $scope.getAbtHeight = function() {
         $timeout(function() {
             document.querySelector('.abt-bg').style.height = $('#abt-stuff').height()/0.9+'px';
         }, 0, false);
 
-    }
+    };
     $scope.showAbt = false;
     $scope.getPwdStren = function() {
         //how stronk is pwrd?
@@ -2275,11 +2274,8 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
             str -= 3;
             $scope.passGud.sameUn = true;
         }
-        console.log(pwd, str, 'out of 12 is ', 100 * str / 12)
         $scope.pwdStren = str;
-        console.log('ang var now', $scope.pwdStren)
-    }
-
+    };
     // ${$scope.passGud.len>3?'&#10003;':'&#10007;'}
     $scope.explPwd = function() {
         sandalchest.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
@@ -2296,12 +2292,12 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
                     } else {
                         sandalchest.alert('Welcome back!', function(p) {
                             window.location.assign('../');
-                        })
+                        });
                     }
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
@@ -2309,21 +2305,21 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
             } else {
                 sandalchest.alert('Welcome back!', function(p) {
                     window.location.assign('../');
-                })
+                });
             }
-        })
-    }
-})
+        });
+    };
+});
 
 var socket = io(),
     socketRoom = null;
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact) {
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
-        console.log('DATA', r.data)
+        console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
-    })
+    });
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
@@ -2331,8 +2327,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
     $scope.logout = function() {
         miscFact.logout().then(function() {
             window.location.assign('./login');
-        })
-    }
+        });
+    };
     window.onkeyup = function(e) {
         if (e.which == 13 && $scope.showChat) {
             $('#msgInp').focus();
@@ -2341,8 +2337,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             $scope.$digest();
             $('#msgInp').focus();
         }
-    }
-    $scope.gameCreateLoad = true;
+    };
+    $scope.gameMenu = true;
     $scope.gameSettingsPanel = 0;
     $scope.newNew = true; //for new game creation, create a completely new map? 
     $scope.numCountries = 20;
@@ -2356,7 +2352,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             numZones = Math.round($scope.numCountries / 0.3);
         $scope.map = mapFact.GetVoronoi($scope.win.h, $scope.win.w, numZones, smootz);
         $scope.map.init();
-        $scope.gameCreateLoad = false;
+        $scope.gameMenu = false;
         sandalchest.confirm("Map okay?", function(r) {
             if (r) {
                 $scope.map.save().then(function(sr) {
@@ -2365,38 +2361,38 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
                         if (play) {
                             //use sr.id to make a new game.
                             fightFact.newGame(sr.data.id, $scope.user).then((g) => {
-                                console.log('Done! Game made!')
-                                $http.get('/game/getGames');
+                                console.log('Done! Game made!');
+                                socket.emit('getGames',{x:true})
                             });
                         }
-                    })
+                    });
                 });
             } else {
                 //user doesnt like this map(D:). reset
                 $scope.map = null;
-                $scope.gameCreateLoad = true;
+                $scope.gameMenu = true;
                 $scope.$digest();
             }
         });
     };
-    $http.get('/game/getGames');
+    socket.emit('getGames',{x:true})
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
         mapFact.loadMaps().then(function(r) {
             console.log('MAPS', r);
             $scope.potentialMaps = r.data;
-        })
-    }
+        });
+    };
     socket.on('allGames', function(g) {
-        console.log('FROM ALL GAMES', g)
+        console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
-    })
+    });
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {
-            console.log('JOINED GAME:', r)
-            $http.get('/game/getGames');
-        })
-    }
+            console.log('JOINED GAME:', r);
+            socket.emit('getGames',{x:true})
+        });
+    };
     $scope.pickMap = function(m, n) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -2405,26 +2401,32 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
             $scope.map[p] = m[p];
         }
         $scope.map.initLoad(m.img);
-        $scope.gameCreateLoad = false;
+        $scope.gameMenu = false;
         fightFact.newGame(n, $scope.user).then((x) => {
-            $http.get('/game/getGames');
+            socket.emit('getGames',{x:true})
         });
-    }
+    };
     $scope.toggleNewMode = function() {
         $scope.newNew = !$scope.newNew;
         if (!$scope.newNew) {
             $scope.loadMaps();
         }
-    }
+    };
     $scope.startGame = function(id) {
         sandalchest.confirm(`Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`, function(r) {
             if (r) {
                 fightFact.startGame(id).then(function(r) {
-                    $http.get('/games/getGames')
+                    socket.emit('gameStarted',r)
                 });
             }
-        })
-    }
+        });
+    };
+    socket.on('putInGame',(c)=>{
+        console.log('PUT IN GAME',c)
+        if(c.data.players.indexOf($scope.user)>-1){
+            socket.emit('putInRoom',{id:c.data.gameId})
+        }
+    })
     $scope.avgCounInfo = function() {
         sandalchest.alert('Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
     };
@@ -2449,60 +2451,49 @@ app.factory('fightFact', function($rootScope, $http) {
                 rd: rd
             });
         },
-        getInitArmies: function(map, usrs) {
-            var armies = [];
-            map.diagram.cells.forEach(function(c) {
-                if (c.name) {
-                    armies.push({
-                        user: usrs[Math.floor(Math.random() * usrs.length)].name,
-                        num: 1,
-                        country: c.name
-                    });
-                }
-            });
-            return armies;
-        },
         newGame: function(n, p) {
             return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },
         joinGame: function(m, p) {
+            //join a not-yet-started game;
             return $http.post('/game/join', { gameId: m, player: p }, function(p) {
                 return p;
-            })
+            });
         },
-        addArmies: function(gameData) {
+        addArmies: function(game) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies', { gameData: gameData })
+            socketRoom.emit('sendAddArmies', { game: game });
         },
         saveGame: function(id, map) {
             if (!id) {
                 sandalchest.alert('Map save error: no map id!', function() {
                     return false;
-                })
+                });
             } else {
                 var gameData = {
                     gameId: id,
                     armies: [],
                     mapId: map.id
-                }
+                };
                 map.diagram.cells.forEach((c, i) => {
                     if (c.name) {
                         gameData.armies.push({
                             user: c.army.usr,
                             country: c.name,
                             num: c.army.num
-                        })
+                        });
                     }
                 });
-                return $http.post('/game/saveGame', gameData)
+                return $http.post('/game/saveGame', gameData);
             }
         },
         startGame: function(id) {
+            //creator of a game sets it to started, meaning no more doodz can join.
             return $http.get('/game/startGame/'+id).then(function(r){
                 return r;
-            })
+            });
         }
     };
 });
@@ -2519,7 +2510,7 @@ app.factory('mapFact', function($rootScope, $http) {
             // load all maps so we can pick one.
             return $http.get('/map/loadMaps').then(function(r) {
                 return r;
-            })
+            });
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
@@ -2550,11 +2541,11 @@ app.factory('mapFact', function($rootScope, $http) {
                         currCont: this.currCont,
                         cellCenters: this.cellCenters,
                         img: this.canvas.toDataURL()
-                    }
-                    console.log('TO SAVE:', mapData)
+                    };
+                    console.log('TO SAVE:', mapData);
                     return $http.post('/map/newMap', mapData).then(function(r) {
                         return r;
-                    })
+                    });
                 },
                 clearSites: function() {
                     this.compute([]);
@@ -2645,18 +2636,18 @@ app.factory('mapFact', function($rootScope, $http) {
                                 x: c.site.x,
                                 y: c.site.y,
                                 name: c.name || c.country
-                            })
+                            });
                         }
-                    })
+                    });
                 },
                 initLoad: function(im) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
-                    console.log('DATA URL', img)
+                    console.log('DATA URL', img);
                     this.getCellNames();
                     
                     var ctx = this.canvas.getContext('2d');
-                    var img = new Image;
+                    var img = new Image();
                     img.onload = function() {
                         ctx.drawImage(img, 0, 0); // Or at whatever offset you like
                     };
@@ -3047,32 +3038,32 @@ app.factory('miscFact', function($rootScope, $http) {
         getUsr: function() {
             return $http.get('/user/currUsrData').then(function(r){
             	return r;
-            })
+            });
         },
         chkLoggedStatus:function(){
         	return $http.get('/user/chkLog').then(function(r){
             	return r;
-            })
+            });
         },
         checkUnDup: function(u){
         	return $http.get('/user/nameOkay/'+u).then(function(r){
         		return r;
-        	})
+        	});
         },
         regNewUsr:function(u,p){
         	return $http.post('/user/new',{user:u,password:p}).then(function(r){
         		return r;
-        	})
+        	});
         },
         login:function(u,p){
         	return $http.post('/user/login',{user:u,password:p}).then(function(r){
         		return r;
-        	})
+        	});
         },
         logout:function(u,p){
         	return $http.get('/user/logout',{user:u,password:p}).then(function(r){
         		return r;
-        	})
+        	});
         }
     };
 });

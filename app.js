@@ -5,6 +5,7 @@ var express = require('express'),
     routes = require('./routes'),
     config = require('./.config'),
     session = require('client-sessions'),
+    mongoose = require('mongoose'),
     sockmod = require('./socketmodules');
 var app = express();
 
@@ -54,6 +55,23 @@ io.on('connection', function(socket) {
     socket.on('testRoom', function(t) {
         console.log('TEST ROOM', t)
         io.sockets.in(socket.room).emit('roomTestCli', { t: t, msg: 'hi from server!' + socket.room })
+    })
+    socket.on('gameStarted', function(r) {
+        //game has been started. send message to all players, so they can connect
+        io.emit('putInGame', r);
+        //also re-send allgames, since this game can no longer be joined!
+        mongoose.model('Game').find({}, function(err, docs) {
+            io.emit('allGames', docs);
+        })
+    })
+    socket.on('putInRoom',function(d){
+        socket.join(d.id);
+        //after this, all players should be in the correct room. can also be used for a player rejoining a game
+    })
+    socket.on('getGames', function(o) {
+        mongoose.model('Game').find({}, function(err, docs) {
+            io.emit('allGames', docs);
+        })
     })
 });
 io.on('error', function(err) {

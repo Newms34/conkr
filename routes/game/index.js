@@ -8,7 +8,7 @@ var router = express.Router(),
     sockmod = require('../../socketmodules');
 module.exports = router;
 router.post('/new/', function(req, res, next) {
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
@@ -29,7 +29,7 @@ router.post('/new/', function(req, res, next) {
     })
 })
 router.post('/join', function(req, res, next) {
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
@@ -37,7 +37,7 @@ router.post('/join', function(req, res, next) {
         if (err) return res.send(500, { error: err });
         if (doc.inPlay) {
             //this SHOULDNT ever be triggered, since only the open games will be joinable, but just in case!
-            res.send('Game already in progress!');
+            res.send('inprog');
             return;
         }
         doc.players.push(req.body.player);
@@ -49,7 +49,7 @@ router.post('/join', function(req, res, next) {
     })
 })
 router.post('/saveGame', function(req, res, next) {
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
@@ -59,26 +59,37 @@ router.post('/saveGame', function(req, res, next) {
     });
 })
 router.get('/startGame/:id', function(req, res, next) {
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
     // basically, this sets a game's 'inPlay' property to true. While a game is in play, players cannot join it (see '/join'). Games cannot be reset to inPlay==false after they're started.
     mongoose.model('Game').findOne({ 'gameId': req.params.id }, function(err, doc) {
-        if (err) return res.send(500, { error: err });
-        if (!doc) return 'Game not found!';
+        if (err||!doc) {
+            res.send('errGame');
+        }
         doc.inPlay = true;
-        res.send('Game started!')
+        doc.turn=0;//should already be set, but just in case!
+        mongoose.model('Map').findOne({ 'id': doc.mapId }, function(err, mdoc) {
+            if (err || !mdoc){
+                res.send('errMap');
+            }
+            var couns = mdoc.mapData.countryNames;
+            var players = doc.players;
+            doc.armies = sockmod.getInitArmies(couns,players);
+            doc.save(); 
+            res.send(doc); 
+        })
     })
 
 })
-router.get('/getGames', function(req,res,next) {
-    if(!req.session.user){
-        res.send('Error! Not logged in!');
+router.get('/getGames', function(req, res, next) {
+    if (!req.session.user) {
+        res.send('errLog');
         return;
     }
-    sockmod.getAllGames().then(function(r) {
+    mongoose.model('Game').find({}, function(err, docs) {
         socket.emit('allGames', r);
-        res.send(true)
+        res.send(true);
     })
 })

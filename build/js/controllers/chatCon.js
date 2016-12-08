@@ -9,11 +9,11 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
     $scope.msgInp = '';
     miscFact.getUsr().then(function(r) {
         if (!r.data || !r.data.name) {
-            throw new Error('User not found or not logged in!')
+            throw new Error('User not found or not logged in!');
         } else {
             $scope.user = r.data.name;
         }
-    })
+    });
     socket.on('newMsg', function(msg) {
         msg.now = new Date().toLocaleTimeString();
         // if ($scope.msgs.length>1 && !$scope.maxMsg)
@@ -21,16 +21,16 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
             $scope.msgs.shift();
         }
         $scope.msgs.push(msg);
-        console.log($scope.msgs)
+        console.log($scope.msgs);
         $scope.$digest();
-        $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()))
-    })
+        $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()));
+    });
     $scope.sendMsg = function() {
         if ($scope.msgInp == '/time') {
             $scope.timeStamp = !$scope.timeStamp;
         } else if ($scope.msgInp == '/inv') {
         	$scope.invCol = !$scope.invCol;
-        } else if($scope.msgInp==''){
+        } else if($scope.msgInp===''){
             return false;
         }else {
             socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user });
@@ -39,7 +39,7 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
         $scope.currPrevMsg = $scope.prevSent.length;
         $scope.msgInp = '';
         $('#msgInp').focus();
-    }
+    };
     document.querySelector('#msgInp').addEventListener('keyup',function(e){
     	//38 == up, 40==down
     	if (e.which==38){
@@ -62,5 +62,5 @@ var app = angular.module('conkr', []).controller('chatController', function($sco
     		$scope.msgInp = '';
     		$scope.$digest();
     	}
-    })
-})
+    });
+});

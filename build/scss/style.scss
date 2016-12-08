@@ -136,15 +136,21 @@ body {
     background:#f00;
     border-radius:50%;
 }
-.log-butt{
+.men-butt{
     position:fixed;
     top:5px;
     right:5px;
     z-index:100;
 }
+.log-butt{
+    position:fixed;
+    top:45px;
+    right:5px;
+    z-index:100;
+}
 .chat-butt{
     position:fixed;
-    left:38%;
+    left:2px;
     bottom:5px;
     z-index:100;
 }
