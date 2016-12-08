@@ -8,6 +8,10 @@ var router = express.Router(),
 module.exports = router;
 router.post('/newMap', function(req,res,next) {
     //create a new game!
+    if(!req.session.user){
+        res.send('Error! Not logged in!');
+        return;
+    }
     var mapId = Math.floor(Math.random() * 99999999999).toString(32),
         map = req.body;
     mongoose.model('Map').create({ id: mapId, mapData: map }, function(err, data) {
@@ -20,6 +24,10 @@ router.post('/newMap', function(req,res,next) {
 })
 router.get('/loadMaps', function(req,res,next) {
     //load all maps so user can pick an old map
+    if(!req.session.user){
+        res.send('Error! Not logged in!');
+        return;
+    }
     var mapId = req.params.mapId
     mongoose.model('Map').find({}, function(err, data) {
         if (err) {

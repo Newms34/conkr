@@ -27,6 +27,6 @@
     "bootstrap": "^3.3.7",
     "angular": "^1.5.8",
     "socket.io-client": "^1.7.1",
-    "bootbox.js": "^4.4.0"
+    "sandal-chest": "*"
   }
 }

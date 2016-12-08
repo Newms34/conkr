@@ -43,22 +43,6 @@ io.on('connection', function(socket) {
     socket.on('sendMsg', function(m) {
         io.emit('newMsg', m)
     });
-    //get a room!
-    socket.on('newRoom', function(d) {
-        sockmod.getAllGames().then(function(r) {
-            socket.emit('allGames', r);
-        })
-    })
-    socket.on('joinGame', function(d) {
-        sockmod.getAllGames().then(function(r) {
-            socket.emit('allGames', r);
-        })
-    })
-    socket.on('getGames', function(d) {
-        sockmod.getAllGames().then(function(r) {
-            socket.emit('allGames', r);
-        })
-    })
     socket.on('sendDoFight', function(d) {
         var cellChanges = sockmod.doFight(d);
         io.sockets.in(socket.room).emit('rcvDoFight', cellChange);

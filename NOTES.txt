@@ -154,4 +154,5 @@ var gameData = {
     }],//data for all cells that are countries.
     gameId:abcd3f6;//rando-generated id of game
 }
+use req.session for security! need to add that to most routes, and change socket.emit('getGames') to a regular http route!
 */

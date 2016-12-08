@@ -43,7 +43,7 @@ app.factory('fightFact', function($rootScope, $http) {
         },
         saveGame: function(id, map) {
             if (!id) {
-                bootbox.alert('Map save error: no map id!', function() {
+                sandalchest.alert('Map save error: no map id!', function() {
                     return false;
                 })
             } else {

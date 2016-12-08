@@ -1,4 +1,4 @@
-app.controller('loginCont', function($scope, miscFact) {
+app.controller('loginCont', function($scope, miscFact,$timeout) {
     $scope.logMode = true;
     $scope.pwdStren = 0;
     $scope.passGud = {
@@ -17,6 +17,13 @@ app.controller('loginCont', function($scope, miscFact) {
             $scope.dupUn = r.data == 'bad';
         });
     }
+    $scope.getAbtHeight = function() {
+        $timeout(function() {
+            document.querySelector('.abt-bg').style.height = $('#abt-stuff').height()/0.9+'px';
+        }, 0, false);
+
+    }
+    $scope.showAbt = false;
     $scope.getPwdStren = function() {
         //how stronk is pwrd?
         var str = 0,
@@ -81,19 +88,19 @@ app.controller('loginCont', function($scope, miscFact) {
 
     // ${$scope.passGud.len>3?'&#10003;':'&#10007;'}
     $scope.explPwd = function() {
-        bootbox.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
+        sandalchest.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
     };
     $scope.newUsr = function() {
         miscFact.regNewUsr($scope.regUser, $scope.regPwdOne).then(function(r) {
             if (r.data == 'DUPLICATE') {
-                bootbox.alert('Uh oh! Something went horribly wrong!');
+                sandalchest.alert('Uh oh! Something went horribly wrong!');
             } else {
                 //auto-login;
                 miscFact.login($scope.regUser, $scope.regPwdOne).then(function(d) {
                     if (d.data == 'no') {
-                        bootbox.alert('Login error: please check your username and/or password');
+                        sandalchest.alert('Login error: please check your username and/or password');
                     } else {
-                        bootbox.alert('Welcome back!', function(p) {
+                        sandalchest.alert('Welcome back!', function(p) {
                             window.location.assign('../');
                         })
                     }
@@ -104,9 +111,9 @@ app.controller('loginCont', function($scope, miscFact) {
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
-                bootbox.alert('Login error: please check your username and/or password');
+                sandalchest.alert('Login error: please check your username and/or password');
             } else {
-                bootbox.alert('Welcome back!', function(p) {
+                sandalchest.alert('Welcome back!', function(p) {
                     window.location.assign('../');
                 })
             }

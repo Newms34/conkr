@@ -4,10 +4,16 @@
 <head>
     <title>Conkr! - Login</title>
     <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/sandal-chest/sandal-chest.css">
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 
 <body id='log-bod' ng-app='conkr' ng-controller='loginCont'>
+    <button class='btn btn-success pull-right' ng-click='showAbt=true;getAbtHeight();'>&#128712;About</button>
+    <div class='abt-bg' ng-show='showAbt'>
+        <div ng-include="'abtPage.html'" class='abt-inner'></div>
+        <button class='btn btn-primary col-md-2 col-md-offset-5' ng-click='showAbt=false'>Close</button>
+    </div>
     <div class='col-md-6 col-md-offset-3 panel panel-primary'>
         <div class='panel-heading'>
             <div class='new-tab n-t-left' ng-class="{'tab-inact':!logMode}" ng-click='logMode=true'>
@@ -33,7 +39,7 @@
                 </div>
             </div>
             <div class='form-group row'>
-            	<button class='btn btn-primary col-md-2 col-md-offset-5' ng-click='log()'>&#128275; Login</button>
+                <button class='btn btn-primary col-md-2 col-md-offset-5' ng-click='log()'>&#128275; Login</button>
             </div>
         </div>
         <div class='panel-body' ng-show='!logMode'>
@@ -54,13 +60,12 @@
                     <input type="password" name="regPwdOne" ng-model='regPwdOne' ng-change='getPwdStren()'>
                 </div>
                 <div class='col-md-3' title='Password strength: {{pwdStren}}'>
-
-                	<div class='stronkmeter'>
-                		<div class='stronkchannel'>
-                			<div class='stronkbar' style='width:{{100*pwdStren/12}}%'></div>
-                		</div>
-                	</div>
-                	<button class='btn btn-xs btn-danger' ng-click='explPwd()'>?</button>
+                    <div class='stronkmeter'>
+                        <div class='stronkchannel'>
+                            <div class='stronkbar' style='width:{{100*pwdStren/12}}%'></div>
+                        </div>
+                    </div>
+                    <button class='btn btn-xs btn-danger' ng-click='explPwd()'>?</button>
                 </div>
             </div>
             <div class='form-group row'>
@@ -73,14 +78,14 @@
                 <div class='col-md-3 alert-danger pull-left' ng-show='regPwdTwo && regPwdOne!==regPwdTwo'><span style='font-size: xx-large'>!</span>Your passwords don't match!</div>
             </div>
             <div class='form-group row'>
-            	<button class='btn btn-primary col-md-2 col-md-offset-5' ng-disabled='!regUser || !regPwdOne || (regPwdOne && regPwdOne!=regPwdTwo)' ng-click='newUsr()'>&#9997; Register</button>
+                <button class='btn btn-primary col-md-2 col-md-offset-5' ng-disabled='!regUser || !regPwdOne || (regPwdOne && regPwdOne!=regPwdTwo)' ng-click='newUsr()'>&#9997; Register</button>
             </div>
         </div>
     </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/bootbox.js/bootbox.js"></script>
+    <script src="/sandal-chest/sandal-chest.js"></script>
     <script src="/angular/angular.min.js"></script>
     <script src="/socket.io-client/dist/socket.io.js"></script>
     <script src="./js/all.js"></script>
