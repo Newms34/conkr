@@ -1,5 +1,13 @@
 app.factory('fightFact', function($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
+    var getCellCoords = function(m,c){
+        for (var i=0;i<m.length;i++){
+            if (m[i].name==c){
+                return m[i].site;
+            }
+        }
+        return false;
+    }
     return {
         getMaxArmy: function(c, m) {
             var attackPenalty = m ? 1 : 0;
@@ -18,6 +26,23 @@ app.factory('fightFact', function($rootScope, $http) {
             return $http.post('/game/new', { id: n, player: p }).then(function(p) {
                 return p;
             });
+        },
+        placeArmies:function(m,a,l){
+            //shouldn't base just be 0,0?
+            //m:map, a: army, l: labels (unicode) organized by playaz
+            var pieces = [];
+            for (var n=0;n<a.length;n++){
+                var site = getCellCoords(m.diagram.cells,a[n])
+                pieces.push({
+                    country:a[n].country,
+                    num:a[n].num,
+                    lbl: l[a[n].user],
+                    usr:a[n].user,
+                    x:site.x,
+                    y:site.y
+                });
+            }
+            return pieces;
         },
         joinGame: function(m, p) {
             //join a not-yet-started game;

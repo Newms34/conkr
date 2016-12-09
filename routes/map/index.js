@@ -6,9 +6,9 @@ var router = express.Router(),
     mongoose = require('mongoose'),
     session = require('client-sessions');
 module.exports = router;
-router.post('/newMap', function(req,res,next) {
+router.post('/newMap', function(req, res, next) {
     //create a new game!
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
@@ -18,24 +18,40 @@ router.post('/newMap', function(req,res,next) {
         if (err) {
             res.send(err)
         } else {
-            res.send({id:mapId});
+            res.send({ id: mapId });
         }
     });
 })
-router.get('/loadMaps', function(req,res,next) {
+router.get('/loadMaps', function(req, res, next) {
     //load all maps so user can pick an old map
-    if(!req.session.user){
+    if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
     }
-    var mapId = req.params.mapId
     mongoose.model('Map').find({}, function(err, data) {
         if (err) {
             res.send(err)
-        } else if(!data.length){
-        	res.send([])
-        }else {
+        } else if (!data.length) {
+            res.send([])
+        } else {
             res.send(data);
+        }
+    });
+})
+
+router.get('/loadMap/:id', function(req, res, next) {
+    //load one map. notice MAP, not MAPS
+    console.log('attempted to get map', req.params.id)
+    if (!req.session.user) {
+        res.send('Error! Not logged in!');
+        return;
+    }
+    mongoose.model('Map').findOne({ 'id': req.params.id }, function(err, doc) {
+        console.log('RESULT IS',doc)
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(doc);
         }
     });
 })

@@ -66,6 +66,7 @@ io.on('connection', function(socket) {
     })
     socket.on('putInRoom',function(d){
         socket.join(d.id);
+        socket.to(d.id).emit('gameReady',d);
         //after this, all players should be in the correct room. can also be used for a player rejoining a game
     })
     socket.on('getGames', function(o) {

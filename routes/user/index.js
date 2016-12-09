@@ -128,4 +128,16 @@ router.get('/logout', function(req, res, next) {
     req.session.reset();
     res.send('logged')
 })
-
+router.get('/checkInGame/:usr',function(req,res,next){
+    mongoose.model('Game').find({},function(err,docs){
+        if(err) return next(err);
+        var gameIn = null;
+        for (var n=0;n<docs.length;n++){
+            if (docs[n].players.indexOf(req.params.usr)>-1 && docs[n].inPlay){
+                gameIn=docs[n];
+                break;
+            }
+        }
+        res.send({game:gameIn})
+    })
+})

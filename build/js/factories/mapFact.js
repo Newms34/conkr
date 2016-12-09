@@ -12,6 +12,12 @@ app.factory('mapFact', function($rootScope, $http) {
                 return r;
             });
         },
+        loadOneMap:function(id){
+            console.log('attempting to get map',id)
+            return $http.get('/map/loadMap/'+id).then(function(r) {
+                return r;
+            });
+        },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
                 voronoi: new Voronoi(),
@@ -141,11 +147,10 @@ app.factory('mapFact', function($rootScope, $http) {
                     });
                 },
                 initLoad: function(im) {
+                    //simply redraw an old map on canvas.
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
-                    console.log('DATA URL', img);
                     this.getCellNames();
-                    
                     var ctx = this.canvas.getContext('2d');
                     var img = new Image();
                     img.onload = function() {
