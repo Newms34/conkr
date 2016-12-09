@@ -26,8 +26,8 @@
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
             <div class='col-md-12 no-room'>
-                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode()'>Make new map</div>
-                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode()'>Load map</div>
+                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(0)'>Make new map</div>
+                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(1)'>Load map</div>
             </div>
             <hr>
             <div ng-show='newNew' class='panel panel-info panel-body'>

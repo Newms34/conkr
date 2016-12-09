@@ -95,8 +95,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             socket.emit('getGames',{x:true})
         });
     };
-    $scope.toggleNewMode = function() {
-        $scope.newNew = !$scope.newNew;
+    $scope.toggleNewMode = function(n) {
+        $scope.newNew = n>0;
         if (!$scope.newNew) {
             $scope.loadMaps();
         }
