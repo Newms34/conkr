@@ -1,4 +1,4 @@
-var app = angular.module('conkr', []).controller('chatController', function($scope, mapFact, miscFact) {
+var app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
 	$scope.prevSent = [];
     $scope.msgs = [{
     	now:new Date().toLocaleTimeString(),

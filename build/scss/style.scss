@@ -11,9 +11,23 @@ body {
     display: flex;
     flex-direction: row;
 }
-
+canvas,#game-parts{
+    position:absolute;
+    left:0px;
+    top:0px;
+}
+.country-army{
+   position:absolute;
+   padding:5px;
+   text-align:center; 
+}
 .panel {
-    padding: 0
+    padding: 0;
+    z-index:50;
+}
+.game-players{
+    box-shadow:0 0 4px #aaa;
+    text-align:center;
 }
 .abt-stuff{
     overflow-y: scroll;

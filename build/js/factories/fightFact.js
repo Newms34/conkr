@@ -15,7 +15,7 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         newGame: function(n, p) {
-            return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
+            return $http.post('/game/new', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },

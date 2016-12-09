@@ -156,6 +156,6 @@ var gameData = {
 }
 use req.session for security! need to add that to most routes
 
-when a socket connects, we should run getAllGames and see if the player is in any inPlay games, then add them to those rooms.
+when a socket connects, we should run getAllGames and see if the player is in any inPlay game, then add them to that room.
 per-game chat?
 */

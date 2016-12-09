@@ -10,6 +10,7 @@ var skillSchema = new mongoose.Schema({
     players:[String],//list of players for convenience
     gameId:String,//ID of game
     creator:String,//ID of creator
+    avas:[Number],//avatar(number) of each player.
     inPlay:{type:Boolean, default:false},//if this is true, the game is in play and new players cannot join
     turn:{type:Number,default:0}//whose turn is it?
 }, { collection: 'Game' });

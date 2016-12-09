@@ -7,7 +7,7 @@ var router = express.Router(),
     session = require('client-sessions'),
     sockmod = require('../../socketmodules');
 module.exports = router;
-router.post('/new/', function(req, res, next) {
+router.post('/new', function(req, res, next) {
     if (!req.session.user) {
         res.send('Error! Not logged in!');
         return;
@@ -26,6 +26,7 @@ router.post('/new/', function(req, res, next) {
             creator: req.body.player
         }
         mongoose.model('Game').create(newGame)
+        res.send('game '+newId+' made')
     })
 })
 router.post('/join', function(req, res, next) {
@@ -76,7 +77,14 @@ router.get('/startGame/:id', function(req, res, next) {
             }
             var couns = mdoc.mapData.countryNames;
             var players = doc.players;
+            if(!doc.avas) doc.avas=[];
             doc.armies = sockmod.getInitArmies(couns,players);
+            var allAnims = [128045,128046,128047,128048,128049,128050,128052,128053,128054,128055,128056,128057,128058,128059,128060,128023,128040];
+            players.forEach((p)=>{
+                var pik = Math.floor(Math.random()*allAnims.length);
+                doc.avas.push(allAnims[pik]);
+                allAnims.slice(pik,1);
+            })
             doc.save(); 
             res.send(doc); 
         })

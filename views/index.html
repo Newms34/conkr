@@ -114,7 +114,6 @@
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
             <h4>My Games:</h4>
-            <code>this'll be games that you've created (and can thus 'start')</code>
             <table class='table table-striped'>
                 <thead>
                     <tr>
@@ -125,10 +124,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat='g in allGames' ng-show='p.creator=user && !inPlay'>
+                    <tr ng-repeat='g in allGames' ng-show='g.creator==user'>
                         <td>{{g.gameId}}</td>
                         <td>{{g.mapId}}</td>
-                        <td>{{g.players.join(', ')}}</td>
+                        <td>
+                            <div class='game-players' ng-repeat='pl in g.players'><span ng-show = 'g.avas.length' ng-bind-html="'&#'+g.avas[$parent.$index]+';'"></span> {{pl}}</div>
+                        </td>
                         <td>
                             <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)'>Start Game</button>
                         </td>
@@ -138,11 +139,15 @@
         </div>
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
+    <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;'>
+        <div class='country-army' ng-repeat='ap in armyPieces'></div>
+    </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/sandal-chest/sandal-chest.js"></script>
     <script src="/angular/angular.min.js"></script>
+    <script src="/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/socket.io-client/dist/socket.io.js"></script>
     <script src="./js/all.js"></script>
 </body>

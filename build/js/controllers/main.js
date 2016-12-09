@@ -1,6 +1,6 @@
 var socket = io(),
     socketRoom = null;
-app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact) {
+app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,$sce) {
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
@@ -46,8 +46,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
                     //got id back from mapsave. Put player in this game.
                     sandalchest.confirm("Do you want to start a new game with this map (" + sr.data.id + ")?", function(play) {
                         if (play) {
+                            console.log('YES NEW GAME?',play)
                             //use sr.id to make a new game.
-                            fightFact.newGame(sr.data.id, $scope.user).then((g) => {
+                            fightFact.newGame(sr.data.id, $scope.user).then(function(g){
                                 console.log('Done! Game made!');
                                 socket.emit('getGames',{x:true})
                             });
@@ -73,6 +74,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
     socket.on('allGames', function(g) {
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
+        $scope.$digest();
     });
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {

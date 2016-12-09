@@ -2125,7 +2125,7 @@ Voronoi.prototype.compute = function(sites, bbox) {
 
     return diagram;
     };
-var app = angular.module('conkr', []).controller('chatController', function($scope, mapFact, miscFact) {
+var app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
 	$scope.prevSent = [];
     $scope.msgs = [{
     	now:new Date().toLocaleTimeString(),
@@ -2313,7 +2313,7 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
 
 var socket = io(),
     socketRoom = null;
-app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact) {
+app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,$sce) {
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
@@ -2359,8 +2359,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
                     //got id back from mapsave. Put player in this game.
                     sandalchest.confirm("Do you want to start a new game with this map (" + sr.data.id + ")?", function(play) {
                         if (play) {
+                            console.log('YES NEW GAME?',play)
                             //use sr.id to make a new game.
-                            fightFact.newGame(sr.data.id, $scope.user).then((g) => {
+                            fightFact.newGame(sr.data.id, $scope.user).then(function(g){
                                 console.log('Done! Game made!');
                                 socket.emit('getGames',{x:true})
                             });
@@ -2386,6 +2387,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact)
     socket.on('allGames', function(g) {
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
+        $scope.$digest();
     });
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {
@@ -2452,7 +2454,7 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         newGame: function(n, p) {
-            return $http.post('/game/new/', { id: n, player: p }).then(function(p) {
+            return $http.post('/game/new', { id: n, player: p }).then(function(p) {
                 return p;
             });
         },
@@ -3064,6 +3066,9 @@ app.factory('miscFact', function($rootScope, $http) {
         	return $http.get('/user/logout',{user:u,password:p}).then(function(r){
         		return r;
         	});
+        },
+        animals:function(){
+            return [128045,128046,128047,128048,128049,128050,128052,128053,128054,128055,128056,128057,128058,128059,128060,128023,128040];
         }
     };
 });
