@@ -30,7 +30,6 @@ app.factory('mapFact', function($rootScope, $http) {
                 cellCenters: [],
                 timeoutDelay: 30,
                 numsRelaxed: 100,
-
                 init: function() {
                     this.canvas = document.querySelector('canvas');
                     this.randomSites(numCells, true);

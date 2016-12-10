@@ -26,8 +26,8 @@
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
             <div class='col-md-12 no-room'>
-                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(0)'>Make new map</div>
-                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(1)'>Load map</div>
+                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map</div>
+                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map</div>
             </div>
             <hr>
             <div ng-show='newNew' class='panel panel-info panel-body'>
@@ -111,7 +111,8 @@
                     </tr>
                 </tbody>
             </table>
-            <div class='alert alert-danger' ng-show='!canJoin'><h4>Hey! You can't join a game while you're already in one!</h4></div>
+            <div class='alert alert-danger' ng-show='!canJoin'>
+                <h4>Hey! You can't join a game while you're already in one!</h4></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
             <h4>My Games:</h4>
@@ -129,7 +130,8 @@
                         <td>{{g.gameId}}</td>
                         <td>{{g.mapId}}</td>
                         <td>
-                            <div class='game-players' ng-repeat='pl in g.players'><span ng-show = 'g.avas.length' ng-bind-html="'&#'+g.avas[$parent.$index]+';'"></span> {{pl}}</div>
+                            <div class='game-players' ng-repeat='pl in g.players'><span ng-show='g.avas.length' ng-bind-html="'&#'+g.avas[$index]+';'"></span> {{pl}}
+                            </div>
                         </td>
                         <td>
                             <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)'>Start Game</button>
@@ -141,7 +143,7 @@
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;'>
-        <div class='country-army' ng-repeat='ap in armyPieces' style = 'left:{{ap.x}}px;top:{{ap.y}}px;' title='{{ap.usr}} - {{ap.country}} - {{ap.num+(ap.num>1?" armies":"army")}}'><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
+        <div class='country-army' ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y}}px;' title='{{ap.usr}} - {{ap.country}} - {{ap.num+(ap.num>1?" armies":" army")}}'><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
@@ -149,8 +151,8 @@
     <script src="/sandal-chest/sandal-chest.js"></script>
     <script src="/angular/angular.min.js"></script>
     <script src="/angular-sanitize/angular-sanitize.min.js"></script>
-    <script src="/socket.io-client/dist/socket.io.js"></script>
-    <script src="./js/all.js"></script>
+    <script src="/socket.io-client/dist/socket.io.min.js"></script>
+    <script src="./js/all.min.js"></script>
 </body>
 
 </html>

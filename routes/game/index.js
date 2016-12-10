@@ -64,7 +64,7 @@ router.get('/startGame/:id', function(req, res, next) {
         res.send('Error! Not logged in!');
         return;
     }
-    // basically, this sets a game's 'inPlay' property to true. While a game is in play, players cannot join it (see '/join'). Games cannot be reset to inPlay==false after they're started.
+    // basically, this sets a game's 'inPlay' property to true. once a game is in play, players cannot join it (see '/join'). Games cannot be reset to inPlay==false after they're started.
     mongoose.model('Game').findOne({ 'gameId': req.params.id }, function(err, doc) {
         if (err||!doc) {
             res.send('errGame');
@@ -79,7 +79,7 @@ router.get('/startGame/:id', function(req, res, next) {
             var players = doc.players;
             if(!doc.avas) doc.avas=[];
             doc.armies = sockmod.getInitArmies(couns,players);
-            var allAnims = [128045,128046,128047,128048,128049,128050,128052,128053,128054,128055,128056,128057,128058,128059,128060,128023,128040];
+            var allAnims = [128045,128046,128047,128048,128049,128050,128052,128053,128054,128055,128056,128057,128058,128059,128060,128023,128040,128127,128125,128123,127877];
             players.forEach((p)=>{
                 var pik = Math.floor(Math.random()*allAnims.length);
                 doc.avas.push(allAnims[pik]);

@@ -56,22 +56,30 @@ io.on('connection', function(socket) {
         console.log('TEST ROOM', t)
         io.sockets.in(socket.room).emit('roomTestCli', { t: t, msg: 'hi from server!' + socket.room })
     })
-    socket.on('gameStarted', function(r) {
+    socket.on('gameStarted', function(doc) {
         //game has been started. send message to all players, so they can connect
-        io.emit('putInGame', r);
+        io.emit('putInGame', doc);
         //also re-send allgames, since this game can no longer be joined!
         mongoose.model('Game').find({}, function(err, docs) {
             io.emit('allGames', docs);
         })
     })
     socket.on('putInRoom',function(d){
+        console.log('socket now in room',d.id)
         socket.join(d.id);
-        socket.to(d.id).emit('gameReady',d);
+        io.sockets.in(d.id).emit('gameReady',d);
         //after this, all players should be in the correct room. can also be used for a player rejoining a game
     })
     socket.on('getGames', function(o) {
         mongoose.model('Game').find({}, function(err, docs) {
             io.emit('allGames', docs);
+        })
+    })
+    socket.on('getGamePieces',function(id){
+        console.log('GET GAME PIECES',id)
+        mongoose.model('Game').findOne({'gameId':id.id}, function(err, doc) {
+            console.log('found game',id,' and now sending game pieces')
+            io.sockets.in(id.id).emit('updateArmies', doc);
         })
     })
 });

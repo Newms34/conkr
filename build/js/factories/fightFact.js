@@ -1,6 +1,7 @@
 app.factory('fightFact', function($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
     var getCellCoords = function(m,c){
+        console.log('Getting cell coords for',c)
         for (var i=0;i<m.length;i++){
             if (m[i].name==c){
                 return m[i].site;
@@ -32,7 +33,7 @@ app.factory('fightFact', function($rootScope, $http) {
             //m:map, a: army, l: labels (unicode) organized by playaz
             var pieces = [];
             for (var n=0;n<a.length;n++){
-                var site = getCellCoords(m.diagram.cells,a[n])
+                var site = getCellCoords(m.diagram.cells,a[n].country)
                 pieces.push({
                     country:a[n].country,
                     num:a[n].num,
@@ -42,6 +43,7 @@ app.factory('fightFact', function($rootScope, $http) {
                     y:site.y
                 });
             }
+            console.log('PEEZIZ!',pieces,m,a,l)
             return pieces;
         },
         joinGame: function(m, p) {

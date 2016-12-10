@@ -11,7 +11,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (m.data.game) {
                 //load map this player's in.
                 $scope.reloadGame(m.data.game);
-                $scope.canJoin=false;//player cannot join a game while they're in one
+                $scope.canJoin = false; //player cannot join a game while they're in one
             }
         })
     });
@@ -25,9 +25,10 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         g.players.forEach((p, i) => {
             $scope.currGamePlayers[p] = g.avas[i];
         });
-        //next, set correct map id
-        $scope.gameId = g.id;
-        //finally, map stuff!
+        //next, set correct game id
+        $scope.gameId = g.gameId;
+        console.log('GAME', g)
+            //finally, map stuff!
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m)
             $scope.pickMap(m.data.mapData, g.mapId, true);
@@ -57,7 +58,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.numCountries = 20;
     $scope.map = null;
     $scope.gameId = null;
-    $scope.canJoin=true;
+    $scope.canJoin = true;
     $scope.potentialMaps = [];
     $scope.loadedMapImg = null;
     $scope.user = null;
@@ -73,8 +74,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     //got id back from mapsave. Put player in this game.
                     sandalchest.confirm("Do you want to start a new game with this map (" + sr.data.id + ")?", function(play) {
                         if (play) {
-                            console.log('YES NEW GAME?', play)
-                                //use sr.id to make a new game.
+                            //use sr.id to make a new game.
                             fightFact.newGame(sr.data.id, $scope.user).then(function(g) {
                                 console.log('Done! Game made!');
                                 socket.emit('getGames', { x: true })
@@ -113,7 +113,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         //load an OLD map for a NEW game
         //map is a new map created just now
         //OR, if 'old' is true, reload an old map and use for old game
-        console.log('pikmap data',m,n,old)
+        console.log('pikmap data', m, n, old)
         $scope.map = mapFact.GetVoronoi(m.bbox.yb, m.bbox.xr, m.countryNames.length, 20);
         for (var p in m) {
             $scope.map[p] = m[p];
@@ -122,18 +122,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.gameMenu = false;
         if (!old) {
             fightFact.newGame(n, $scope.user).then((x) => {
-                socket.emit('getGames', { x: true })
+                socket.emit('getGames', { g: true });
             });
         }
+        socket.emit('putInRoom',{id:$scope.gameId})
     };
     socket.on('updateArmies', function(d) {
-        $scope.armyPieces = placeArmies($scope.map, d, $scope.currGamePlayers);
-    })
-    socket.on('gameReady', function(d) {
-        $scope.gameIsReady = true;
+        console.log('UPDATE ARMIES',d)
         d.players.forEach((p, i) => {
             $scope.currGamePlayers[p] = d.avas[i];
         })
+        $scope.armyPieces = fightFact.placeArmies($scope.map, d.armies, $scope.currGamePlayers);
+        $scope.$digest();
+    })
+    socket.on('gameReady', function(d) {
+        $scope.gameIsReady = true;
+        socket.emit('getGamePieces',d)
+        console.log('AT GAMEREADY, D IS', d);
     })
     $scope.toggleNewMode = function(n) {
         $scope.newNew = n > 0;
