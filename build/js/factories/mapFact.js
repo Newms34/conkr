@@ -12,11 +12,27 @@ app.factory('mapFact', function($rootScope, $http) {
                 return r;
             });
         },
-        loadOneMap:function(id){
-            console.log('attempting to get map',id)
-            return $http.get('/map/loadMap/'+id).then(function(r) {
+        loadOneMap: function(id) {
+            console.log('attempting to get map', id)
+            return $http.get('/map/loadMap/' + id).then(function(r) {
                 return r;
             });
+        },
+        isNeighbor: function(c, s, d) {
+            //c: cells (array), s: start cell, d: destination cell
+            if (!c[s] || !c[d]) {
+                throw new Error('cells not found!')
+                return;
+            }
+            for (var i = 0; i < c[s].halfedges.length; i++) {
+                if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
+                    continue;
+                }
+                if ((c[s].halfedges[i].edge.lSite.x == c[d].site.x && c[s].halfedges[i].edge.lSite.y == c[d].site.y) || (c[s].halfedges[i].edge.rSite.x == c[d].site.x && c[s].halfedges[i].edge.rSite.y == c[d].site.y)) {
+                    return true;
+                }
+            }
+            return false;
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {

@@ -24,20 +24,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'node_modules')));
 app.use(express.static(path.join(__dirname, 'views')));
-app.use(session({
+var cookieSettings = {
     cookieName: 'session', // cookie name dictates the key name added to the request object
     secret: 'doctrix musica optima ut ei marcescem et eam felicem esse spero', // should be a large unguessable string
     duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
     ephemeral: false, // when true, cookie expires when the browser closes
     httpOnly: true, // when true, cookie is not accessible from javascript
     secure: false // when true, cookie will only be sent over SSL. use key 'secureProxy' instead if you handle SSL not in your node process
-}));
+}
+app.use(session(cookieSettings));
 app.use('/', routes);
 
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+var cookie = require('cookie'),
+    cookieParser = require('cookie-parser');
 io.on('connection', function(socket) {
     //default socket stuff for just message sending.
     //this does not get put in separate rooms.
@@ -45,8 +47,14 @@ io.on('connection', function(socket) {
         io.emit('newMsg', m)
     });
     socket.on('sendDoFight', function(d) {
-        var cellChanges = sockmod.doFight(d);
-        io.sockets.in(socket.room).emit('rcvDoFight', cellChange);
+        var actualUsr = sockmod.getAuthUsr(cookieSettings,cookie.parse(socket.handshake.headers.cookie).session),
+        claimedUsr = d.user;
+        if (!actualUsr||actualUsr!=claimedUsr){
+            console.log(actualUsr,'is not',claimedUsr)
+            return;
+        }
+            // var cellChanges = sockmod.doFight(d);//ch-ch-ch-changes!
+            // io.sockets.in(socket.room).emit('rcvDoFight', cellChanges);
     })
     socket.on('sendAddArmies', function(d) {
         var armyChanges = sockmod.newArmies;
@@ -64,10 +72,10 @@ io.on('connection', function(socket) {
             io.emit('allGames', docs);
         })
     })
-    socket.on('putInRoom',function(d){
-        console.log('socket now in room',d.id)
+    socket.on('putInRoom', function(d) {
+        console.log('socket now in room', d.id)
         socket.join(d.id);
-        io.sockets.in(d.id).emit('gameReady',d);
+        io.sockets.in(d.id).emit('gameReady', d);
         //after this, all players should be in the correct room. can also be used for a player rejoining a game
     })
     socket.on('getGames', function(o) {
@@ -75,10 +83,10 @@ io.on('connection', function(socket) {
             io.emit('allGames', docs);
         })
     })
-    socket.on('getGamePieces',function(id){
-        console.log('GET GAME PIECES',id)
-        mongoose.model('Game').findOne({'gameId':id.id}, function(err, doc) {
-            console.log('found game',id,' and now sending game pieces')
+    socket.on('getGamePieces', function(id) {
+        console.log('GET GAME PIECES', id)
+        mongoose.model('Game').findOne({ 'gameId': id.id }, function(err, doc) {
+            console.log('found game', id, ' and now sending game pieces')
             io.sockets.in(id.id).emit('updateArmies', doc);
         })
     })

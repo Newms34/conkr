@@ -85,8 +85,8 @@ router.get('/startGame/:id', function(req, res, next) {
                 doc.avas.push(allAnims[pik]);
                 allAnims.slice(pik,1);
             })
-            doc.save(); 
-            res.send(doc); 
+            doc.save();
+            res.send(doc);
         })
     })
 

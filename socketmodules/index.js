@@ -1,5 +1,7 @@
-var mongoose = require('mongoose');
-var newArmies = function(usrs, map) {
+var mongoose = require('mongoose'),
+    cookie = require('cookie'),
+    session = require('client-sessions')
+newArmies = function(usrs, map) {
     //function to add armies for each user
     usrs.forEach(function(u) {
         var newArmies = 0,
@@ -40,8 +42,7 @@ var newArmies = function(usrs, map) {
         })
         u.newArmies = newArmies;
     })
-}
-var doFight = function(ca, cd, ra, rd) {
+},doFight = function(ca, cd, ra, rd) {
     //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
     var aRolls = [],
         dRolls = [],
@@ -80,9 +81,7 @@ var doFight = function(ca, cd, ra, rd) {
         ca: ca,
         cd: cd
     }
-}
-
-var getInitArmies = function(c, p) {
+},getInitArmies = function(c, p) {
     var arr = [];
     c.forEach((n) => {
         arr.push({
@@ -92,10 +91,15 @@ var getInitArmies = function(c, p) {
         });
     });
     return arr;
-}
+},getAuthUsr = function(settings,rawDough){
+    //get the authorized username from the client sessions cookie. This allows us to authenticate that the person doing an attack is, in fact, the person doing the attack.
+    var ingredients = session.util.decode(settings, rawDough).content;
+    return ingredients && ingredients.user && ingredients.user.name?ingredients.user.name:false;
+};
 
 module.exports = {
     fight: doFight,
     newArmies: newArmies,
-    getInitArmies: getInitArmies
+    getInitArmies: getInitArmies,
+    getAuthUsr:getAuthUsr
 };

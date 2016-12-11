@@ -1,7 +1,7 @@
 app.factory('fightFact', function($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
     var getCellCoords = function(m,c){
-        console.log('Getting cell coords for',c)
+        console.log('Getting cell coords for',c);
         for (var i=0;i<m.length;i++){
             if (m[i].name==c){
                 return m[i].site;
@@ -15,8 +15,9 @@ app.factory('fightFact', function($rootScope, $http) {
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
         },
-        doFight: function(ca, cd, ra, rd) {
+        doFight: function(usr, ca, cd, ra, rd) {
             socketRoom.emit('sendDoFight', {
+                user:usr,
                 ca: ca,
                 cd: cd,
                 ra: ra,
@@ -43,7 +44,6 @@ app.factory('fightFact', function($rootScope, $http) {
                     y:site.y
                 });
             }
-            console.log('PEEZIZ!',pieces,m,a,l)
             return pieces;
         },
         joinGame: function(m, p) {
