@@ -15,14 +15,18 @@ app.factory('fightFact', function($rootScope, $http) {
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
         },
-        doFight: function(usr, ca, cd, ra, rd) {
-            socketRoom.emit('sendDoFight', {
+        doFight: function(usr, ca, cd, ra, rd,id) {
+            socket.emit('sendDoFight', {
                 user:usr,
                 ca: ca,
                 cd: cd,
                 ra: ra,
-                rd: rd
+                rd: rd,
+                gameId:id
             });
+        },
+        nextTurn:function(game,usr){
+            socket.emit('nextTurn',{id:game,usr:usr})
         },
         newGame: function(n, p) {
             return $http.post('/game/new', { id: n, player: p }).then(function(p) {
@@ -54,7 +58,7 @@ app.factory('fightFact', function($rootScope, $http) {
         },
         addArmies: function(game) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies', { game: game });
+            socket.emit('sendAddArmies', { game: game });
         },
         saveGame: function(id, map) {
             if (!id) {

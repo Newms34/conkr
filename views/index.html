@@ -142,7 +142,7 @@
         </div>
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
-    <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;'>
+    <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
         <div class='country-army' ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y}}px;' title='{{ap.usr}} - {{ap.country}} - {{ap.num+(ap.num>1?" armies":" army")}}'><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>

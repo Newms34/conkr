@@ -54,7 +54,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.currGamePlayers = {};
     $scope.gameIsReady = true;
     $scope.gameSettingsPanel = 0;
-    $scope.newNew = true; //for new game creation, create a completely new map? 
+    $scope.newNew = true; //for new game creation, create a completely new map?
     $scope.numCountries = 20;
     $scope.map = null;
     $scope.gameId = null;
@@ -125,6 +125,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 socket.emit('getGames', { g: true });
             });
         }
+        $scope.armyPieces = [];
         socket.emit('putInRoom',{id:$scope.gameId})
     };
     socket.on('updateArmies', function(d) {
@@ -177,9 +178,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 break;
             }
         }
-        if (rd>ra) ra=rd; //defender cannot defend with more armies than attacked attacks with
+        if (rd>ra) ra=rd; //defender cannot defend with more armies than attacker attacks with
         if(mapFact.isNeighbor($scope.map.diagram.cells,s,d)){
-            fightFact.doFight($scope.user,$scope.map.diagram.cells[s],$scope.diagram.cells[d],ra,rd)
+            fightFact.doFight($scope.user,$scope.map.diagram.cells[s],$scope.diagram.cells[d],ra,rd,$scope.gameId)
         }
     }
 });

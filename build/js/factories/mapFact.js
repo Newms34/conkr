@@ -166,10 +166,13 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
                     this.getCellNames();
-                    var ctx = this.canvas.getContext('2d');
-                    var img = new Image();
+                    var ctx = this.canvas.getContext('2d'),
+                        img = new Image(),
+                        canv = this.canvas;
                     img.onload = function() {
-                        ctx.drawImage(img, 0, 0); // Or at whatever offset you like
+                        canv.width = img.width;
+                        canv.height = img.height;
+                        ctx.drawImage(img, 0, 0);
                     };
                     img.src = im;
                 },

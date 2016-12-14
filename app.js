@@ -44,22 +44,31 @@ io.on('connection', function(socket) {
     //default socket stuff for just message sending.
     //this does not get put in separate rooms.
     socket.on('sendMsg', function(m) {
-        io.emit('newMsg', m)
+        io.emit('newMsg', m);
     });
     socket.on('sendDoFight', function(d) {
-        var actualUsr = sockmod.getAuthUsr(cookieSettings,cookie.parse(socket.handshake.headers.cookie).session),
-        claimedUsr = d.user;
-        if (!actualUsr||actualUsr!=claimedUsr){
-            console.log(actualUsr,'is not',claimedUsr)
-            return;
-        }
-            // var cellChanges = sockmod.doFight(d);//ch-ch-ch-changes!
-            // io.sockets.in(socket.room).emit('rcvDoFight', cellChanges);
-    })
+        var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
+            claimedUsr = d.user;
+        mongoose.model('Game').findOne({ gameId: d.gameId }, function(err, doc) {
+            if (err) return;
+            if (!doc) return;
+
+            if (!actualUsr || actualUsr != claimedUsr) {
+                //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
+                console.log(actualUsr, 'is not', claimedUsr);
+                return;
+            } else if (doc.players[doc.turn] !== d.user) {
+                io.sockets.in(socket.room).emit('wrongTurn', { usr: d.user }); //user tried to take turn when it wasnt their turn.
+            } else {
+                var cellChanges = sockmod.doFight(d); //ch-ch-ch-changes!
+                io.sockets.in(socket.room).emit('rcvDoFight', cellChanges);
+            }
+        });
+    });
     socket.on('sendAddArmies', function(d) {
         var armyChanges = sockmod.newArmies;
-        io.sockets.in(socket.room).emit('rcvAddArmies', armyChanges)
-    })
+        io.sockets.in(socket.room).emit('rcvAddArmies', armyChanges);
+    });
     socket.on('testRoom', function(t) {
         console.log('TEST ROOM', t)
         io.sockets.in(socket.room).emit('roomTestCli', { t: t, msg: 'hi from server!' + socket.room })
@@ -89,6 +98,27 @@ io.on('connection', function(socket) {
             console.log('found game', id, ' and now sending game pieces')
             io.sockets.in(id.id).emit('updateArmies', doc);
         })
+    })
+    socket.on('nextTurn', function(d) {
+        var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
+            claimedUsr = d.usr;
+        mongoose.model('Game').findOne({ gameId: d.id }, function(err, doc) {
+            if (err) return;
+            if (!doc) return;
+
+            if (!actualUsr || actualUsr != claimedUsr) {
+                //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
+                console.log(actualUsr, 'is not', claimedUsr);
+                return;
+            } else if (doc.players[doc.turn] !== d.usr) {
+                io.sockets.in(socket.room).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
+            } else {
+                doc.turn++;
+                if (doc.turn>=doc.players.length) doc.turn=0;
+                doc.save();
+                io.sockets.in(socket.room).emit('turnSwitch',{id:d.id,usr:doc.players[doc.turn]})
+            }
+        });
     })
 });
 io.on('error', function(err) {

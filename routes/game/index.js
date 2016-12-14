@@ -7,6 +7,18 @@ var router = express.Router(),
     session = require('client-sessions'),
     sockmod = require('../../socketmodules');
 module.exports = router;
+Array.prototype.shuffle = function() {
+    var currentIndex = this.length,
+        temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = this[currentIndex];
+        this[currentIndex] = this[randomIndex];
+        this[randomIndex] = temporaryValue;
+    }
+    return this;
+};
 router.post('/new', function(req, res, next) {
     if (!req.session.user) {
         res.send('Error! Not logged in!');
@@ -26,9 +38,9 @@ router.post('/new', function(req, res, next) {
             creator: req.body.player
         }
         mongoose.model('Game').create(newGame)
-        res.send('game '+newId+' made')
+        res.send('game ' + newId + ' made')
     })
-})
+});
 router.post('/join', function(req, res, next) {
     if (!req.session.user) {
         res.send('Error! Not logged in!');
@@ -48,7 +60,7 @@ router.post('/join', function(req, res, next) {
             res.send({ map: mdoc, game: doc });
         })
     })
-})
+});
 router.post('/saveGame', function(req, res, next) {
     if (!req.session.user) {
         res.send('Error! Not logged in!');
@@ -58,7 +70,7 @@ router.post('/saveGame', function(req, res, next) {
         if (err) return res.send(500, { error: err });
         return res.send("succesfully saved");
     });
-})
+});
 router.get('/startGame/:id', function(req, res, next) {
     if (!req.session.user) {
         res.send('Error! Not logged in!');
@@ -66,31 +78,31 @@ router.get('/startGame/:id', function(req, res, next) {
     }
     // basically, this sets a game's 'inPlay' property to true. once a game is in play, players cannot join it (see '/join'). Games cannot be reset to inPlay==false after they're started.
     mongoose.model('Game').findOne({ 'gameId': req.params.id }, function(err, doc) {
-        if (err||!doc) {
+        if (err || !doc) {
             res.send('errGame');
         }
         doc.inPlay = true;
-        doc.turn=0;//should already be set, but just in case!
+        doc.turn = 0; //should already be set, but just in case!
         mongoose.model('Map').findOne({ 'id': doc.mapId }, function(err, mdoc) {
-            if (err || !mdoc){
+            if (err || !mdoc) {
                 res.send('errMap');
             }
+            doc.players = doc.players.shuffle()
             var couns = mdoc.mapData.countryNames;
             var players = doc.players;
-            if(!doc.avas) doc.avas=[];
-            doc.armies = sockmod.getInitArmies(couns,players);
-            var allAnims = [128045,128046,128047,128048,128049,128050,128052,128053,128054,128055,128056,128057,128058,128059,128060,128023,128040,128127,128125,128123,127877];
-            players.forEach((p)=>{
-                var pik = Math.floor(Math.random()*allAnims.length);
+            if (!doc.avas) doc.avas = [];
+            doc.armies = sockmod.getInitArmies(couns, players);
+            var allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128059, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
+            players.forEach((p) => {
+                var pik = Math.floor(Math.random() * allAnims.length);
                 doc.avas.push(allAnims[pik]);
-                allAnims.slice(pik,1);
+                allAnims.slice(pik, 1);
             })
             doc.save();
             res.send(doc);
         })
     })
-
-})
+});
 router.get('/getGames', function(req, res, next) {
     if (!req.session.user) {
         res.send('errLog');
@@ -100,4 +112,4 @@ router.get('/getGames', function(req, res, next) {
         socket.emit('allGames', r);
         res.send(true);
     })
-})
+});

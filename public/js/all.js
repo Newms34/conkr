@@ -2367,7 +2367,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.currGamePlayers = {};
     $scope.gameIsReady = true;
     $scope.gameSettingsPanel = 0;
-    $scope.newNew = true; //for new game creation, create a completely new map? 
+    $scope.newNew = true; //for new game creation, create a completely new map?
     $scope.numCountries = 20;
     $scope.map = null;
     $scope.gameId = null;
@@ -2438,6 +2438,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 socket.emit('getGames', { g: true });
             });
         }
+        $scope.armyPieces = [];
         socket.emit('putInRoom',{id:$scope.gameId})
     };
     socket.on('updateArmies', function(d) {
@@ -2490,9 +2491,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 break;
             }
         }
-        if (rd>ra) ra=rd; //defender cannot defend with more armies than attacked attacks with
+        if (rd>ra) ra=rd; //defender cannot defend with more armies than attacker attacks with
         if(mapFact.isNeighbor($scope.map.diagram.cells,s,d)){
-            fightFact.doFight($scope.user,$scope.map.diagram.cells[s],$scope.diagram.cells[d],ra,rd)
+            fightFact.doFight($scope.user,$scope.map.diagram.cells[s],$scope.diagram.cells[d],ra,rd,$scope.gameId)
         }
     }
 });
@@ -2514,14 +2515,18 @@ app.factory('fightFact', function($rootScope, $http) {
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
         },
-        doFight: function(usr, ca, cd, ra, rd) {
-            socketRoom.emit('sendDoFight', {
+        doFight: function(usr, ca, cd, ra, rd,id) {
+            socket.emit('sendDoFight', {
                 user:usr,
                 ca: ca,
                 cd: cd,
                 ra: ra,
-                rd: rd
+                rd: rd,
+                gameId:id
             });
+        },
+        nextTurn:function(game,usr){
+            socket.emit('nextTurn',{id:game,usr:usr})
         },
         newGame: function(n, p) {
             return $http.post('/game/new', { id: n, player: p }).then(function(p) {
@@ -2553,7 +2558,7 @@ app.factory('fightFact', function($rootScope, $http) {
         },
         addArmies: function(game) {
             //function to add armies for each user
-            socketRoom.emit('sendAddArmies', { game: game });
+            socket.emit('sendAddArmies', { game: game });
         },
         saveGame: function(id, map) {
             if (!id) {
@@ -2755,10 +2760,13 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
                     this.getCellNames();
-                    var ctx = this.canvas.getContext('2d');
-                    var img = new Image();
+                    var ctx = this.canvas.getContext('2d'),
+                        img = new Image(),
+                        canv = this.canvas;
                     img.onload = function() {
-                        ctx.drawImage(img, 0, 0); // Or at whatever offset you like
+                        canv.width = img.width;
+                        canv.height = img.height;
+                        ctx.drawImage(img, 0, 0);
                     };
                     img.src = im;
                 },
