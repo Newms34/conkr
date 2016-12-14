@@ -2642,6 +2642,7 @@ app.factory('mapFact', function($rootScope, $http) {
                 numsRelaxed: 100,
                 init: function() {
                     this.canvas = document.querySelector('canvas');
+                    this.clearMap();
                     this.randomSites(numCells, true);
                 },
                 save: function() {
@@ -2737,11 +2738,8 @@ app.factory('mapFact', function($rootScope, $http) {
                             me.relaxSites();
                         }, this.timeoutDelay);
                     } else {
-                        this.doAllCells();
                         this.render();
-                        this.makeCellNames();
-                        this.getCellNames();
-                        this.doCellSites();
+
                     }
                 },
                 doCellSites: function() {
@@ -2855,94 +2853,50 @@ app.factory('mapFact', function($rootScope, $http) {
                     ctx.fill();
                 },
                 render: function() {
-                    var ctx = this.canvas.getContext('2d');
-                    // background
-                    ctx.globalAlpha = 1;
-                    ctx.beginPath();
-                    // ctx.rect(0, 0, this.canvas.width, this.canvas.height);
-                    // ctx.fillStyle = 'white';
-                    // ctx.fill();
-                    ctx.strokeStyle = '#888';
-                    ctx.stroke();
-                    // voronoi
-                    if (!this.diagram) {
-                        return;
-                    }
-                    //to get angle: 
-                    ctx.lineWidth = 5;
-                    var edges = this.diagram.edges,
-                        iEdge = edges.length,
-                        edge, v;
-                    var gradArr = [];
-                    while (iEdge--) {
-                        ctx.beginPath();
-                        edge = edges[iEdge];
-                        var edgeGradLine = this.getEdgeGrad(edge);
-                        console.log(edgeGradLine);
-                        gradArr.push(ctx.createLinearGradient(edgeGradLine.xi, edgeGradLine.yi, edgeGradLine.xf, edgeGradLine.yf));
-                        gradArr[gradArr.length - 1].addColorStop(0, edgeGradLine.start);
-                        gradArr[gradArr.length - 1].addColorStop(1, edgeGradLine.end);
-                        ctx.strokeStyle = gradArr[gradArr.length - 1];
-                        v = edge.va;
-                        ctx.moveTo(v.x, v.y);
-                        v = edge.vb;
-                        ctx.lineTo(v.x, v.y);
-                        ctx.stroke();
-                    }
+                    //drawBorders
+                    var ctx = this.canvas.getContext('2d'),
+                        waterImg = new Image(),
+                        me = this;
+                    waterImg.src = '../img/water.jpg';
 
-                    // sites
-                    // ctx.beginPath();
-                    // ctx.fillStyle = '#44f';
-                    // var sites = this.sites,
-                    //     iSite = sites.length;
-                    // while (iSite--) {
-                    //     v = sites[iSite];
-                    //     ctx.rect(v.x - 2 / 3, v.y - 2 / 3, 2, 2);
-                    // }
-                    // ctx.fill();
-                },
-                getEdgeGrad: function(e) {
-                    console.log('EDGEGRAD', e);
-                    if (!e.lSite || !e.rSite) {
-                        return {
-                            xi: 0,
-                            xf: 100,
-                            yi: 0,
-                            yf: 0,
-                            start: '#0c0',
-                            end: '#000'
-                        };
-                    }
-                    var grad = {
-                            xi: null,
-                            xf: null,
-                            yi: null,
-                            yf: null,
-                            start: '#35a',
-                            end: '#35a'
-                        },
-                        source = this.findCell(e.lSite.x, e.lSite.y),
-                        dest = this.findCell(e.rSite.x, e.rSite.y),
-                        ang = Math.atan((e.rSite.y - e.lSite.y) / (e.rSite.x - e.lSite.x)) + (0 * Math.PI / 2),
-                        midPt = { x: (e.rSite.x + e.lSite.x) / 2, y: (e.rSite.y - e.lSite.y) },
-                        dh = 2.5 * Math.sin(ang),
-                        dw = 2.5 * Math.cos(ang);
-                    if (ang > Math.PI) {
-                        ang = Math.PI - ang;
-                    }
-                    ang = 0 - ang;
-                    // console.log('SOURCE', source, 'DEST', dest, 'src', this.cellIdFromPoint(e.lSite.x, e.lSite.y), 'd', this.cellIdFromPoint(e.rSite.x, e.rSite.y), 'full input', e);
-                    grad.xi = midPt.x - dw;
-                    grad.xf = midPt.x + dw;
-                    grad.yi = midPt.y - dh;
-                    grad.yf = midPt.y + dh;
-                    if (source.isLand) {
-                        grad.start = '#9c9';
-                    }
-                    if (dest.isLand) {
-                        grad.end = '#9c9';
-                    }
-                    return grad;
+                    waterImg.onload = function() {
+                        ctx.rect(0, 0, me.canvas.width, me.canvas.height);
+                        ctx.fillStyle = ctx.createPattern(this, "repeat");
+                        ctx.fill();
+
+                        // background
+                        ctx.globalAlpha = 1;
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#888';
+                        ctx.stroke();
+                        // voronoi
+                        if (!me.diagram) {
+                            return;
+                        }
+                        //to get angle: 
+                        ctx.lineWidth = 2;
+                        var edges = me.diagram.edges,
+                            iEdge = edges.length,
+                            edge, v;
+                        while (iEdge--) {
+                            ctx.beginPath();
+                            edge = edges[iEdge];
+                            // var edgeGradLine = me.getEdgeGrad(edge);
+                            // console.log(edgeGradLine);
+                            // // gradArr.push(ctx.createLinearGradient(edgeGradLine.xi, edgeGradLine.yi, edgeGradLine.xf, edgeGradLine.yf));
+                            // // gradArr[gradArr.length - 1].addColorStop(0, edgeGradLine.start);
+                            // // gradArr[gradArr.length - 1].addColorStop(1, edgeGradLine.end);
+                            // ctx.strokeStyle = gradArr[gradArr.length - 1];
+                            ctx.strokeStyle = '#003259'
+                            v = edge.va;
+                            ctx.moveTo(v.x, v.y);
+                            v = edge.vb;
+                            ctx.lineTo(v.x, v.y);
+                            ctx.stroke();
+                        }
+                        me.doAllCells();
+                        
+                    };
                 },
                 getCellNames: function() {
                     var ctx = this.canvas.getContext('2d');
@@ -2955,7 +2909,7 @@ app.factory('mapFact', function($rootScope, $http) {
                             console.log('CELL LABEL DIMS FOR CELL', n, ':', Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13, ' NAME WID:', textBoxWid);
                             ctx.fillRect(Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13); //country label background
                             ctx.fillStyle = '#000';
-                            ctx.font = '10px Arial';
+                            ctx.font = '12px Arial';
                             ctx.fillText(cell.name, cell.site.x - (textBoxWid / 2), cell.site.y - 2);
                             cell.country = cell.name;
                         }
@@ -3018,7 +2972,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         }
                     }
                 },
-                renderCell: function(id, fillStyle, strokeStyle) {
+                renderCell: function(id) {
                     if (id === undefined) {
                         return;
                     }
@@ -3030,6 +2984,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         return;
                     }
                     var ctx = this.canvas.getContext('2d');
+                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx)
                     ctx.globalAlpha = 1;
                     // edges
                     ctx.beginPath();
@@ -3042,8 +2997,10 @@ app.factory('mapFact', function($rootScope, $http) {
                         v = halfedges[iHalfedge].getEndpoint();
                         ctx.lineTo(v.x, v.y);
                     }
-                    ctx.fillStyle = fillStyle;
-                    ctx.strokeStyle = strokeStyle;
+                    // ctx.fillStyle = '#0c0';
+                    // ctx.strokeStyle = '#9c9';
+                    ctx.fillStyle = this.landPattern;
+                    ctx.strokeStyle = '#AB9B69'
                     ctx.fill();
                     ctx.stroke();
                     // site
@@ -3054,20 +3011,18 @@ app.factory('mapFact', function($rootScope, $http) {
                     ctx.fill();
                 },
                 doAllCells: function() {
-                    for (var n = 0; n < this.diagram.cells.length; n++) {
-                        var col = '#000',
-                            eCol = '#fff',
-                            doName = false;
-                        if (this.diagram.cells[n].isLand) {
-                            //cell is land, so give name, color green
-                            col = '#0c0';
-                            eCol = '#9c9';
-                        } else {
-                            //water
-                            col = '#35a';
-                            eCol = '#92a8c8';
+                    var landImg = new Image(),
+                        me = this,
+                        ctx = this.canvas.getContext("2d");
+                        landImg.src = '../img/grass.jpg'
+                    landImg.onload = function() {
+                        me.landPattern = ctx.createPattern(this, "repeat");
+                        for (var n = 0; n < me.diagram.cells.length; n++) {
+                            if (me.diagram.cells[n].isLand) me.renderCell(n);
                         }
-                        this.renderCell(n, col, eCol);
+                        me.makeCellNames();
+                        me.getCellNames();
+                        me.doCellSites();
                     }
                 },
                 getCellByName: function(n) {

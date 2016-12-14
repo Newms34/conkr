@@ -105,8 +105,8 @@
                         <td>{{p.mapId}}</td>
                         <td>{{p.players.join(', ')}}</td>
                         <td><span ng-if='p.inPlay'>no</span><span ng-if='!p.inPlay'>yes</span></td>
-                        <td>
-                            <button class='btn btn-success' ng-disabled='p.inPlay' ng-click='joinGame(p.gameId)'>Join Game</button>
+                        <td>{{p.players.indexOf('dave')}}
+                            <button class='btn btn-success' ng-disabled='p.inPlay || p.players.indexOf(user)>-1' ng-click='joinGame(p.gameId)'>Join Game</button>
                         </td>
                     </tr>
                 </tbody>
@@ -152,7 +152,7 @@
     <script src="/angular/angular.min.js"></script>
     <script src="/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/socket.io-client/dist/socket.io.min.js"></script>
-    <script src="./js/all.min.js"></script>
+    <script src="./js/all.js"></script>
 </body>
 
 </html>
