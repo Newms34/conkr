@@ -2441,7 +2441,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         })
     };
     $scope.pickTarg = false;
-    var debugMode = true; //allows us to pick our own dudes as targets
+    var debugMode = false; //allows us to pick our own dudes as targets
     $scope.pickCell = function(ap) {
         if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
@@ -2596,8 +2596,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             defr[p]=res.cd[p];
             atkr[p]=res.ca[p];
         })
-        // $scope.getAPByName(res.cd.country)=res.cd
-        // $scope.getAPByName(res.ca.country)=res.ca
+        $scope.$apply()
     });
 });
 
