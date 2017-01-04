@@ -107,22 +107,30 @@ io.on('connection', function(socket) {
         //this function, on confirms, switches the turn of a particular game to the next user.
         var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
             claimedUsr = d.usr;
-        mongoose.model('Game').findOne({ gameId: d.game.id }, function(err, doc) {
-            if (err) return;
-            if (!doc) return;
+        mongoose.model('Game').findOne({ gameId: d.game }, function(err, doc) {
+            if (err){
+                console.log('game find err',err)
+                return;
+            }
+            if (!doc){
+                console.log('game not found',doc)
+                return;
+            }
             if (!actualUsr || actualUsr != claimedUsr) {
                 //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
                 console.log(actualUsr, 'is not', claimedUsr);
                 return;
             } else if (doc.players[doc.turn] !== d.usr) {
-                io.sockets.in(socket.room).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
+                io.sockets.in(d.game).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
             } else {
+                console.log('Switching turn!')
                 doc.turn++;
                 if (doc.turn>=doc.players.length) doc.turn=0;
                 //we need to add armies to this new player.
-                doc.armies = sockmod.addArmies(doc.armies,doc.players[doc.turn]);
+                doc.armies = sockmod.addArmies(d.conts, doc.armies,doc.players[doc.turn]);
                 doc.save();
-                io.sockets.in(socket.room).emit('turnSwitch',{id:d.id,usr:doc.players[doc.turn]})
+                io.sockets.in(d.game).emit('turnSwitch',{id:d.game,usr:doc.players[doc.turn]})
+                console.log('Turn for game',d.game,'successfully switched to',doc.players[doc.turn])
             }
         });
     })

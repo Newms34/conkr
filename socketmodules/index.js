@@ -43,7 +43,7 @@ newArmies = function(usrs, map) {
         })
         u.newArmies = newArmies;
     })
-}, addArmies = function(armies, usr) {
+}, addArmies = function(conts, armies, usr) {
     //function to add armies for each user
     var newArmies = 0,
         totalCells = 0,
@@ -55,9 +55,10 @@ newArmies = function(usrs, map) {
             ownCountries.push(a.country);
         }
     })
+    console.log('MAP CONTS', conts)
     newArmies += Math.floor(totalCells / 3);
     if (newArmies < 3) newArmies = 3;
-    map.getContinents().forEach((c) => {
+    conts.forEach((c) => {
         if (c.length < 2 && ownCountries.indexOf(c[0]) > -1) {
             newArmies += 2;
         } else if (ownCountries.indexOf(c[0]) > -1) {
@@ -87,14 +88,15 @@ newArmies = function(usrs, map) {
             }
         }
     });
+    return newArmies;
 }, doFight = function(ca, cd, ra, rd) {
-    console.log(ca.country,ca.num,'vs',cd.country,cd.num)
-    //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
+    console.log(ca.country, ca.num, 'vs', cd.country, cd.num)
+        //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
     var aRolls = [],
         dRolls = [],
         conflicts,
-        results=[],
-        status=false;//final status (true=conkr'd)
+        results = [],
+        status = false; //final status (true=conkr'd)
     for (var i = 0; i < ra; i++) {
         //roll attacker
         aRolls.push(Math.ceil(Math.floor() * 6));
@@ -120,13 +122,13 @@ newArmies = function(usrs, map) {
     });
     if (!cd.num) {
         //zone 'conquered'
-        status=true;
+        status = true;
     }
     console.log(`End result: ${ca.country} ${ca.num} vs ${cd.country} ${cd.num}`)
     return {
         ca: ca,
         cd: cd,
-        status:status
+        status: status
     }
 }, getInitArmies = function(c, p) {
     var arr = [];
@@ -149,5 +151,6 @@ module.exports = {
     newArmies: newArmies,
     getInitArmies: getInitArmies,
     getAuthUsr: getAuthUsr,
-    doFight:doFight
+    doFight: doFight,
+    addArmies: addArmies
 };

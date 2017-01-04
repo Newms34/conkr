@@ -24,7 +24,7 @@ app.factory('mapFact', function($rootScope, $http) {
                 throw new Error('cells not found!')
                 return;
             }
-            console.log('Cells',c,'source cell',c[s],'target',c[d])
+            console.log('Cells', c, 'source cell', c[s], 'target', c[d])
             for (var i = 0; i < c[s].halfedges.length; i++) {
                 if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
                     continue;
@@ -214,8 +214,8 @@ app.factory('mapFact', function($rootScope, $http) {
                         p1, p2;
                     while (iHalfedge--) {
                         halfedge = halfedges[iHalfedge];
-                        p1 = halfedge.getStartpoint();
-                        p2 = halfedge.getEndpoint();
+                        p1 = this.getStartpoint(halfedge);
+                        p2 = this.getEndpoint(halfedge);
                         area += p1.x * p2.y;
                         area -= p1.y * p2.x;
                     }
@@ -232,8 +232,8 @@ app.factory('mapFact', function($rootScope, $http) {
                         v, p1, p2;
                     while (iHalfedge--) {
                         halfedge = halfedges[iHalfedge];
-                        p1 = halfedge.getStartpoint();
-                        p2 = halfedge.getEndpoint();
+                        p1 = this.getStartpoint(halfedge);
+                        p2 = this.getEndpoint(halfedge);
                         v = p1.x * p2.y - p2.x * p1.y;
                         x += (p1.x + p2.x) * v;
                         y += (p1.y + p2.y) * v;
@@ -369,6 +369,43 @@ app.factory('mapFact', function($rootScope, $http) {
                     }
                     return treemap;
                 },
+                pointIntersection: function(cell, x, y) {
+                    // Check if point in polygon. Since all polygons of a Voronoi
+                    // diagram are convex, then:
+                    // http://paulbourke.net/geometry/polygonmesh/
+                    // Solution 3 (2D):
+                    //   "If the polygon is convex then one can consider the polygon
+                    //   "as a 'path' from the first vertex. A point is on the interior
+                    //   "of this polygons if it is always on the same side of all the
+                    //   "line segments making up the path. ...
+                    //   "(y - y0) (x1 - x0) - (x - x0) (y1 - y0)
+                    //   "if it is less than 0 then P is to the right of the line segment,
+                    //   "if greater than 0 it is to the left, if equal to 0 then it lies
+                    //   "on the line segment"
+                    var halfedges = cell.halfedges,
+                        iHalfedge = halfedges.length,
+                        halfedge,
+                        p0, p1, r;
+                    while (iHalfedge--) {
+                        halfedge = halfedges[iHalfedge];
+                        p0 = this.getStartpoint(halfedge);
+                        p1 = this.getEndpoint(halfedge);
+                        r = (y - p0.y) * (p1.x - p0.x) - (x - p0.x) * (p1.y - p0.y);
+                        if (!r) {
+                            return 0;
+                        }
+                        if (r > 0) {
+                            return -1;
+                        }
+                    }
+                    return 1;
+                },
+                getStartpoint: function(h) {
+                    return h.edge.lSite === h.site ? h.edge.va : h.edge.vb;
+                },
+                getEndpoint: function(h) {
+                    return h.edge.lSite === h.site ? h.edge.vb : h.edge.va;
+                },
                 cellIdFromPoint: function(x, y) {
                     // We build the treemap on-demand
 
@@ -382,7 +419,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     while (iItem--) {
                         cellid = items[iItem].cellid;
                         cell = cells[cellid];
-                        if (cell.pointIntersection(x, y) > 0) {
+                        if (this.pointIntersection(cell, x, y) > 0) {
                             return cellid;
                         }
                     }
@@ -393,7 +430,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         cell, cellNum = this.diagram.cells.length;
                     while (--cellNum) {
                         cell = cells[cellNum];
-                        if (cell.pointIntersection(x, y) > 0) {
+                        if (this.pointIntersection(cell, x, y) > 0) {
                             return cellNum;
                         }
                     }
@@ -416,11 +453,11 @@ app.factory('mapFact', function($rootScope, $http) {
                     ctx.beginPath();
                     var halfedges = cell.halfedges,
                         nHalfedges = halfedges.length,
-                        v = halfedges[0].getStartpoint();
+                        v = this.getStartpoint(halfedges[0]);
                     ctx.moveTo(v.x, v.y);
 
                     for (var iHalfedge = 0; iHalfedge < nHalfedges; iHalfedge++) {
-                        v = halfedges[iHalfedge].getEndpoint();
+                        v = this.getEndpoint(halfedges[iHalfedge]);
                         ctx.lineTo(v.x, v.y);
                     }
                     // ctx.fillStyle = '#0c0';
@@ -469,6 +506,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         this.findNeighbors(i, true);
                     }
+                    console.log(this.allConts)
                     return this.allConts;
                 },
                 doneCouns: [], //if a country's in here, don't re-add it.

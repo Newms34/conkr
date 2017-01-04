@@ -25,8 +25,8 @@ app.factory('fightFact', function($rootScope, $http) {
                 gameId: id
             });
         },
-        nextTurn: function(game, usr, map) {
-            socket.emit('nextTurn', { game: game, usr: usr })
+        nextTurn: function(map, game, usr) {
+            socket.emit('nextTurn', { conts:map.getContinents(), game: game, usr: usr })
         },
         newGame: function(n, p) {
             return $http.post('/game/new', { id: n, player: p }).then(function(p) {

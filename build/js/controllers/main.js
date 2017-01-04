@@ -268,10 +268,18 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             res.cd.usr = res.ca.usr;
         }
         console.log('from rcvDoFight, we get', defr, atkr);
-        replProps.forEach((p)=>{
-            defr[p]=res.cd[p];
-            atkr[p]=res.ca[p];
+        replProps.forEach((p) => {
+            defr[p] = res.cd[p];
+            atkr[p] = res.ca[p];
         })
         $scope.$apply()
     });
+    $scope.nextTurn = function() {
+        sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
+            console.log(res)
+            if (res && res != null) {
+                fightFact.nextTurn($scope.map,$scope.gameId, $scope.user);
+            }
+        })
+    }
 });
