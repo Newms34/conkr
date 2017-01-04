@@ -3,7 +3,8 @@ var app = angular.module('conkr', ['ngSanitize']).controller('chatController', f
     $scope.msgs = [{
     	now:new Date().toLocaleTimeString(),
     	usr:'system',
-    	msg:'Welcome to Conkr! chat. Type /inv to switch color modes, or /time to toggle timestamp.'
+    	msg:'Welcome to Conkr! chat. "/inv": toggle color modes, "/time": toggle timestamp, "/l": switch to local chat (only works if you\'re in a game!), "/a": switch to all chat',
+        local:false
     }];
     $scope.user = null;
     $scope.msgInp = '';
@@ -30,10 +31,16 @@ var app = angular.module('conkr', ['ngSanitize']).controller('chatController', f
             $scope.timeStamp = !$scope.timeStamp;
         } else if ($scope.msgInp == '/inv') {
         	$scope.invCol = !$scope.invCol;
-        } else if($scope.msgInp===''){
+        }else if($scope.msgInp == '/l' && $scope.$parent.gameId){
+            $scope.chatLocal = true;
+        }else if($scope.msgInp == '/l' && !$scope.$parent.gameId){
+            // do nothin
+        }else if($scope.msgInp == '/a'){
+            $scope.chatLocal = false;
+        }else if($scope.msgInp===''){
             return false;
         }else {
-            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user });
+            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user, local:!!$scope.$parent.gameId});
         }
         $scope.prevSent.push($scope.msgInp);
         $scope.currPrevMsg = $scope.prevSent.length;
@@ -63,4 +70,8 @@ var app = angular.module('conkr', ['ngSanitize']).controller('chatController', f
     		$scope.$digest();
     	}
     });
+    $scope.switchTabs = function(dir){
+        console.log($scope.$parent.gameId)
+        $scope.chatLocal = !!$scope.$parent.gameId && parseInt(dir);
+    }
 });

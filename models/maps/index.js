@@ -17,7 +17,9 @@ var skillSchema = new mongoose.Schema({
         currCont:String,
         cellCenters: [{ x: Number, y: Number, name:String}],
         img:String
-    }
+    },
+    creator:String,
+    hasGames:Boolean // is this map being used by any games?
 }, { collection: 'Map' });
 
 mongoose.model('Map', skillSchema);

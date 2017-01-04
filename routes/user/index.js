@@ -133,8 +133,10 @@ router.get('/checkInGame/:usr',function(req,res,next){
         if(err) return next(err);
         var gameIn = null;
         for (var n=0;n<docs.length;n++){
-            if (docs[n].players.indexOf(req.params.usr)>-1 && docs[n].inPlay){
+            console.log('GAME',docs[n].gameId,'PLAYERS',docs[n].players,'THIS PLAYER',req.params.usr)
+            if (docs[n].players.indexOf(req.params.usr)>-1){
                 gameIn=docs[n];
+                console.log('FOUND GAME NUMBER',n,'FOR',req.params.usr)
                 break;
             }
         }

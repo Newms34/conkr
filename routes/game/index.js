@@ -24,9 +24,9 @@ router.post('/new', function(req, res, next) {
         res.send('Error! Not logged in!');
         return;
     }
-    mongoose.model('Map').find({ id: req.body.id }, function(err, tingz) {
+    mongoose.model('Map').findOne({ id: req.body.id }, function(err, tingz) {
         if (err) return next(err);
-        if (!tingz.length) return "Map not found err!";
+        if (!tingz) return "Map not found err!";
         var newId = Math.floor(Math.random() * 99999999).toString(32);
         var newGame = {
             mapId: req.body.id,
@@ -38,7 +38,37 @@ router.post('/new', function(req, res, next) {
             creator: req.body.player
         }
         mongoose.model('Game').create(newGame)
-        res.send('game ' + newId + ' made')
+        tingz.hasGames = true;
+        tingz.save();
+        res.send(newId)
+    })
+});
+router.get('/del/:id', function(req, res, next) {
+    if (!req.session.user) {
+        res.send('Error! Not logged in!');
+        return;
+    }
+    mongoose.model('Game').find({}, function(err, games) {
+        var game = null; 
+        for(var i=0;i<games.length;i++){
+            if (games[i].id == req.params.id){
+                game=games[i];
+                break;
+            }
+        }
+        if(!game || game.creator!==req.session.user.name) return 'wrongUser';
+        mongoose.model('Map').findOne({id:game.mapId},function(err,map){
+            //find this game's map
+            map.hasGames = false;
+            //go thru all games and see if any are still using this map. 
+            games.forEach((gm)=>{
+                //look thru all games. If a game exists where the game id is NOT this one's (i.e., not the same game) AND the map's the same, set hasGames to true.
+                if (gm.mapId == game.mapId && gm.gameId!=game.gameId) map.hasGames = true;
+            })
+            map.save();
+            socket.emit('replaceMap',map);
+        })
+        
     })
 });
 router.post('/join', function(req, res, next) {
@@ -93,6 +123,7 @@ router.get('/startGame/:id', function(req, res, next) {
             if (!doc.avas) doc.avas = [];
             doc.armies = sockmod.getInitArmies(couns, players);
             var allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128059, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
+            //pick an avatar (animal) for each player
             players.forEach((p) => {
                 var pik = Math.floor(Math.random() * allAnims.length);
                 doc.avas.push(allAnims[pik]);

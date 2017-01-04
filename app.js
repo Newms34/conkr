@@ -44,6 +44,9 @@ io.on('connection', function(socket) {
     //default socket stuff for just message sending.
     //this does not get put in separate rooms.
     socket.on('sendMsg', function(m) {
+        if(m.local && m.local!=null){
+            io.sockets.in(socket.room).emit('newMsg',m)
+        }
         io.emit('newMsg', m);
     });
     socket.on('sendDoFight', function(d) {
@@ -100,12 +103,12 @@ io.on('connection', function(socket) {
         })
     })
     socket.on('nextTurn', function(d) {
+        //this function, on confirms, switches the turn of a particular game to the next user.
         var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
             claimedUsr = d.usr;
-        mongoose.model('Game').findOne({ gameId: d.id }, function(err, doc) {
+        mongoose.model('Game').findOne({ gameId: d.game.id }, function(err, doc) {
             if (err) return;
             if (!doc) return;
-
             if (!actualUsr || actualUsr != claimedUsr) {
                 //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
                 console.log(actualUsr, 'is not', claimedUsr);
@@ -115,6 +118,8 @@ io.on('connection', function(socket) {
             } else {
                 doc.turn++;
                 if (doc.turn>=doc.players.length) doc.turn=0;
+                //we need to add armies to this new player.
+                doc.armies = sockmod.addArmies(doc.armies,doc.players[doc.turn]);
                 doc.save();
                 io.sockets.in(socket.room).emit('turnSwitch',{id:d.id,usr:doc.players[doc.turn]})
             }

@@ -110,7 +110,7 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
             if (d.data == 'no') {
                 sandalchest.alert('Login error: please check your username and/or password');
             } else {
-                sandalchest.alert('Welcome back!', function(p) {
+                sandalchest.alert('Welcome!', function(p) {
                     window.location.assign('../');
                 });
             }

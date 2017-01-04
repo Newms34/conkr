@@ -146,4 +146,9 @@ Will need to rewrite ALL of the fight routes (i.e., cell vs cell, etc.) to use s
 
 per-game chat?
 how should we handle water tiles? can players cross oceans?
+
+WHEN does the sorting of initial armies occur? is it randomized?
+
+
+should probly rewrite country labels to be separate divs, so they're clickable.
 */

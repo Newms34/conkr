@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
     cookie = require('cookie'),
     session = require('client-sessions')
 newArmies = function(usrs, map) {
+    //DO WE STILL NEED THIS (see 'addArmies' below)
     //function to add armies for each user
     usrs.forEach(function(u) {
         var newArmies = 0,
@@ -42,7 +43,51 @@ newArmies = function(usrs, map) {
         })
         u.newArmies = newArmies;
     })
-},doFight = function(ca, cd, ra, rd) {
+}, addArmies = function(armies, usr) {
+    //function to add armies for each user
+    var newArmies = 0,
+        totalCells = 0,
+        contBonus = 0,
+        ownCountries = [];
+    armies.forEach((a) => {
+        if (a.user == usr) {
+            totalCells++;
+            ownCountries.push(a.country);
+        }
+    })
+    newArmies += Math.floor(totalCells / 3);
+    if (newArmies < 3) newArmies = 3;
+    map.getContinents().forEach((c) => {
+        if (c.length < 2 && ownCountries.indexOf(c[0]) > -1) {
+            newArmies += 2;
+        } else if (ownCountries.indexOf(c[0]) > -1) {
+            var numCounts = 0,
+                usrOwns = true;
+            for (var i = 1; i < c.length; i++) {
+                if (ownCountries.indexOf(c[i]) > -1) {
+                    numCounts
+                } else {
+                    usrOwns = false;
+                    break;
+                }
+            }
+            if (usrOwns) {
+                //gone thru all the countries on this continent, and usr owns the WHOLE thing.
+                if (numCounts < 3) {
+                    newArmies += 2;
+                } else if (numCounts < 6) {
+                    newArmies += 3
+                } else if (numCounts < 8) {
+                    newArmies += 5
+                } else if (numCounts < 10) {
+                    newArmies += 7
+                } else {
+                    newArmies += 9;
+                }
+            }
+        }
+    });
+}, doFight = function(ca, cd, ra, rd) {
     //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
     var aRolls = [],
         dRolls = [],
@@ -81,25 +126,25 @@ newArmies = function(usrs, map) {
         ca: ca,
         cd: cd
     }
-},getInitArmies = function(c, p) {
+}, getInitArmies = function(c, p) {
     var arr = [];
     c.forEach((n) => {
         arr.push({
-            user:p[Math.floor(Math.random()*p.length)],
-            country:n,
-            num:1
+            user: p[Math.floor(Math.random() * p.length)],
+            country: n,
+            num: 1
         });
     });
     return arr;
-},getAuthUsr = function(settings,rawDough){
+}, getAuthUsr = function(settings, rawDough) {
     //get the authorized username from the client sessions cookie. This allows us to authenticate that the person doing an attack is, in fact, the person doing the attack.
     var ingredients = session.util.decode(settings, rawDough).content;
-    return ingredients && ingredients.user && ingredients.user.name?ingredients.user.name:false;
+    return ingredients && ingredients.user && ingredients.user.name ? ingredients.user.name : false;
 };
 
 module.exports = {
     fight: doFight,
     newArmies: newArmies,
     getInitArmies: getInitArmies,
-    getAuthUsr:getAuthUsr
+    getAuthUsr: getAuthUsr
 };

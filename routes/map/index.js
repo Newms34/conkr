@@ -14,7 +14,9 @@ router.post('/newMap', function(req, res, next) {
     }
     var mapId = Math.floor(Math.random() * 99999999999).toString(32),
         map = req.body;
-    mongoose.model('Map').create({ id: mapId, mapData: map }, function(err, data) {
+        console.log('SESSION USER',req.session.user.name)
+    mongoose.model('Map').create({ id: mapId, mapData: map ,creator:req.session.user.name}, function(err, data) {
+        console.log("KREEAYTRZ",data.creator)
         if (err) {
             res.send(err)
         } else {
@@ -52,6 +54,21 @@ router.get('/loadMap/:id', function(req, res, next) {
             res.send(err);
         } else {
             res.send(doc);
+        }
+    });
+})
+
+router.delete('/del/:id',function(req,res,next){
+    if (!req.session.user) {
+        res.send('Error! Not logged in!');
+        return;
+    }
+    mongoose.model('Map').remove({'id':req.params.id},function(err){
+        if(err){
+            res.send(err);
+        }else{
+            socket.emit('replaceMap',{x:true});
+            res.send('deleted!');
         }
     });
 })

@@ -15,7 +15,7 @@
     <div class='chat-win' ng-show='showChat'>
         <div ng-include="'chat.html'" style='width:100%;height:100%;'></div>
     </div>
-    <div class='panel panel-primary col-md-4 col-md-offset-4' ng-show='gameMenu'>
+    <div class='panel panel-primary col-md-5 col-md-offset-3' ng-show='gameMenu'>
         <div class='panel-heading'>
             <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click='gameSettingsPanel=0'>
                 <h3>New Game</h3></div>
@@ -67,18 +67,22 @@
                             <th>Countries</th>
                             <th>Number of Countries</th>
                             <th>&nbsp;</th>
+                            <th>&nbsp;</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td ng-show='potentialMaps.length===0'>
-                                No maps yet!
+                            <td ng-show='potentialMaps.length===0' class='alert alert-danger'>
+                                <h4>No maps yet!</h4>
                             </td>
                         </tr>
                         <tr ng-repeat='m in potentialMaps'>
                             <td>{{m.id}}</td>
                             <td>{{m.mapData.countryNames.join(', ')}}</td>
                             <td>{{m.mapData.countryNames.length}}</td>
+                            <td>
+                                <button class='btn btn-primary' ng-click='deleteMap(m.id)' ng-disabled='m.hasGames' title="Delete this map.">Delete</button>
+                            </td>
                             <td>
                                 <button class='btn btn-primary' ng-click='pickMap(m.mapData,m.id)'>Load</button>
                             </td>
@@ -115,7 +119,7 @@
                 <h4>Hey! You can't join a game while you're already in one!</h4></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
-            <h4>My Games:</h4>
+            <h4>Games I've Created:</h4>
             <table class='table table-striped'>
                 <thead>
                     <tr>
@@ -123,6 +127,7 @@
                         <th>Map ID</th>
                         <th>Players</th>
                         <th>Start</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +139,10 @@
                             </div>
                         </td>
                         <td>
-                            <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)'>Start Game</button>
+                            <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)' title='{{g.inPlay?"Cannot start an already-started game!":"Start the game, locking it to any new players."}}'>Start Game</button>
+                        </td>
+                        <td>
+                            <button class='btn btn-success' ng-disabled='g.creator!=user || g.inPlay' ng-click='delGame(g.gameId)' title='{{g.creator==user?g.inPlay?"Canot delete in-progress games!":"Delete game "+g.gameId+".":"Cannot delete games created by other players!"}}'>Delete Game</button>
                         </td>
                     </tr>
                 </tbody>
@@ -143,7 +151,7 @@
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
-        <div class='country-army' ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y}}px;' title='{{ap.usr}} - {{ap.country}} - {{ap.num+(ap.num>1?" armies":" army")}}'><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
+        <div class='country-army' ng-class = "{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span><br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>

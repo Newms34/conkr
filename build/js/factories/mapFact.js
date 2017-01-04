@@ -24,6 +24,7 @@ app.factory('mapFact', function($rootScope, $http) {
                 throw new Error('cells not found!')
                 return;
             }
+            console.log('Cells',c,'source cell',c[s],'target',c[d])
             for (var i = 0; i < c[s].halfedges.length; i++) {
                 if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
                     continue;
@@ -33,6 +34,11 @@ app.factory('mapFact', function($rootScope, $http) {
                 }
             }
             return false;
+        },
+        delMap: function(id) {
+            return $http.delete('/map/del/' + id, function(r) {
+                return r;
+            })
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
@@ -301,7 +307,7 @@ app.factory('mapFact', function($rootScope, $http) {
                             ctx.stroke();
                         }
                         me.doAllCells();
-                        
+
                     };
                 },
                 getCellNames: function() {
@@ -312,7 +318,6 @@ app.factory('mapFact', function($rootScope, $http) {
                             console.log('creating country ', cell.name);
                             var textBoxWid = ctx.measureText(cell.name).width + 4;
                             ctx.fillStyle = '#fed';
-                            console.log('CELL LABEL DIMS FOR CELL', n, ':', Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13, ' NAME WID:', textBoxWid);
                             ctx.fillRect(Math.floor(cell.site.x - (textBoxWid / 2) - 2), Math.floor(cell.site.y - 13), textBoxWid, 13); //country label background
                             ctx.fillStyle = '#000';
                             ctx.font = '12px Arial';
@@ -333,6 +338,21 @@ app.factory('mapFact', function($rootScope, $http) {
                     }
                     return false;
                 },
+                // counLblObjs: function() {
+                //     var ctx = this.canvas.getContext('2d'); //for measuring
+                //     var arr = [];
+                //     for (var i = 0; i < this.diagram.cells.length; i++) {
+                //         var cell = this.diagram.cells[i];
+                //         if (cell.name && cell.isLand) {
+                //             arr.push({
+                //                 boxWid: ctx.measureText(cell.name) + 4,
+                //                 boxHeight: 13,
+                //                 boxLeft: Math.floor(cell.site.x - (textBoxWid / 2) - 2),
+                //                 boxTop: cell.site.y - 2
+                //             })
+                //         }
+                //     }
+                // },
                 buildTreemap: function() {
                     var treemap = new QuadTree({
                         x: this.bbox.xl,
@@ -420,7 +440,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     var landImg = new Image(),
                         me = this,
                         ctx = this.canvas.getContext("2d");
-                        landImg.src = '../img/grass.jpg'
+                    landImg.src = '../img/grass.jpg'
                     landImg.onload = function() {
                         me.landPattern = ctx.createPattern(this, "repeat");
                         for (var n = 0; n < me.diagram.cells.length; n++) {
@@ -434,6 +454,12 @@ app.factory('mapFact', function($rootScope, $http) {
                 getCellByName: function(n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         if (this.diagram.cells[i].name == n) return this.diagram.cells[i];
+                    }
+                    return false;
+                },
+                getCellNumByName: function(n) {
+                    for (var i = 0; i < this.diagram.cells.length; i++) {
+                        if (this.diagram.cells[i].name == n) return i;
                     }
                     return false;
                 },

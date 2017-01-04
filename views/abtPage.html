@@ -15,15 +15,14 @@
     <h2>Server</h2>
     <p>The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.</p>
     <h2>Technical Stuff</h2>
-    <p>Conkr uses (or <em>will</em> use) the following technologies:</p>
+    <p>Conkr uses the following technologies:</p>
     <ul>
         <li>AngularJS for front-end responsiveness.</li>
         <li>NodeJS and ExpressJS on the back-end for the server.</li>
-        <li>Websockets, via socket.io, to allow quick communication between the server, phones, and game.</li>
+        <li>Websockets, via socket.io, to allow quick communication between the server, phones, and game. One major advantage to websockets is that both the server <i>and</i> the client can initiate a conversation, whereas with normal HTTP (without long-polling), the server can never send information to the client without the client first requesting that information.</li>
         <li>HTML5's Canvas.</li>
-        <li>The map itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. I'm not completely sure how this works, but suffice it to say it produces nice, random shapes.</li>
-        <li>Socket.io for quick chat communication.</li>
-        <li>MongoDB for storing currently in-progress games.</li>
+        <li>The map itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. As I'm not really a math dude, I'm not 100% sure how this works. However, generally speaking, it generates a number of random points ('sites') on the canvas. It then draws an edge equidistant between each pair of points. Finally, there's some Math, and maybe even a bit of Science, and you get a map.</li>
+        <li>MongoDB for storing currently in-progress games. I may <i>consider</i> switching this to MySQL later (via Sequelize), depending on the conversion difficulty/time.</li>
     </ul>
     <h2>Credits</h2>
     <ul>

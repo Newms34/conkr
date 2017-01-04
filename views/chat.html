@@ -1,8 +1,14 @@
 <div class='col-md-12 talk-table' ng-controller='chatController' ng-class='{"inv-chat":invCol}'>
+    <div class='chat-tabs-cont'>
+        <div class='col-md-6 chat-tab active-chat' ng-click='switchTabs(0)' ng-class='{"active-chat":!chatLocal}'>All Chat</div>
+        <div class='col-md-6 chat-tab' ng-click='switchTabs(1)' ng-class='{"active-chat":chatLocal, "no-local":!$parent.gameId}'>Local Chat</div>
+    </div>
     <div class='chat-cont'>
-        <div class='chat-inst' ng-repeat='msg in msgs' ng-class='{"self-message":msg.usr==user,"sys-msg":msg.usr=="system"}'><span ng-show='timeStamp'>{{msg.now}} </span>{{msg.usr}}: {{msg.msg}}</div>
+    <!-- messages -->
+        <div class='chat-inst' ng-repeat='msg in msgs' ng-class='{"self-message":msg.usr==user,"sys-msg":msg.usr=="system"}' ng-show='(!msg.local && !chatLocal)||(msg.local && chatLocal)||msg.usr=="system"'><span ng-show='timeStamp'>{{msg.now}} </span>{{msg.usr}}: {{msg.msg}}</div>
     </div>
     <div class='input-cont'>
+    <!-- input for new message -->
         <form>
         	<div class='col-md-1'></div>
             <input type="text" ng-model='msgInp' class='col-xs-12 col-md-8' id='msgInp'>
