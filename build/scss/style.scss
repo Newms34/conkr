@@ -11,64 +11,83 @@ body {
     display: flex;
     flex-direction: row;
 }
-canvas,#game-parts{
-    position:absolute;
-    left:0px;
-    top:0px;
+
+canvas,
+#game-parts {
+    position: absolute;
+    left: 0px;
+    top: 0px;
 }
-.country-army{
-   position:absolute;
-   padding:5px;
-   background:#333;
-   color:#fff;
-   text-align:center;
-   opacity:.4;
-   transition-duration:.5s; 
-   cursor:pointer;
-   &:hover, &:hover span{
-    opacity:1!important;
-   }
-}
-.src-cell{
-    background:#fc0;
-    opacity:1;
-    box-shadow: 0 0 3px 3px #fc0;
-    color:#000;
-}
-.perma-on-lbl{
-    opacity:1!important;
-}
-.targ-cell{
-    background:#f00;
-    opacity:1;
-    box-shadow: 0 0 3px 3px #f00;
-}
-.panel {
-    padding: 0;
-    z-index:50;
-}
-.game-players{
-    box-shadow:0 0 4px #aaa;
-    text-align:center;
-}
-.abt-stuff{
-    overflow-y: scroll;
-    height:100%;
-    width:100%;
-}
-.abt-bg{
-    background: rgba(0,0,0,.5);
-    width:100%;
-    min-height:100%;
-    left:0;
-    top:0;
-    position:absolute;
-    z-index:99;
-    & button{
-        bottom:5px;
-        position:fixed;
+
+.country-army {
+    position: absolute;
+    padding: 5px;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    opacity: .4;
+    transition-duration: .5s;
+    cursor: pointer;
+    &:hover,
+    &:hover span {
+        opacity: 1!important;
     }
 }
+
+.src-cell {
+    background: #fc0;
+    opacity: 1;
+    box-shadow: 0 0 3px 3px #fc0;
+    color: #000;
+}
+
+.perma-on-lbl {
+    opacity: 1!important;
+}
+
+.targ-cell {
+    background: #f00;
+    opacity: 1;
+    box-shadow: 0 0 3px 3px #f00;
+}
+
+.panel {
+    padding: 0;
+    z-index: 50;
+}
+
+.game-players {
+    box-shadow: 0 0 4px #aaa;
+    text-align: center;
+}
+
+.abt-stuff {
+    overflow-y: scroll;
+    height: 100%;
+    width: 100%;
+}
+
+.abt-bg {
+    background: rgba(0, 0, 0, .5);
+    width: 100%;
+    min-height: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    z-index: 99;
+    & button {
+        bottom: 5px;
+        position: fixed;
+    }
+}
+
+.atk-btn {
+    position: fixed;
+    bottom: 2px;
+    color: #000!important;
+    left: 45%;
+}
+
 .tab {
     border-radius: 0px;
     height: 100%;
@@ -77,14 +96,15 @@ canvas,#game-parts{
     width: 33.3%;
     margin: 0;
 }
-.abt-inner{
-    position:absolute;
-    width:95%;
-    left:2.5%;
-    top:2%;
-    background:#fed;
 
+.abt-inner {
+    position: absolute;
+    width: 95%;
+    left: 2.5%;
+    top: 2%;
+    background: #fed;
 }
+
 .tab-left {
     border-top-left-radius: 3px;
 }
@@ -126,61 +146,66 @@ canvas,#game-parts{
     margin: 0;
 }
 
-.self-message{
-    font-weight:bold;
+.self-message {
+    font-weight: bold;
 }
 
-#main-bod{
-    background:url("../img/chargebg.jpg");
-    background-size:cover;
-    background-attachment:fixed;
+#main-bod {
+    background: url("../img/chargebg.jpg");
+    background-size: cover;
+    background-attachment: fixed;
 }
 
-#log-bod{
-    background:url("../img/siegebg.jpg");
-    background-size:cover;
-    background-attachment:fixed;
-    .pass-mismatch{
-        background:#fcc;
+#log-bod {
+    background: url("../img/siegebg.jpg");
+    background-size: cover;
+    background-attachment: fixed;
+    .pass-mismatch {
+        background: #fcc;
     }
 }
-.stronkmeter{
-    width:100%;
-    height:15px;
-    background:#337ab7;
-    border:2px outset #337ab7;
-    & .stronkchannel{
-        position:relative;
-        background:#23527b;
-        width:98%;
-        height:8px;
-        top:2px;
-        left:1%;
+
+.stronkmeter {
+    width: 100%;
+    height: 15px;
+    background: #337ab7;
+    border: 2px outset #337ab7;
+    & .stronkchannel {
+        position: relative;
+        background: #23527b;
+        width: 98%;
+        height: 8px;
+        top: 2px;
+        left: 1%;
         & .stronkbar {
-            background:#cfc;
-            height:100%;
+            background: #cfc;
+            height: 100%;
         }
     }
 }
-.pwd-list{
-    list-style:none;
+
+.pwd-list {
+    list-style: none;
 }
-#pwd-len-btn{
-    display:inline-block;
-    width:10px;
-    height:10px;
-    background:#f00;
-    border-radius:50%;
+
+#pwd-len-btn {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #f00;
+    border-radius: 50%;
 }
-.men-butt{
-    position:fixed;
-    top:5px;
-    right:5px;
-    z-index:100;
+
+.men-butt {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    z-index: 100;
 }
-.log-butt{
-    position:fixed;
-    top:45px;
-    right:5px;
-    z-index:100;
+
+.log-butt {
+    position: fixed;
+    top: 45px;
+    right: 5px;
+    z-index: 100;
 }

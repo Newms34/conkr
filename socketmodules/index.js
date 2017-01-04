@@ -88,11 +88,13 @@ newArmies = function(usrs, map) {
         }
     });
 }, doFight = function(ca, cd, ra, rd) {
+    console.log(ca.country,ca.num,'vs',cd.country,cd.num)
     //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
     var aRolls = [],
         dRolls = [],
         conflicts,
-        results;
+        results=[],
+        status=false;//final status (true=conkr'd)
     for (var i = 0; i < ra; i++) {
         //roll attacker
         aRolls.push(Math.ceil(Math.floor() * 6));
@@ -114,17 +116,17 @@ newArmies = function(usrs, map) {
         results.push(aRolls[i] > dRolls[i]); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
     }
     results.forEach((r) => {
-        return r ? cd.army.num-- : ca.army.num--
+        r ? cd.num-- : ca.num--;
     });
     if (!cd.num) {
         //zone 'conquered'
-        cd.user = ca.user;
-        cd.num += ra;
-        ca.num -= ra;
+        status=true;
     }
+    console.log(`End result: ${ca.country} ${ca.num} vs ${cd.country} ${cd.num}`)
     return {
         ca: ca,
-        cd: cd
+        cd: cd,
+        status:status
     }
 }, getInitArmies = function(c, p) {
     var arr = [];
@@ -146,5 +148,6 @@ module.exports = {
     fight: doFight,
     newArmies: newArmies,
     getInitArmies: getInitArmies,
-    getAuthUsr: getAuthUsr
+    getAuthUsr: getAuthUsr,
+    doFight:doFight
 };

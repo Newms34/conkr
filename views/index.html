@@ -153,6 +153,7 @@
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
         <div class='country-army' ng-class = "{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span><br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
+    <button class='btn btn-warning col-md-1 atk-btn' ng-click='startAttack();' ng-disabled='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)'>Attack!s:{{srcCell}},{{targCell}}</button>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>

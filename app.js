@@ -61,10 +61,11 @@ io.on('connection', function(socket) {
                 console.log(actualUsr, 'is not', claimedUsr);
                 return;
             } else if (doc.players[doc.turn] !== d.user) {
-                io.sockets.in(socket.room).emit('wrongTurn', { usr: d.user }); //user tried to take turn when it wasnt their turn.
+                io.sockets.in(d.gameId).emit('wrongTurn', { usr: d.user }); //user tried to take turn when it wasnt their turn.
             } else {
-                var cellChanges = sockmod.doFight(d); //ch-ch-ch-changes!
-                io.sockets.in(socket.room).emit('rcvDoFight', cellChanges);
+                console.log('socket',socket)
+                var cellChanges = sockmod.doFight(d.ca,d.cd,d.ra,d.rd); //ch-ch-ch-changes!
+                io.sockets.in(d.gameId).emit('rcvDoFight', cellChanges);
             }
         });
     });
