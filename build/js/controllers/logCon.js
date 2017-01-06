@@ -108,7 +108,7 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
-                sandalchest.alert('Login error','Please check your username and/or password');
+                sandalchest.alert('Login error','Please check your username and/or password<hr/><i>Note:</i> While Conkr is under development, data may be deleted at any time!');
             } else {
                 sandalchest.alert('Login Successful','Welcome back!', function(p) {
                     window.location.assign('../');
