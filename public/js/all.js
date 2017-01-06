@@ -2387,15 +2387,29 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         sandalchest.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
             if (r) {
                 $scope.map.save().then(function(sr) {
-                    // $scope.countryLbls = $scope.map.counLblObjs();
-                    sandalchest.confirm("Start Game", "Do you want to start a new game with this map (" + sr.data.id + ")?", function(play) {
-                        if (play) {
-                            //use sr.id to make a new game.
-                            fightFact.newGame(sr.data.id, $scope.user).then(function(g) {
+                    $scope.countryLbls = $scope.map.counLblObjs();
+                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+                        buttons: [{
+                            text: 'Create Game',
+                            close: true,
+                            click: function() {
+                                //use sr.id to make a new game.
+                            var ngpwd = document.querySelector('#newGamePwd').value;
+                            fightFact.newGame(sr.data.id, $scope.user,ngpwd).then(function(g) {
+                                $scope.gameId = g.data.id;
+                                socket.emit('getGamePieces'{id:g.data.id});
                                 console.log('Done! Game made!');
                                 socket.emit('getGames', { x: true })
                             });
-                        }
+                            }
+                        }, {
+                            text: 'Cancel',
+                            close: true,
+                            click: function() {
+
+                            }
+                        }],
+                        speed: 250
                     });
                 });
             } else {
@@ -2406,6 +2420,11 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         });
     };
+    $scope.pwdExpl = function() {
+        sandalchest.alert('Protected Games', 'If you include a password, only players who have that password can join. Leave this blank if you want a public game!', {
+            rotation: -5
+        })
+    }
     socket.emit('getGames', { x: true })
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
@@ -2471,8 +2490,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     return false;
                 }
                 var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
-                if(srcNum<2){
-                    sandalchest.alert('Uh Oh!','You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
+                if (srcNum < 2) {
+                    sandalchest.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
                     return false;
                 }
                 sandalchest.dialog({
@@ -2480,7 +2499,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         text: 'Move em!',
                         close: true,
                         click: function() {
-                            console.log('wanna move',{ num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
+                            console.log('wanna move', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
                             socket.emit('moveArmies', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
                             $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
                             $scope.srcCell = null;
@@ -2507,16 +2526,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         }
     }
-    $scope.joinGame = function(g) {
-        fightFact.joinGame(g, $scope.user).then(function(r) {
+    $scope.joinGame = function(g, pwd) {
+        fightFact.joinGame(g, $scope.user, pwd).then(function(r) {
+            if (r.data == 'gameLogErr') {
+                sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!')
+                return false;
+            }
             console.log('JOINED GAME:', r);
             socket.emit('getGames', { x: true })
         });
     };
-    $scope.switchPlayMode = function(){
-        sandalchest.confirm('Switch Modes','Are you sure you wanna stop moving armies and begin the attack phase?',function(res){
-            if(res && res!=null){
-                $scope.moveArmies=false;
+    $scope.neighborTest = function(s, d) {
+        console.log('tested cells are neighbors: ', mapFact.isNeighbor($scope.map.diagram.cells, s, d));
+    }
+    $scope.switchPlayMode = function() {
+        sandalchest.confirm('Switch Modes', 'Are you sure you wanna stop moving armies and begin the attack phase?', function(res) {
+            if (res && res != null) {
+                $scope.moveArmies = false;
                 $scope.$digest();
             }
         })
@@ -2535,9 +2561,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         // $scope.countryLbls = $scope.map.counLblObjs();
         $scope.gameMenu = false;
         if (!old) {
-            fightFact.newGame(n, $scope.user).then((x) => {
+            fightFact.newGame(n, $scope.user, pwd).then((x) => {
                 socket.emit('getGames', { g: true });
-                sandalchest.alert('Started a new game!')
                 socket.emit('putInRoom', { id: x.data })
             });
         } else {
@@ -2681,10 +2706,10 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         nextTurn: function(map, game, usr) {
-            socket.emit('nextTurn', { conts:map.getContinents(), game: game, usr: usr })
+            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr })
         },
-        newGame: function(n, p) {
-            return $http.post('/game/new', { id: n, player: p }).then(function(p) {
+        newGame: function(n, p, pwd) {
+            return $http.post('/game/new', { id: n, player: p, pwd: pwd }).then(function(p) {
                 return p;
             });
         },
@@ -2694,7 +2719,7 @@ app.factory('fightFact', function($rootScope, $http) {
             var pieces = [];
             for (var n = 0; n < a.length; n++) {
                 var site = getCellCoords(m.diagram.cells, a[n].country);
-                var boxwid = document.querySelector('canvas').getContext("2d").measureText(a[n].country).width*1.2;
+                var boxwid = document.querySelector('canvas').getContext("2d").measureText(a[n].country).width * 1.2;
                 // alert('BOX WID',boxwid)
                 pieces.push({
                     country: a[n].country,
@@ -2705,14 +2730,14 @@ app.factory('fightFact', function($rootScope, $http) {
                     y: site.y,
                     fullName: a[n].user + ' - ' + a[n].country + ' - ' + a[n].num + (a[n].num > 1 ? " armies" : " army"),
                     wid: boxwid,
-                    status:0 //0 = unpicked (neither target nor source), 1 = source (attacking from this loc), 2 = target (attacking this loc)
+                    status: 0 //0 = unpicked (neither target nor source), 1 = source (attacking from this loc), 2 = target (attacking this loc)
                 });
             }
             return pieces;
         },
-        joinGame: function(m, p) {
+        joinGame: function(m, p, pwd) {
             //join a not-yet-started game;
-            return $http.post('/game/join', { gameId: m, player: p }, function(p) {
+            return $http.post('/game/join', { gameId: m, player: p, pwd: pwd }, function(p) {
                 return p;
             });
         },
@@ -2772,7 +2797,8 @@ app.factory('mapFact', function($rootScope, $http) {
                 return r;
             });
         },
-        isNeighbor: function(c, s, d) {
+        isBorderNeighbor: function(c, s, d) {
+            //OLD VERSION of isNeighbor, only returns true if start and destination are immediate neigbors
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
                 throw new Error('cells not found!')
@@ -2785,6 +2811,80 @@ app.factory('mapFact', function($rootScope, $http) {
                 }
                 if ((c[s].halfedges[i].edge.lSite.x == c[d].site.x && c[s].halfedges[i].edge.lSite.y == c[d].site.y) || (c[s].halfedges[i].edge.rSite.x == c[d].site.x && c[s].halfedges[i].edge.rSite.y == c[d].site.y)) {
                     return true;
+                }
+            }
+            return false;
+        },
+        isWater: function(c, x, y) {
+            //test if a cell at point (x,y) is water (i.e., isLand==false)
+            for (var i = 0; i < c.length; i++) {
+                if (c[i].site.x == x && c[i].site.y == y && !c[i].isLand) {
+                    return i;
+                }
+            }
+            return false;
+        },
+        isNeighbor: function(c, s, d) {
+            //detect if start is either A) an immediate neighbor or B) immediately across the water from dest
+            //c: cells (array), s: start cell, d: destination cell
+            if (!c[s] || !c[d]) {
+                //error reading cells, not found
+                throw new Error('cells not found!')
+                return;
+            }
+            //all stuff should 'exist' now. We can continue
+            var startSite = {
+                    x: c[s].site.x,
+                    y: c[s].site.y
+                },
+                testSite = {
+                    x: null,
+                    y: null
+                },
+                surroundingOceanCandidates = [];
+            for (var i = 0; i < c[s].halfedges.length; i++) {
+                if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
+                    //edges we're lookin at don't exist
+                    continue;
+                }
+                if (c[s].halfedges[i].edge.lSite.x == startSite.x && c[s].halfedges[i].edge.lSite.y == startSite.y) {
+                    //left side is origin
+                    testSite.x = c[s].halfedges[i].edge.rSite.x;
+                    testSite.y = c[s].halfedges[i].edge.rSite.y;
+                } else {
+                    testSite.x = c[s].halfedges[i].edge.lSite.x;
+                    testSite.y = c[s].halfedges[i].edge.lSite.y;
+                }
+                // console.log('Cell edge', i, c[s].halfedges[i], 'other side is', i, angular.element('body').scope().map.diagram.cells[angular.element('body').scope().map.cellByPoint(c[s].halfedges[i].edge.lSite.x, c[s].halfedges[i].edge.lSite.y)])
+                if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
+                    return true;
+                } else {
+                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y))
+                }
+            }
+            //finished testing immediate neighbors. Now test ocean neighbors
+            for (i = 0; i < surroundingOceanCandidates.length; i++) {
+                if (surroundingOceanCandidates[i] || surroundingOceanCandidates[i] === 0) {
+                    //ocean, test
+                    startSite.x = c[surroundingOceanCandidates[i]].site.x;
+                    startSite.y = c[surroundingOceanCandidates[i]].site.y;
+                    for (var j = 0; j < c[surroundingOceanCandidates[i]].halfedges.length; j++) {
+                        if (!c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite || !c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite) {
+                            //edges we're lookin at don't exist
+                            continue;
+                        }
+                        if (c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.x == startSite.x && c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.y == startSite.y) {
+                            //left side is origin
+                            testSite.x = c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite.x;
+                            testSite.y = c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite.y;
+                        } else {
+                            testSite.x = c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.x;
+                            testSite.y = c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.y;
+                        }
+                        if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
+                            return true;
+                        }
+                    }
                 }
             }
             return false;

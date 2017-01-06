@@ -18,7 +18,8 @@ app.factory('mapFact', function($rootScope, $http) {
                 return r;
             });
         },
-        isNeighbor: function(c, s, d) {
+        isBorderNeighbor: function(c, s, d) {
+            //OLD VERSION of isNeighbor, only returns true if start and destination are immediate neigbors
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
                 throw new Error('cells not found!')
@@ -31,6 +32,80 @@ app.factory('mapFact', function($rootScope, $http) {
                 }
                 if ((c[s].halfedges[i].edge.lSite.x == c[d].site.x && c[s].halfedges[i].edge.lSite.y == c[d].site.y) || (c[s].halfedges[i].edge.rSite.x == c[d].site.x && c[s].halfedges[i].edge.rSite.y == c[d].site.y)) {
                     return true;
+                }
+            }
+            return false;
+        },
+        isWater: function(c, x, y) {
+            //test if a cell at point (x,y) is water (i.e., isLand==false)
+            for (var i = 0; i < c.length; i++) {
+                if (c[i].site.x == x && c[i].site.y == y && !c[i].isLand) {
+                    return i;
+                }
+            }
+            return false;
+        },
+        isNeighbor: function(c, s, d) {
+            //detect if start is either A) an immediate neighbor or B) immediately across the water from dest
+            //c: cells (array), s: start cell, d: destination cell
+            if (!c[s] || !c[d]) {
+                //error reading cells, not found
+                throw new Error('cells not found!')
+                return;
+            }
+            //all stuff should 'exist' now. We can continue
+            var startSite = {
+                    x: c[s].site.x,
+                    y: c[s].site.y
+                },
+                testSite = {
+                    x: null,
+                    y: null
+                },
+                surroundingOceanCandidates = [];
+            for (var i = 0; i < c[s].halfedges.length; i++) {
+                if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
+                    //edges we're lookin at don't exist
+                    continue;
+                }
+                if (c[s].halfedges[i].edge.lSite.x == startSite.x && c[s].halfedges[i].edge.lSite.y == startSite.y) {
+                    //left side is origin
+                    testSite.x = c[s].halfedges[i].edge.rSite.x;
+                    testSite.y = c[s].halfedges[i].edge.rSite.y;
+                } else {
+                    testSite.x = c[s].halfedges[i].edge.lSite.x;
+                    testSite.y = c[s].halfedges[i].edge.lSite.y;
+                }
+                // console.log('Cell edge', i, c[s].halfedges[i], 'other side is', i, angular.element('body').scope().map.diagram.cells[angular.element('body').scope().map.cellByPoint(c[s].halfedges[i].edge.lSite.x, c[s].halfedges[i].edge.lSite.y)])
+                if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
+                    return true;
+                } else {
+                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y))
+                }
+            }
+            //finished testing immediate neighbors. Now test ocean neighbors
+            for (i = 0; i < surroundingOceanCandidates.length; i++) {
+                if (surroundingOceanCandidates[i] || surroundingOceanCandidates[i] === 0) {
+                    //ocean, test
+                    startSite.x = c[surroundingOceanCandidates[i]].site.x;
+                    startSite.y = c[surroundingOceanCandidates[i]].site.y;
+                    for (var j = 0; j < c[surroundingOceanCandidates[i]].halfedges.length; j++) {
+                        if (!c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite || !c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite) {
+                            //edges we're lookin at don't exist
+                            continue;
+                        }
+                        if (c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.x == startSite.x && c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.y == startSite.y) {
+                            //left side is origin
+                            testSite.x = c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite.x;
+                            testSite.y = c[surroundingOceanCandidates[i]].halfedges[j].edge.rSite.y;
+                        } else {
+                            testSite.x = c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.x;
+                            testSite.y = c[surroundingOceanCandidates[i]].halfedges[j].edge.lSite.y;
+                        }
+                        if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
+                            return true;
+                        }
+                    }
                 }
             }
             return false;

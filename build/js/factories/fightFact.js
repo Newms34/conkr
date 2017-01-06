@@ -26,10 +26,10 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         nextTurn: function(map, game, usr) {
-            socket.emit('nextTurn', { conts:map.getContinents(), game: game, usr: usr })
+            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr })
         },
-        newGame: function(n, p) {
-            return $http.post('/game/new', { id: n, player: p }).then(function(p) {
+        newGame: function(n, p, pwd) {
+            return $http.post('/game/new', { id: n, player: p, pwd: pwd }).then(function(p) {
                 return p;
             });
         },
@@ -39,7 +39,7 @@ app.factory('fightFact', function($rootScope, $http) {
             var pieces = [];
             for (var n = 0; n < a.length; n++) {
                 var site = getCellCoords(m.diagram.cells, a[n].country);
-                var boxwid = document.querySelector('canvas').getContext("2d").measureText(a[n].country).width*1.2;
+                var boxwid = document.querySelector('canvas').getContext("2d").measureText(a[n].country).width * 1.2;
                 // alert('BOX WID',boxwid)
                 pieces.push({
                     country: a[n].country,
@@ -50,14 +50,14 @@ app.factory('fightFact', function($rootScope, $http) {
                     y: site.y,
                     fullName: a[n].user + ' - ' + a[n].country + ' - ' + a[n].num + (a[n].num > 1 ? " armies" : " army"),
                     wid: boxwid,
-                    status:0 //0 = unpicked (neither target nor source), 1 = source (attacking from this loc), 2 = target (attacking this loc)
+                    status: 0 //0 = unpicked (neither target nor source), 1 = source (attacking from this loc), 2 = target (attacking this loc)
                 });
             }
             return pieces;
         },
-        joinGame: function(m, p) {
+        joinGame: function(m, p, pwd) {
             //join a not-yet-started game;
-            return $http.post('/game/join', { gameId: m, player: p }, function(p) {
+            return $http.post('/game/join', { gameId: m, player: p, pwd: pwd }, function(p) {
                 return p;
             });
         },

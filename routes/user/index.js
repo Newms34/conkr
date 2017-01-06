@@ -7,6 +7,7 @@ var router = express.Router(),
     session = require('client-sessions');
 module.exports = router;
 router.post('/reset', function(req, res, next) {
+    //i dont think we're actually using this!...should we?
     var un = req.body.name,
         pwd = req.body.pass;
     mongoose.model('User').findOne({ 'name': un }, function(err, usr) {

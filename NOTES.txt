@@ -23,4 +23,7 @@ how should we handle water tiles? can players cross oceans?
 WHEN does the sorting of initial armies occur? is it randomized?
 
 Can we do private games? i.e., give game a pwd so that only players with the pwd can join?
+
+CAN NOW MOVE ACROSS THE WATER!
+should we delay movement(i.e., one turn "travel" time)? probly not, as not sure how i'd handle attacks
 */

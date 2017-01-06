@@ -35,9 +35,19 @@ router.post('/new', function(req, res, next) {
             gameId: newId,
             inPlay: false,
             turn: 0,
-            creator: req.body.player
+            creator: req.body.player,
+            protected:false
+        }
+        if (req.body.pwd && req.body.pwd!=''){
+            //if the user supplies a password, password-protected
+            var salt = mongoose.model('Game').generateSalt();
+            var pass = mongoose.model('Game').encryptPassword(req.body.pwd,salt)
+            newGame.salt = salt;
+            newGame.pass = pass;
+            newGame.protected=true;
         }
         mongoose.model('Game').create(newGame)
+        //finally, we record that the relevant map now has an associated game (and thus cannot be deleted)
         tingz.hasGames = true;
         tingz.save();
         res.send(newId)
@@ -81,6 +91,10 @@ router.post('/join', function(req, res, next) {
         if (doc.inPlay) {
             //this SHOULDNT ever be triggered, since only the open games will be joinable, but just in case!
             res.send('inprog');
+            return;
+        }
+        if(doc.protected && !doc.correctPassword(req.body.pwd)){
+            res.send('gameLogErr')
             return;
         }
         doc.players.push(req.body.player);

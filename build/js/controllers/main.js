@@ -71,15 +71,29 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         sandalchest.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
             if (r) {
                 $scope.map.save().then(function(sr) {
-                    // $scope.countryLbls = $scope.map.counLblObjs();
-                    sandalchest.confirm("Start Game", "Do you want to start a new game with this map (" + sr.data.id + ")?", function(play) {
-                        if (play) {
-                            //use sr.id to make a new game.
-                            fightFact.newGame(sr.data.id, $scope.user).then(function(g) {
+                    $scope.countryLbls = $scope.map.counLblObjs();
+                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+                        buttons: [{
+                            text: 'Create Game',
+                            close: true,
+                            click: function() {
+                                //use sr.id to make a new game.
+                            var ngpwd = document.querySelector('#newGamePwd').value;
+                            fightFact.newGame(sr.data.id, $scope.user,ngpwd).then(function(g) {
+                                $scope.gameId = g.data.id;
+                                socket.emit('getGamePieces'{id:g.data.id});
                                 console.log('Done! Game made!');
                                 socket.emit('getGames', { x: true })
                             });
-                        }
+                            }
+                        }, {
+                            text: 'Cancel',
+                            close: true,
+                            click: function() {
+
+                            }
+                        }],
+                        speed: 250
                     });
                 });
             } else {
@@ -90,6 +104,11 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         });
     };
+    $scope.pwdExpl = function() {
+        sandalchest.alert('Protected Games', 'If you include a password, only players who have that password can join. Leave this blank if you want a public game!', {
+            rotation: -5
+        })
+    }
     socket.emit('getGames', { x: true })
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
@@ -155,8 +174,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     return false;
                 }
                 var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
-                if(srcNum<2){
-                    sandalchest.alert('Uh Oh!','You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
+                if (srcNum < 2) {
+                    sandalchest.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
                     return false;
                 }
                 sandalchest.dialog({
@@ -164,7 +183,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         text: 'Move em!',
                         close: true,
                         click: function() {
-                            console.log('wanna move',{ num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
+                            console.log('wanna move', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
                             socket.emit('moveArmies', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
                             $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
                             $scope.srcCell = null;
@@ -191,16 +210,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         }
     }
-    $scope.joinGame = function(g) {
-        fightFact.joinGame(g, $scope.user).then(function(r) {
+    $scope.joinGame = function(g, pwd) {
+        fightFact.joinGame(g, $scope.user, pwd).then(function(r) {
+            if (r.data == 'gameLogErr') {
+                sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!')
+                return false;
+            }
             console.log('JOINED GAME:', r);
             socket.emit('getGames', { x: true })
         });
     };
-    $scope.switchPlayMode = function(){
-        sandalchest.confirm('Switch Modes','Are you sure you wanna stop moving armies and begin the attack phase?',function(res){
-            if(res && res!=null){
-                $scope.moveArmies=false;
+    $scope.neighborTest = function(s, d) {
+        console.log('tested cells are neighbors: ', mapFact.isNeighbor($scope.map.diagram.cells, s, d));
+    }
+    $scope.switchPlayMode = function() {
+        sandalchest.confirm('Switch Modes', 'Are you sure you wanna stop moving armies and begin the attack phase?', function(res) {
+            if (res && res != null) {
+                $scope.moveArmies = false;
                 $scope.$digest();
             }
         })
@@ -219,9 +245,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         // $scope.countryLbls = $scope.map.counLblObjs();
         $scope.gameMenu = false;
         if (!old) {
-            fightFact.newGame(n, $scope.user).then((x) => {
+            fightFact.newGame(n, $scope.user, pwd).then((x) => {
                 socket.emit('getGames', { g: true });
-                sandalchest.alert('Started a new game!')
                 socket.emit('putInRoom', { id: x.data })
             });
         } else {
