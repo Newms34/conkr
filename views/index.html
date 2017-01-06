@@ -100,6 +100,7 @@
                         <th>Map ID</th>
                         <th>Players</th>
                         <th>Joinable</th>
+                        <th>Password</th>
                         <th>Join</th>
                     </tr>
                 </thead>
@@ -109,8 +110,9 @@
                         <td>{{p.mapId}}</td>
                         <td>{{p.players.join(', ')}}</td>
                         <td><span ng-if='p.inPlay'>no</span><span ng-if='!p.inPlay'>yes</span></td>
-                        <td>{{p.players.indexOf('dave')}}
-                            <button class='btn btn-success' ng-disabled='p.inPlay || p.players.indexOf(user)>-1' ng-click='joinGame(p.gameId)'>Join Game</button>
+                        <td><input type="password" id='gamePwdCand' ng-model='p.gamePwdCand' ng-show='p.protected'/><span ng-show='!p.protected'>Public game</span></td>
+                        <td>
+                            <button class='btn btn-success' ng-disabled='p.inPlay || p.players.indexOf(user)>-1' ng-click='joinGame(p.gameId,p.gamePwdCand)'>Join Game</button>
                         </td>
                     </tr>
                 </tbody>
@@ -142,7 +144,7 @@
                             <button class='btn btn-success' ng-disabled='g.inPlay' ng-click='startGame(g.gameId)' title='{{g.inPlay?"Cannot start an already-started game!":"Start the game, locking it to any new players."}}'>Start Game</button>
                         </td>
                         <td>
-                            <button class='btn btn-success' ng-disabled='g.creator!=user || g.inPlay' ng-click='delGame(g.gameId)' title='{{g.creator==user?g.inPlay?"Canot delete in-progress games!":"Delete game "+g.gameId+".":"Cannot delete games created by other players!"}}'>Delete Game</button>
+                            <button class='btn btn-success' ng-disabled='g.creator!=user || g.inPlay' ng-click='delGame(g.gameId)' title='{{g.creator==user?g.inPlay?"Cannot delete in-progress games!":"Delete game "+g.gameId+".":"Cannot delete games created by other players!"}}'>Delete Game</button>
                         </td>
                     </tr>
                 </tbody>

@@ -15,6 +15,12 @@ app.factory('fightFact', function($rootScope, $http) {
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
         },
+        delGame: function(id) {
+            return $http.get('/game/del/'+id).then(function(r) {
+                console.log('factory back from back end game del')
+                return r;
+            })
+        },
         doFight: function(usr, ca, cd, ra, rd, id) {
             socket.emit('sendDoFight', {
                 user: usr,

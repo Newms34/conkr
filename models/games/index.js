@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    crypto = require('crypto');
 // Note that this stores the game info (i.e., populations, army strengths, etc.). It does NOT store the map info (i.e., shape/names of countries)
 var skillSchema = new mongoose.Schema({
     mapId: String, //which map this applies to

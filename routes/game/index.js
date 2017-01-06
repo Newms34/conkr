@@ -36,18 +36,18 @@ router.post('/new', function(req, res, next) {
             inPlay: false,
             turn: 0,
             creator: req.body.player,
-            protected:false
+            protected: false
         }
-        if (req.body.pwd && req.body.pwd!=''){
+        if (req.body.pwd && req.body.pwd != '') {
             //if the user supplies a password, password-protected
             var salt = mongoose.model('Game').generateSalt();
-            var pass = mongoose.model('Game').encryptPassword(req.body.pwd,salt)
+            var pass = mongoose.model('Game').encryptPassword(req.body.pwd, salt)
             newGame.salt = salt;
             newGame.pass = pass;
-            newGame.protected=true;
+            newGame.protected = true;
         }
         mongoose.model('Game').create(newGame)
-        //finally, we record that the relevant map now has an associated game (and thus cannot be deleted)
+            //finally, we record that the relevant map now has an associated game (and thus cannot be deleted)
         tingz.hasGames = true;
         tingz.save();
         res.send(newId)
@@ -58,27 +58,32 @@ router.get('/del/:id', function(req, res, next) {
         res.send('Error! Not logged in!');
         return;
     }
-    mongoose.model('Game').find({}, function(err, games) {
-        var game = null; 
-        for(var i=0;i<games.length;i++){
-            if (games[i].id == req.params.id){
-                game=games[i];
-                break;
-            }
+    console.log('Deleting game',req.params.id,'or at least attempt to...')
+    mongoose.model('Game').findOne({ gameId: req.params.id }, function(err, game) {
+        console.log('Game is',game,'curr usr is',req.session.user.name)
+        if (!game || game.creator !== req.session.user.name) {
+            res.send('wrongUser')
+            return;
         }
-        if(!game || game.creator!==req.session.user.name) return 'wrongUser';
-        mongoose.model('Map').findOne({id:game.mapId},function(err,map){
-            //find this game's map
-            map.hasGames = false;
-            //go thru all games and see if any are still using this map. 
-            games.forEach((gm)=>{
-                //look thru all games. If a game exists where the game id is NOT this one's (i.e., not the same game) AND the map's the same, set hasGames to true.
-                if (gm.mapId == game.mapId && gm.gameId!=game.gameId) map.hasGames = true;
+        var whichMap = game.mapId;
+        mongoose.model('Game').find({gameId:req.params.id}).remove(function(err) {
+            console.log('Successfully removed game!')
+            if (err) res.send(err);
+            mongoose.model('Map').findOne({ id: game.mapId }, function(err, map) {
+                mongoose.model('Game').find({}, function(errg, games) {
+                    //find this game's map
+                    map.hasGames = false;
+                    //go thru all games and see if any are still using this map. 
+                    games.forEach((gm) => {
+                        //look thru all games. If a game exists where the map's the same as this just-deleted game, set hasGames to true.
+                        if (gm.mapId == whichMap) map.hasGames = true;
+                    })
+                    map.save();
+                    res.send('done')
+                })
             })
-            map.save();
-            socket.emit('replaceMap',map);
         })
-        
+
     })
 });
 router.post('/join', function(req, res, next) {
@@ -93,7 +98,7 @@ router.post('/join', function(req, res, next) {
             res.send('inprog');
             return;
         }
-        if(doc.protected && !doc.correctPassword(req.body.pwd)){
+        if (doc.protected && !doc.correctPassword(req.body.pwd)) {
             res.send('gameLogErr')
             return;
         }

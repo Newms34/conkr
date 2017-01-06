@@ -49,6 +49,9 @@ io.on('connection', function(socket) {
         }
         io.emit('newMsg', m);
     });
+    socket.on('refreshMap',function(r){
+        io.emit('replaceMap');
+    })
     socket.on('sendDoFight', function(d) {
         var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
             claimedUsr = d.user;
@@ -110,9 +113,10 @@ io.on('connection', function(socket) {
     })
     socket.on('getGamePieces', function(id) {
         console.log('GET GAME PIECES', id)
-        mongoose.model('Game').findOne({ 'gameId': id.id }, function(err, doc) {
+        var theId = id.id||id.gameId;
+        mongoose.model('Game').findOne({ 'gameId': theId }, function(err, doc) {
             console.log('found game', id, ' and now sending game pieces')
-            io.sockets.in(id.id).emit('updateArmies', doc);
+            io.sockets.in(theId).emit('updateArmies', doc);
         })
     })
     socket.on('nextTurn', function(d) {

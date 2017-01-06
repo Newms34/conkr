@@ -2385,22 +2385,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.map.init();
         $scope.gameMenu = false;
         sandalchest.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
+            console.log('R FROM MAP CONFIRM', r)
             if (r) {
                 $scope.map.save().then(function(sr) {
-                    $scope.countryLbls = $scope.map.counLblObjs();
+                    console.log('ASKING IF NEW GAME')
                     sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
                         buttons: [{
                             text: 'Create Game',
                             close: true,
                             click: function() {
                                 //use sr.id to make a new game.
-                            var ngpwd = document.querySelector('#newGamePwd').value;
-                            fightFact.newGame(sr.data.id, $scope.user,ngpwd).then(function(g) {
-                                $scope.gameId = g.data.id;
-                                socket.emit('getGamePieces'{id:g.data.id});
-                                console.log('Done! Game made!');
-                                socket.emit('getGames', { x: true })
-                            });
+                                var ngpwd = document.querySelector('#newGamePwd').value;
+                                fightFact.newGame(sr.data.id, $scope.user, ngpwd).then(function(g) {
+                                    $scope.gameId = g.data.id;
+                                    socket.emit('getGamePieces', { id: g.data.id });
+                                    console.log('Done! Game made!');
+                                    socket.emit('getGames', { x: true })
+                                });
                             }
                         }, {
                             text: 'Cancel',
@@ -2439,6 +2440,15 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.loadMaps();
     })
     socket.on('allGames', function(g) {
+        //this socket cmd basically refreshes the list of games.
+        //now we check each game, and see if the old game we were in still exists. 
+        $scope.canJoin=true;
+        g.forEach((gi)=>{
+            if (gi.gameId==$scope.gameId){
+                $scope.canJoin=false;
+            }
+        })
+        if($scope.canJoin) $scope.gameId=null;
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
         $scope.loadMaps();
@@ -2447,7 +2457,26 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.deleteMap = function(id) {
         sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
-                mapFact.delMap(id);
+                mapFact.delMap(id).then(function(r){
+                    if(r.data='logErr') return;
+                    
+                });
+            }
+        })
+    };
+    $scope.delGame = function(id) {
+        sandalchest.confirm('Delete Game', 'Are you sure you wanna delete this game? This isn\'t reversable!', function(delConf) {
+            if (delConf) {
+                fightFact.delGame(id).then(function(r) {
+                    console.log('back from delGame thing')
+                    if (r.data == 'wrongUser') {
+                        sandalchest.alert('Hey! You can\'t delete that game!')
+                    } else {
+                        console.log('REMOVED GAME! REFRESHING DATA')
+                        socket.emit('getGames', { x: true })
+                        
+                    }
+                });
             }
         })
     };
@@ -2561,14 +2590,35 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         // $scope.countryLbls = $scope.map.counLblObjs();
         $scope.gameMenu = false;
         if (!old) {
-            fightFact.newGame(n, $scope.user, pwd).then((x) => {
-                socket.emit('getGames', { g: true });
-                socket.emit('putInRoom', { id: x.data })
-            });
+            //makin a new game with an old map
+            sandalchest.dialog('New Game', `Making a new game!<hr/> Password (optional): <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+                buttons: [{
+                    text: 'Create Game',
+                    close: true,
+                    click: function() {
+                        //use sr.id to make a new game.
+                        var ngpwd = document.querySelector('#newGamePwd').value;
+                        fightFact.newGame(n, $scope.user, ngpwd).then(function(g) {
+                            $scope.gameId = g.data.id;
+                            socket.emit('getGamePieces', { id: g.data.id });
+                            console.log('Done! Game made!');
+                            socket.emit('getGames', { x: true })
+                        });
+                        $scope.armyPieces = [];
+                    }
+                }, {
+                    text: 'Cancel',
+                    close: true,
+                    click: function() {
+
+                    }
+                }],
+                speed: 250
+            })
         } else {
             socket.emit('putInRoom', { id: $scope.gameId })
+            $scope.armyPieces = [];
         }
-        $scope.armyPieces = [];
     };
     socket.on('updateArmies', function(d) {
         console.log('UPDATE ARMIES', d)
@@ -2694,6 +2744,12 @@ app.factory('fightFact', function($rootScope, $http) {
             var attackPenalty = m ? 1 : 0;
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
+        },
+        delGame: function(id) {
+            return $http.get('/game/del/'+id).then(function(r) {
+                console.log('factory back from back end game del')
+                return r;
+            })
         },
         doFight: function(usr, ca, cd, ra, rd, id) {
             socket.emit('sendDoFight', {
