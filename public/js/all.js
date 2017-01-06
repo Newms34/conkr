@@ -516,40 +516,45 @@ function Voronoi() {
     this.vertexJunkyard = [];
     this.edgeJunkyard = [];
     this.cellJunkyard = [];
-    }
+}
 
 // ---------------------------------------------------------------------------
 
 Voronoi.prototype.reset = function() {
     if (!this.beachline) {
         this.beachline = new this.RBTree();
-        }
+    }
     // Move leftover beachsections to the beachsection junkyard.
     if (this.beachline.root) {
         var beachsection = this.beachline.getFirst(this.beachline.root);
         while (beachsection) {
             this.beachsectionJunkyard.push(beachsection); // mark for reuse
             beachsection = beachsection.rbNext;
-            }
         }
+    }
     this.beachline.root = null;
     if (!this.circleEvents) {
         this.circleEvents = new this.RBTree();
-        }
+    }
     this.circleEvents.root = this.firstCircleEvent = null;
     this.vertices = [];
     this.edges = [];
     this.cells = [];
-    };
+};
 
 Voronoi.prototype.sqrt = Math.sqrt;
 Voronoi.prototype.abs = Math.abs;
 Voronoi.prototype.EPSILON = 1e-9;
-Voronoi.prototype.equalWithEpsilon = function(a,b){return this.abs(a-b)<1e-9;};
-Voronoi.prototype.greaterThanWithEpsilon = function(a,b){return a-b>1e-9;};
-Voronoi.prototype.greaterThanOrEqualWithEpsilon = function(a,b){return b-a<1e-9;};
-Voronoi.prototype.lessThanWithEpsilon = function(a,b){return b-a>1e-9;};
-Voronoi.prototype.lessThanOrEqualWithEpsilon = function(a,b){return a-b<1e-9;};
+Voronoi.prototype.equalWithEpsilon = function(a, b) {
+    return this.abs(a - b) < 1e-9; };
+Voronoi.prototype.greaterThanWithEpsilon = function(a, b) {
+    return a - b > 1e-9; };
+Voronoi.prototype.greaterThanOrEqualWithEpsilon = function(a, b) {
+    return b - a < 1e-9; };
+Voronoi.prototype.lessThanWithEpsilon = function(a, b) {
+    return b - a > 1e-9; };
+Voronoi.prototype.lessThanOrEqualWithEpsilon = function(a, b) {
+    return a - b < 1e-9; };
 
 // ---------------------------------------------------------------------------
 // Red-Black tree code (based on C version of "rbtree" by Franck Bui-Huu
@@ -557,7 +562,7 @@ Voronoi.prototype.lessThanOrEqualWithEpsilon = function(a,b){return a-b<1e-9;};
 
 Voronoi.prototype.RBTree = function() {
     this.root = null;
-    };
+};
 
 Voronoi.prototype.RBTree.prototype.rbInsertSuccessor = function(node, successor) {
     var parent;
@@ -567,20 +572,19 @@ Voronoi.prototype.RBTree.prototype.rbInsertSuccessor = function(node, successor)
         successor.rbNext = node.rbNext;
         if (node.rbNext) {
             node.rbNext.rbPrevious = successor;
-            }
+        }
         node.rbNext = successor;
         // <<<
         if (node.rbRight) {
             // in-place expansion of node.rbRight.getFirst();
             node = node.rbRight;
-            while (node.rbLeft) {node = node.rbLeft;}
+            while (node.rbLeft) { node = node.rbLeft; }
             node.rbLeft = successor;
-            }
-        else {
+        } else {
             node.rbRight = successor;
-            }
-        parent = node;
         }
+        parent = node;
+    }
     // rhill 2011-06-07: if node is null, successor must be inserted
     // to the left-most part of the tree
     else if (this.root) {
@@ -592,14 +596,13 @@ Voronoi.prototype.RBTree.prototype.rbInsertSuccessor = function(node, successor)
         // <<<
         node.rbLeft = successor;
         parent = node;
-        }
-    else {
+    } else {
         // >>> Performance: cache previous/next nodes
         successor.rbPrevious = successor.rbNext = null;
         // <<<
         this.root = successor;
         parent = null;
-        }
+    }
     successor.rbLeft = successor.rbRight = null;
     successor.rbParent = parent;
     successor.rbRed = true;
@@ -616,49 +619,46 @@ Voronoi.prototype.RBTree.prototype.rbInsertSuccessor = function(node, successor)
                 parent.rbRed = uncle.rbRed = false;
                 grandpa.rbRed = true;
                 node = grandpa;
-                }
-            else {
+            } else {
                 if (node === parent.rbRight) {
                     this.rbRotateLeft(parent);
                     node = parent;
                     parent = node.rbParent;
-                    }
+                }
                 parent.rbRed = false;
                 grandpa.rbRed = true;
                 this.rbRotateRight(grandpa);
-                }
             }
-        else {
+        } else {
             uncle = grandpa.rbLeft;
             if (uncle && uncle.rbRed) {
                 parent.rbRed = uncle.rbRed = false;
                 grandpa.rbRed = true;
                 node = grandpa;
-                }
-            else {
+            } else {
                 if (node === parent.rbLeft) {
                     this.rbRotateRight(parent);
                     node = parent;
                     parent = node.rbParent;
-                    }
+                }
                 parent.rbRed = false;
                 grandpa.rbRed = true;
                 this.rbRotateLeft(grandpa);
-                }
             }
-        parent = node.rbParent;
         }
+        parent = node.rbParent;
+    }
     this.root.rbRed = false;
-    };
+};
 
 Voronoi.prototype.RBTree.prototype.rbRemoveNode = function(node) {
     // >>> rhill 2011-05-27: Performance: cache previous/next nodes
     if (node.rbNext) {
         node.rbNext.rbPrevious = node.rbPrevious;
-        }
+    }
     if (node.rbPrevious) {
         node.rbPrevious.rbNext = node.rbNext;
-        }
+    }
     node.rbNext = node.rbPrevious = null;
     // <<<
     var parent = node.rbParent,
@@ -667,24 +667,20 @@ Voronoi.prototype.RBTree.prototype.rbRemoveNode = function(node) {
         next;
     if (!left) {
         next = right;
-        }
-    else if (!right) {
+    } else if (!right) {
         next = left;
-        }
-    else {
+    } else {
         next = this.getFirst(right);
-        }
+    }
     if (parent) {
         if (parent.rbLeft === node) {
             parent.rbLeft = next;
-            }
-        else {
+        } else {
             parent.rbRight = next;
-            }
         }
-    else {
+    } else {
         this.root = next;
-        }
+    }
     // enforce red-black rules
     var isRed;
     if (left && right) {
@@ -699,34 +695,33 @@ Voronoi.prototype.RBTree.prototype.rbRemoveNode = function(node) {
             parent.rbLeft = node;
             next.rbRight = right;
             right.rbParent = next;
-            }
-        else {
+        } else {
             next.rbParent = parent;
             parent = next;
             node = next.rbRight;
-            }
         }
-    else {
+    } else {
         isRed = node.rbRed;
         node = next;
-        }
+    }
     // 'node' is now the sole successor's child and 'parent' its
     // new parent (since the successor can have been moved)
     if (node) {
         node.rbParent = parent;
-        }
+    }
     // the 'easy' cases
-    if (isRed) {return;}
+    if (isRed) {
+        return; }
     if (node && node.rbRed) {
         node.rbRed = false;
         return;
-        }
+    }
     // the other cases
     var sibling;
     do {
         if (node === this.root) {
             break;
-            }
+        }
         if (node === parent.rbLeft) {
             sibling = parent.rbRight;
             if (sibling.rbRed) {
@@ -734,49 +729,48 @@ Voronoi.prototype.RBTree.prototype.rbRemoveNode = function(node) {
                 parent.rbRed = true;
                 this.rbRotateLeft(parent);
                 sibling = parent.rbRight;
-                }
+            }
             if ((sibling.rbLeft && sibling.rbLeft.rbRed) || (sibling.rbRight && sibling.rbRight.rbRed)) {
                 if (!sibling.rbRight || !sibling.rbRight.rbRed) {
                     sibling.rbLeft.rbRed = false;
                     sibling.rbRed = true;
                     this.rbRotateRight(sibling);
                     sibling = parent.rbRight;
-                    }
+                }
                 sibling.rbRed = parent.rbRed;
                 parent.rbRed = sibling.rbRight.rbRed = false;
                 this.rbRotateLeft(parent);
                 node = this.root;
                 break;
-                }
             }
-        else {
+        } else {
             sibling = parent.rbLeft;
             if (sibling.rbRed) {
                 sibling.rbRed = false;
                 parent.rbRed = true;
                 this.rbRotateRight(parent);
                 sibling = parent.rbLeft;
-                }
+            }
             if ((sibling.rbLeft && sibling.rbLeft.rbRed) || (sibling.rbRight && sibling.rbRight.rbRed)) {
                 if (!sibling.rbLeft || !sibling.rbLeft.rbRed) {
                     sibling.rbRight.rbRed = false;
                     sibling.rbRed = true;
                     this.rbRotateLeft(sibling);
                     sibling = parent.rbLeft;
-                    }
+                }
                 sibling.rbRed = parent.rbRed;
                 parent.rbRed = sibling.rbLeft.rbRed = false;
                 this.rbRotateRight(parent);
                 node = this.root;
                 break;
-                }
             }
+        }
         sibling.rbRed = true;
         node = parent;
         parent = parent.rbParent;
     } while (!node.rbRed);
-    if (node) {node.rbRed = false;}
-    };
+    if (node) { node.rbRed = false; }
+};
 
 Voronoi.prototype.RBTree.prototype.rbRotateLeft = function(node) {
     var p = node,
@@ -785,22 +779,20 @@ Voronoi.prototype.RBTree.prototype.rbRotateLeft = function(node) {
     if (parent) {
         if (parent.rbLeft === p) {
             parent.rbLeft = q;
-            }
-        else {
+        } else {
             parent.rbRight = q;
-            }
         }
-    else {
+    } else {
         this.root = q;
-        }
+    }
     q.rbParent = parent;
     p.rbParent = q;
     p.rbRight = q.rbLeft;
     if (p.rbRight) {
         p.rbRight.rbParent = p;
-        }
+    }
     q.rbLeft = p;
-    };
+};
 
 Voronoi.prototype.RBTree.prototype.rbRotateRight = function(node) {
     var p = node,
@@ -809,43 +801,41 @@ Voronoi.prototype.RBTree.prototype.rbRotateRight = function(node) {
     if (parent) {
         if (parent.rbLeft === p) {
             parent.rbLeft = q;
-            }
-        else {
+        } else {
             parent.rbRight = q;
-            }
         }
-    else {
+    } else {
         this.root = q;
-        }
+    }
     q.rbParent = parent;
     p.rbParent = q;
     p.rbLeft = q.rbRight;
     if (p.rbLeft) {
         p.rbLeft.rbParent = p;
-        }
+    }
     q.rbRight = p;
-    };
+};
 
 Voronoi.prototype.RBTree.prototype.getFirst = function(node) {
     while (node.rbLeft) {
         node = node.rbLeft;
-        }
+    }
     return node;
-    };
+};
 
 Voronoi.prototype.RBTree.prototype.getLast = function(node) {
     while (node.rbRight) {
         node = node.rbRight;
-        }
+    }
     return node;
-    };
+};
 
 // ---------------------------------------------------------------------------
 // Diagram methods
 
 Voronoi.prototype.Diagram = function(site) {
     this.site = site;
-    };
+};
 
 // ---------------------------------------------------------------------------
 // Cell methods
@@ -854,22 +844,22 @@ Voronoi.prototype.Cell = function(site) {
     this.site = site;
     this.halfedges = [];
     this.closeMe = false;
-    };
+};
 
 Voronoi.prototype.Cell.prototype.init = function(site) {
     this.site = site;
     this.halfedges = [];
     this.closeMe = false;
     return this;
-    };
+};
 
 Voronoi.prototype.createCell = function(site) {
     var cell = this.cellJunkyard.pop();
-    if ( cell ) {
+    if (cell) {
         return cell.init(site);
-        }
+    }
     return new this.Cell(site);
-    };
+};
 
 Voronoi.prototype.Cell.prototype.prepareHalfedges = function() {
     var halfedges = this.halfedges,
@@ -881,35 +871,35 @@ Voronoi.prototype.Cell.prototype.prepareHalfedges = function() {
     while (iHalfedge--) {
         edge = halfedges[iHalfedge].edge;
         if (!edge.vb || !edge.va) {
-            halfedges.splice(iHalfedge,1);
-            }
+            halfedges.splice(iHalfedge, 1);
         }
+    }
 
     // rhill 2011-05-26: I tried to use a binary search at insertion
     // time to keep the array sorted on-the-fly (in Cell.addHalfedge()).
     // There was no real benefits in doing so, performance on
     // Firefox 3.6 was improved marginally, while performance on
     // Opera 11 was penalized marginally.
-    halfedges.sort(function(a,b){return b.angle-a.angle;});
+    halfedges.sort(function(a, b) {
+        return b.angle - a.angle; });
     return halfedges.length;
-    };
+};
 
 // Return a list of the neighbor Ids
 Voronoi.prototype.Cell.prototype.getNeighborIds = function() {
     var neighbors = [],
         iHalfedge = this.halfedges.length,
         edge;
-    while (iHalfedge--){
+    while (iHalfedge--) {
         edge = this.halfedges[iHalfedge].edge;
         if (edge.lSite !== null && edge.lSite.voronoiId != this.site.voronoiId) {
             neighbors.push(edge.lSite.voronoiId);
-            }
-        else if (edge.rSite !== null && edge.rSite.voronoiId != this.site.voronoiId){
+        } else if (edge.rSite !== null && edge.rSite.voronoiId != this.site.voronoiId) {
             neighbors.push(edge.rSite.voronoiId);
-            }
         }
+    }
     return neighbors;
-    };
+};
 
 // Compute bounding box
 //
@@ -925,20 +915,20 @@ Voronoi.prototype.Cell.prototype.getBbox = function() {
         v = halfedges[iHalfedge].getStartpoint();
         vx = v.x;
         vy = v.y;
-        if (vx < xmin) {xmin = vx;}
-        if (vy < ymin) {ymin = vy;}
-        if (vx > xmax) {xmax = vx;}
-        if (vy > ymax) {ymax = vy;}
+        if (vx < xmin) { xmin = vx; }
+        if (vy < ymin) { ymin = vy; }
+        if (vx > xmax) { xmax = vx; }
+        if (vy > ymax) { ymax = vy; }
         // we dont need to take into account end point,
         // since each end point matches a start point
-        }
+    }
     return {
         x: xmin,
         y: ymin,
-        width: xmax-xmin,
-        height: ymax-ymin
-        };
+        width: xmax - xmin,
+        height: ymax - ymin
     };
+};
 
 // Return whether a point is inside, on, or outside the cell:
 //   -1: point is outside the perimeter of the cell
@@ -966,16 +956,16 @@ Voronoi.prototype.Cell.prototype.pointIntersection = function(x, y) {
         halfedge = halfedges[iHalfedge];
         p0 = halfedge.getStartpoint();
         p1 = halfedge.getEndpoint();
-        r = (y-p0.y)*(p1.x-p0.x)-(x-p0.x)*(p1.y-p0.y);
+        r = (y - p0.y) * (p1.x - p0.x) - (x - p0.x) * (p1.y - p0.y);
         if (!r) {
             return 0;
-            }
+        }
         if (r > 0) {
             return -1;
-            }
         }
+    }
     return 1;
-    };
+};
 
 // ---------------------------------------------------------------------------
 // Edge methods
@@ -984,13 +974,13 @@ Voronoi.prototype.Cell.prototype.pointIntersection = function(x, y) {
 Voronoi.prototype.Vertex = function(x, y) {
     this.x = x;
     this.y = y;
-    };
+};
 
 Voronoi.prototype.Edge = function(lSite, rSite) {
     this.lSite = lSite;
     this.rSite = rSite;
     this.va = this.vb = null;
-    };
+};
 
 Voronoi.prototype.Halfedge = function(edge, lSite, rSite) {
     this.site = lSite;
@@ -1003,30 +993,29 @@ Voronoi.prototype.Halfedge = function(edge, lSite, rSite) {
     // use the angle of line perpendicular to the halfsegment (the
     // edge should have both end points defined in such case.)
     if (rSite) {
-        this.angle = Math.atan2(rSite.y-lSite.y, rSite.x-lSite.x);
-        }
-    else {
+        this.angle = Math.atan2(rSite.y - lSite.y, rSite.x - lSite.x);
+    } else {
         var va = edge.va,
             vb = edge.vb;
         // rhill 2011-05-31: used to call getStartpoint()/getEndpoint(),
         // but for performance purpose, these are expanded in place here.
         this.angle = edge.lSite === lSite ?
-            Math.atan2(vb.x-va.x, va.y-vb.y) :
-            Math.atan2(va.x-vb.x, vb.y-va.y);
-        }
-    };
+            Math.atan2(vb.x - va.x, va.y - vb.y) :
+            Math.atan2(va.x - vb.x, vb.y - va.y);
+    }
+};
 
 Voronoi.prototype.createHalfedge = function(edge, lSite, rSite) {
     return new this.Halfedge(edge, lSite, rSite);
-    };
+};
 
 Voronoi.prototype.Halfedge.prototype.getStartpoint = function() {
     return this.edge.lSite === this.site ? this.edge.va : this.edge.vb;
-    };
+};
 
 Voronoi.prototype.Halfedge.prototype.getEndpoint = function() {
     return this.edge.lSite === this.site ? this.edge.vb : this.edge.va;
-    };
+};
 
 
 
@@ -1034,16 +1023,15 @@ Voronoi.prototype.Halfedge.prototype.getEndpoint = function() {
 
 Voronoi.prototype.createVertex = function(x, y) {
     var v = this.vertexJunkyard.pop();
-    if ( !v ) {
+    if (!v) {
         v = new this.Vertex(x, y);
-        }
-    else {
+    } else {
         v.x = x;
         v.y = y;
-        }
+    }
     this.vertices.push(v);
     return v;
-    };
+};
 
 // this create and add an edge to internal collection, and also create
 // two halfedges which are added to each site's counterclockwise array
@@ -1051,67 +1039,62 @@ Voronoi.prototype.createVertex = function(x, y) {
 
 Voronoi.prototype.createEdge = function(lSite, rSite, va, vb) {
     var edge = this.edgeJunkyard.pop();
-    if ( !edge ) {
+    if (!edge) {
         edge = new this.Edge(lSite, rSite);
-        }
-    else {
+    } else {
         edge.lSite = lSite;
         edge.rSite = rSite;
         edge.va = edge.vb = null;
-        }
+    }
 
     this.edges.push(edge);
     if (va) {
         this.setEdgeStartpoint(edge, lSite, rSite, va);
-        }
+    }
     if (vb) {
         this.setEdgeEndpoint(edge, lSite, rSite, vb);
-        }
+    }
     this.cells[lSite.voronoiId].halfedges.push(this.createHalfedge(edge, lSite, rSite));
     this.cells[rSite.voronoiId].halfedges.push(this.createHalfedge(edge, rSite, lSite));
     return edge;
-    };
+};
 
 Voronoi.prototype.createBorderEdge = function(lSite, va, vb) {
     var edge = this.edgeJunkyard.pop();
-    if ( !edge ) {
+    if (!edge) {
         edge = new this.Edge(lSite, null);
-        }
-    else {
+    } else {
         edge.lSite = lSite;
         edge.rSite = null;
-        }
+    }
     edge.va = va;
     edge.vb = vb;
     this.edges.push(edge);
     return edge;
-    };
+};
 
 Voronoi.prototype.setEdgeStartpoint = function(edge, lSite, rSite, vertex) {
     if (!edge.va && !edge.vb) {
         edge.va = vertex;
         edge.lSite = lSite;
         edge.rSite = rSite;
-        }
-    else if (edge.lSite === rSite) {
+    } else if (edge.lSite === rSite) {
         edge.vb = vertex;
-        }
-    else {
+    } else {
         edge.va = vertex;
-        }
-    };
+    }
+};
 
 Voronoi.prototype.setEdgeEndpoint = function(edge, lSite, rSite, vertex) {
     this.setEdgeStartpoint(edge, rSite, lSite, vertex);
-    };
+};
 
 // ---------------------------------------------------------------------------
 // Beachline methods
 
 // rhill 2011-06-07: For some reasons, performance suffers significantly
 // when instanciating a literal object instead of an empty ctor
-Voronoi.prototype.Beachsection = function() {
-    };
+Voronoi.prototype.Beachsection = function() {};
 
 // rhill 2011-06-02: A lot of Beachsection instanciations
 // occur during the computation of the Voronoi diagram,
@@ -1126,10 +1109,10 @@ Voronoi.prototype.createBeachsection = function(site) {
     var beachsection = this.beachsectionJunkyard.pop();
     if (!beachsection) {
         beachsection = new this.Beachsection();
-        }
+    }
     beachsection.site = site;
     return beachsection;
-    };
+};
 
 // calculate the left break point of a particular beach section,
 // given a particular sweep line
@@ -1171,32 +1154,32 @@ Voronoi.prototype.leftBreakPoint = function(arc, directrix) {
     var site = arc.site,
         rfocx = site.x,
         rfocy = site.y,
-        pby2 = rfocy-directrix;
+        pby2 = rfocy - directrix;
     // parabola in degenerate case where focus is on directrix
     if (!pby2) {
         return rfocx;
-        }
+    }
     var lArc = arc.rbPrevious;
     if (!lArc) {
         return -Infinity;
-        }
+    }
     site = lArc.site;
     var lfocx = site.x,
         lfocy = site.y,
-        plby2 = lfocy-directrix;
+        plby2 = lfocy - directrix;
     // parabola in degenerate case where focus is on directrix
     if (!plby2) {
         return lfocx;
-        }
-    var hl = lfocx-rfocx,
-        aby2 = 1/pby2-1/plby2,
-        b = hl/plby2;
+    }
+    var hl = lfocx - rfocx,
+        aby2 = 1 / pby2 - 1 / plby2,
+        b = hl / plby2;
     if (aby2) {
-        return (-b+this.sqrt(b*b-2*aby2*(hl*hl/(-2*plby2)-lfocy+plby2/2+rfocy-pby2/2)))/aby2+rfocx;
-        }
+        return (-b + this.sqrt(b * b - 2 * aby2 * (hl * hl / (-2 * plby2) - lfocy + plby2 / 2 + rfocy - pby2 / 2))) / aby2 + rfocx;
+    }
     // both parabolas have same distance to directrix, thus break point is midway
-    return (rfocx+lfocx)/2;
-    };
+    return (rfocx + lfocx) / 2;
+};
 
 // calculate the right break point of a particular beach section,
 // given a particular directrix
@@ -1204,16 +1187,16 @@ Voronoi.prototype.rightBreakPoint = function(arc, directrix) {
     var rArc = arc.rbNext;
     if (rArc) {
         return this.leftBreakPoint(rArc, directrix);
-        }
+    }
     var site = arc.site;
     return site.y === directrix ? site.x : Infinity;
-    };
+};
 
 Voronoi.prototype.detachBeachsection = function(beachsection) {
     this.detachCircleEvent(beachsection); // detach potentially attached circle event
     this.beachline.rbRemoveNode(beachsection); // remove from RB-tree
     this.beachsectionJunkyard.push(beachsection); // mark for reuse
-    };
+};
 
 Voronoi.prototype.removeBeachsection = function(beachsection) {
     var circle = beachsection.circleEvent,
@@ -1239,12 +1222,12 @@ Voronoi.prototype.removeBeachsection = function(beachsection) {
 
     // look left
     var lArc = previous;
-    while (lArc.circleEvent && abs_fn(x-lArc.circleEvent.x)<1e-9 && abs_fn(y-lArc.circleEvent.ycenter)<1e-9) {
+    while (lArc.circleEvent && abs_fn(x - lArc.circleEvent.x) < 1e-9 && abs_fn(y - lArc.circleEvent.ycenter) < 1e-9) {
         previous = lArc.rbPrevious;
         disappearingTransitions.unshift(lArc);
         this.detachBeachsection(lArc); // mark for reuse
         lArc = previous;
-        }
+    }
     // even though it is not disappearing, I will also add the beach section
     // immediately to the left of the left-most collapsed beach section, for
     // convenience, since we need to refer to it later as this beach section
@@ -1254,12 +1237,12 @@ Voronoi.prototype.removeBeachsection = function(beachsection) {
 
     // look right
     var rArc = next;
-    while (rArc.circleEvent && abs_fn(x-rArc.circleEvent.x)<1e-9 && abs_fn(y-rArc.circleEvent.ycenter)<1e-9) {
+    while (rArc.circleEvent && abs_fn(x - rArc.circleEvent.x) < 1e-9 && abs_fn(y - rArc.circleEvent.ycenter) < 1e-9) {
         next = rArc.rbNext;
         disappearingTransitions.push(rArc);
         this.detachBeachsection(rArc); // mark for reuse
         rArc = next;
-        }
+    }
     // we also have to add the beach section immediately to the right of the
     // right-most collapsed beach section, since there is also a disappearing
     // transition representing an edge's start point on its left.
@@ -1270,11 +1253,11 @@ Voronoi.prototype.removeBeachsection = function(beachsection) {
     // set the start point of their (implied) edge.
     var nArcs = disappearingTransitions.length,
         iArc;
-    for (iArc=1; iArc<nArcs; iArc++) {
+    for (iArc = 1; iArc < nArcs; iArc++) {
         rArc = disappearingTransitions[iArc];
-        lArc = disappearingTransitions[iArc-1];
+        lArc = disappearingTransitions[iArc - 1];
         this.setEdgeStartpoint(rArc.edge, lArc.site, rArc.site, vertex);
-        }
+    }
 
     // create a new edge as we have now a new transition between
     // two beach sections which were previously not adjacent.
@@ -1282,14 +1265,14 @@ Voronoi.prototype.removeBeachsection = function(beachsection) {
     // actually define an end point of the edge (relative to the site
     // on the left)
     lArc = disappearingTransitions[0];
-    rArc = disappearingTransitions[nArcs-1];
+    rArc = disappearingTransitions[nArcs - 1];
     rArc.edge = this.createEdge(lArc.site, rArc.site, undefined, vertex);
 
     // create circle events if any for beach sections left in the beachline
     // adjacent to collapsed sections
     this.attachCircleEvent(lArc);
     this.attachCircleEvent(rArc);
-    };
+};
 
 Voronoi.prototype.addBeachsection = function(site) {
     var x = site.x,
@@ -1304,7 +1287,7 @@ Voronoi.prototype.addBeachsection = function(site) {
         node = this.beachline.root;
 
     while (node) {
-        dxl = this.leftBreakPoint(node,directrix)-x;
+        dxl = this.leftBreakPoint(node, directrix) - x;
         // x lessThanWithEpsilon xl => falls somewhere before the left edge of the beachsection
         if (dxl > 1e-9) {
             // this case should never happen
@@ -1313,36 +1296,34 @@ Voronoi.prototype.addBeachsection = function(site) {
             //    break;
             //    }
             node = node.rbLeft;
-            }
-        else {
-            dxr = x-this.rightBreakPoint(node,directrix);
+        } else {
+            dxr = x - this.rightBreakPoint(node, directrix);
             // x greaterThanWithEpsilon xr => falls somewhere after the right edge of the beachsection
             if (dxr > 1e-9) {
                 if (!node.rbRight) {
                     lArc = node;
                     break;
-                    }
-                node = node.rbRight;
                 }
-            else {
+                node = node.rbRight;
+            } else {
                 // x equalWithEpsilon xl => falls exactly on the left edge of the beachsection
                 if (dxl > -1e-9) {
                     lArc = node.rbPrevious;
                     rArc = node;
-                    }
+                }
                 // x equalWithEpsilon xr => falls exactly on the right edge of the beachsection
                 else if (dxr > -1e-9) {
                     lArc = node;
                     rArc = node.rbNext;
-                    }
+                }
                 // falls exactly somewhere in the middle of the beachsection
                 else {
                     lArc = rArc = node;
-                    }
-                break;
                 }
+                break;
             }
         }
+    }
     // at this point, keep in mind that lArc and/or rArc could be
     // undefined or null.
 
@@ -1362,7 +1343,7 @@ Voronoi.prototype.addBeachsection = function(site) {
     //   new beachsection become root of the RB-tree
     if (!lArc && !rArc) {
         return;
-        }
+    }
 
     // [lArc,rArc] where lArc == rArc
     // most likely case: new beach section split an existing beach
@@ -1389,7 +1370,7 @@ Voronoi.prototype.addBeachsection = function(site) {
         this.attachCircleEvent(lArc);
         this.attachCircleEvent(rArc);
         return;
-        }
+    }
 
     // [lArc,null]
     // even less likely case: new beach section is the *last* beach section
@@ -1401,9 +1382,9 @@ Voronoi.prototype.addBeachsection = function(site) {
     //   no collapsing beach section as a result
     //   new beach section become right-most node of the RB-tree
     if (lArc && !rArc) {
-        newArc.edge = this.createEdge(lArc.site,newArc.site);
+        newArc.edge = this.createEdge(lArc.site, newArc.site);
         return;
-        }
+    }
 
     // [null,rArc]
     // impossible case: because sites are strictly processed from top to bottom,
@@ -1439,15 +1420,15 @@ Voronoi.prototype.addBeachsection = function(site) {
         var lSite = lArc.site,
             ax = lSite.x,
             ay = lSite.y,
-            bx=site.x-ax,
-            by=site.y-ay,
+            bx = site.x - ax,
+            by = site.y - ay,
             rSite = rArc.site,
-            cx=rSite.x-ax,
-            cy=rSite.y-ay,
-            d=2*(bx*cy-by*cx),
-            hb=bx*bx+by*by,
-            hc=cx*cx+cy*cy,
-            vertex = this.createVertex((cy*hb-by*hc)/d+ax, (bx*hc-cx*hb)/d+ay);
+            cx = rSite.x - ax,
+            cy = rSite.y - ay,
+            d = 2 * (bx * cy - by * cx),
+            hb = bx * bx + by * by,
+            hc = cx * cx + cy * cy,
+            vertex = this.createVertex((cy * hb - by * hc) / d + ax, (bx * hc - cx * hb) / d + ay);
 
         // one transition disappear
         this.setEdgeStartpoint(rArc.edge, lSite, rSite, vertex);
@@ -1461,8 +1442,8 @@ Voronoi.prototype.addBeachsection = function(site) {
         this.attachCircleEvent(lArc);
         this.attachCircleEvent(rArc);
         return;
-        }
-    };
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Circle event methods
@@ -1480,19 +1461,21 @@ Voronoi.prototype.CircleEvent = function() {
     this.rbRight = null;
     this.site = null;
     this.x = this.y = this.ycenter = 0;
-    };
+};
 
 Voronoi.prototype.attachCircleEvent = function(arc) {
     var lArc = arc.rbPrevious,
         rArc = arc.rbNext;
-    if (!lArc || !rArc) {return;} // does that ever happen?
+    if (!lArc || !rArc) {
+        return; } // does that ever happen?
     var lSite = lArc.site,
         cSite = arc.site,
         rSite = rArc.site;
 
     // If site of left beachsection is same as site of
     // right beachsection, there can't be convergence
-    if (lSite===rSite) {return;}
+    if (lSite === rSite) {
+        return; }
 
     // Find the circumscribed circle for the three sites associated
     // with the beachsection triplet.
@@ -1506,10 +1489,10 @@ Voronoi.prototype.attachCircleEvent = function(arc) {
     // Voronoi diagram.
     var bx = cSite.x,
         by = cSite.y,
-        ax = lSite.x-bx,
-        ay = lSite.y-by,
-        cx = rSite.x-bx,
-        cy = rSite.y-by;
+        ax = lSite.x - bx,
+        ay = lSite.y - by,
+        cx = rSite.x - bx,
+        cy = rSite.y - by;
 
     // If points l->c->r are clockwise, then center beach section does not
     // collapse, hence it can't end up as a vertex (we reuse 'd' here, which
@@ -1517,14 +1500,15 @@ Voronoi.prototype.attachCircleEvent = function(arc) {
     // http://en.wikipedia.org/wiki/Curve_orientation#Orientation_of_a_simple_polygon
     // rhill 2011-05-21: Nasty finite precision error which caused circumcircle() to
     // return infinites: 1e-12 seems to fix the problem.
-    var d = 2*(ax*cy-ay*cx);
-    if (d >= -2e-12){return;}
+    var d = 2 * (ax * cy - ay * cx);
+    if (d >= -2e-12) {
+        return; }
 
-    var ha = ax*ax+ay*ay,
-        hc = cx*cx+cy*cy,
-        x = (cy*ha-ay*hc)/d,
-        y = (ax*hc-cx*ha)/d,
-        ycenter = y+by;
+    var ha = ax * ax + ay * ay,
+        hc = cx * cx + cy * cy,
+        x = (cy * ha - ay * hc) / d,
+        y = (ax * hc - cx * ha) / d,
+        ycenter = y + by;
 
     // Important: ybottom should always be under or at sweep, so no need
     // to waste CPU cycles by checking
@@ -1533,11 +1517,11 @@ Voronoi.prototype.attachCircleEvent = function(arc) {
     var circleEvent = this.circleEventJunkyard.pop();
     if (!circleEvent) {
         circleEvent = new this.CircleEvent();
-        }
+    }
     circleEvent.arc = arc;
     circleEvent.site = cSite;
-    circleEvent.x = x+bx;
-    circleEvent.y = ycenter+this.sqrt(x*x+y*y); // y bottom
+    circleEvent.x = x + bx;
+    circleEvent.y = ycenter + this.sqrt(x * x + y * y); // y bottom
     circleEvent.ycenter = ycenter;
     arc.circleEvent = circleEvent;
 
@@ -1549,39 +1533,36 @@ Voronoi.prototype.attachCircleEvent = function(arc) {
         if (circleEvent.y < node.y || (circleEvent.y === node.y && circleEvent.x <= node.x)) {
             if (node.rbLeft) {
                 node = node.rbLeft;
-                }
-            else {
+            } else {
                 predecessor = node.rbPrevious;
                 break;
-                }
             }
-        else {
+        } else {
             if (node.rbRight) {
                 node = node.rbRight;
-                }
-            else {
+            } else {
                 predecessor = node;
                 break;
-                }
             }
         }
+    }
     this.circleEvents.rbInsertSuccessor(predecessor, circleEvent);
     if (!predecessor) {
         this.firstCircleEvent = circleEvent;
-        }
-    };
+    }
+};
 
 Voronoi.prototype.detachCircleEvent = function(arc) {
     var circleEvent = arc.circleEvent;
     if (circleEvent) {
         if (!circleEvent.rbPrevious) {
             this.firstCircleEvent = circleEvent.rbNext;
-            }
+        }
         this.circleEvents.rbRemoveNode(circleEvent); // remove from RB-tree
         this.circleEventJunkyard.push(circleEvent);
         arc.circleEvent = null;
-        }
-    };
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Diagram completion methods
@@ -1594,7 +1575,8 @@ Voronoi.prototype.detachCircleEvent = function(arc) {
 Voronoi.prototype.connectEdge = function(edge, bbox) {
     // skip if end point already connected
     var vb = edge.vb;
-    if (!!vb) {return true;}
+    if (!!vb) {
+        return true; }
 
     // make local copy for performance purpose
     var va = edge.va,
@@ -1608,8 +1590,8 @@ Voronoi.prototype.connectEdge = function(edge, bbox) {
         ly = lSite.y,
         rx = rSite.x,
         ry = rSite.y,
-        fx = (lx+rx)/2,
-        fy = (ly+ry)/2,
+        fx = (lx + rx) / 2,
+        fy = (ly + ry) / 2,
         fm, fb;
 
     // if we reach here, this means cells which use this edge will need
@@ -1620,9 +1602,9 @@ Voronoi.prototype.connectEdge = function(edge, bbox) {
 
     // get the line equation of the bisector if line is not vertical
     if (ry !== ly) {
-        fm = (lx-rx)/(ry-ly);
-        fb = fy-fm*fx;
-        }
+        fm = (lx - rx) / (ry - ly);
+        fb = fy - fm * fx;
+    }
 
     // remember, direction of line (relative to left site):
     // upward: left.x < right.x
@@ -1639,81 +1621,76 @@ Voronoi.prototype.connectEdge = function(edge, bbox) {
     // special case: vertical line
     if (fm === undefined) {
         // doesn't intersect with viewport
-        if (fx < xl || fx >= xr) {return false;}
+        if (fx < xl || fx >= xr) {
+            return false; }
         // downward
         if (lx > rx) {
             if (!va) {
                 va = this.createVertex(fx, yt);
-                }
-            else if (va.y >= yb) {
+            } else if (va.y >= yb) {
                 return false;
-                }
-            vb = this.createVertex(fx, yb);
             }
+            vb = this.createVertex(fx, yb);
+        }
         // upward
         else {
             if (!va) {
                 va = this.createVertex(fx, yb);
-                }
-            else if (va.y < yt) {
+            } else if (va.y < yt) {
                 return false;
-                }
-            vb = this.createVertex(fx, yt);
             }
+            vb = this.createVertex(fx, yt);
         }
+    }
     // closer to vertical than horizontal, connect start point to the
     // top or bottom side of the bounding box
     else if (fm < -1 || fm > 1) {
         // downward
         if (lx > rx) {
             if (!va) {
-                va = this.createVertex((yt-fb)/fm, yt);
-                }
-            else if (va.y >= yb) {
+                va = this.createVertex((yt - fb) / fm, yt);
+            } else if (va.y >= yb) {
                 return false;
-                }
-            vb = this.createVertex((yb-fb)/fm, yb);
             }
+            vb = this.createVertex((yb - fb) / fm, yb);
+        }
         // upward
         else {
             if (!va) {
-                va = this.createVertex((yb-fb)/fm, yb);
-                }
-            else if (va.y < yt) {
+                va = this.createVertex((yb - fb) / fm, yb);
+            } else if (va.y < yt) {
                 return false;
-                }
-            vb = this.createVertex((yt-fb)/fm, yt);
             }
+            vb = this.createVertex((yt - fb) / fm, yt);
         }
+    }
     // closer to horizontal than vertical, connect start point to the
     // left or right side of the bounding box
     else {
         // rightward
         if (ly < ry) {
             if (!va) {
-                va = this.createVertex(xl, fm*xl+fb);
-                }
-            else if (va.x >= xr) {
+                va = this.createVertex(xl, fm * xl + fb);
+            } else if (va.x >= xr) {
                 return false;
-                }
-            vb = this.createVertex(xr, fm*xr+fb);
             }
+            vb = this.createVertex(xr, fm * xr + fb);
+        }
         // leftward
         else {
             if (!va) {
-                va = this.createVertex(xr, fm*xr+fb);
-                }
-            else if (va.x < xl) {
+                va = this.createVertex(xr, fm * xr + fb);
+            } else if (va.x < xl) {
                 return false;
-                }
-            vb = this.createVertex(xl, fm*xl+fb);
             }
+            vb = this.createVertex(xl, fm * xl + fb);
         }
+    }
     edge.va = va;
     edge.vb = vb;
 
     return true;
-    };
+};
 
 // line-clipping code taken from:
 //   Liang-Barsky function by Daniel White
@@ -1727,56 +1704,64 @@ Voronoi.prototype.clipEdge = function(edge, bbox) {
         by = edge.vb.y,
         t0 = 0,
         t1 = 1,
-        dx = bx-ax,
-        dy = by-ay;
+        dx = bx - ax,
+        dy = by - ay;
     // left
-    var q = ax-bbox.xl;
-    if (dx===0 && q<0) {return false;}
-    var r = -q/dx;
-    if (dx<0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-    else if (dx>0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
+    var q = ax - bbox.xl;
+    if (dx === 0 && q < 0) {
+        return false; }
+    var r = -q / dx;
+    if (dx < 0) {
+        if (r < t0) {
+            return false; }
+        if (r < t1) { t1 = r; }
+    } else if (dx > 0) {
+        if (r > t1) {
+            return false; }
+        if (r > t0) { t0 = r; }
+    }
     // right
-    q = bbox.xr-ax;
-    if (dx===0 && q<0) {return false;}
-    r = q/dx;
-    if (dx<0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    else if (dx>0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
+    q = bbox.xr - ax;
+    if (dx === 0 && q < 0) {
+        return false; }
+    r = q / dx;
+    if (dx < 0) {
+        if (r > t1) {
+            return false; }
+        if (r > t0) { t0 = r; }
+    } else if (dx > 0) {
+        if (r < t0) {
+            return false; }
+        if (r < t1) { t1 = r; }
+    }
     // top
-    q = ay-bbox.yt;
-    if (dy===0 && q<0) {return false;}
-    r = -q/dy;
-    if (dy<0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-    else if (dy>0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
+    q = ay - bbox.yt;
+    if (dy === 0 && q < 0) {
+        return false; }
+    r = -q / dy;
+    if (dy < 0) {
+        if (r < t0) {
+            return false; }
+        if (r < t1) { t1 = r; }
+    } else if (dy > 0) {
+        if (r > t1) {
+            return false; }
+        if (r > t0) { t0 = r; }
+    }
     // bottom        
-    q = bbox.yb-ay;
-    if (dy===0 && q<0) {return false;}
-    r = q/dy;
-    if (dy<0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    else if (dy>0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
+    q = bbox.yb - ay;
+    if (dy === 0 && q < 0) {
+        return false; }
+    r = q / dy;
+    if (dy < 0) {
+        if (r > t1) {
+            return false; }
+        if (r > t0) { t0 = r; }
+    } else if (dy > 0) {
+        if (r < t0) {
+            return false; }
+        if (r < t1) { t1 = r; }
+    }
 
     // if we reach this point, Voronoi edge is within bbox
 
@@ -1785,26 +1770,26 @@ Voronoi.prototype.clipEdge = function(edge, bbox) {
     // than modifying the existing one, since the existing
     // one is likely shared with at least another edge
     if (t0 > 0) {
-        edge.va = this.createVertex(ax+t0*dx, ay+t0*dy);
-        }
+        edge.va = this.createVertex(ax + t0 * dx, ay + t0 * dy);
+    }
 
     // if t1 < 1, vb needs to change
     // rhill 2011-06-03: we need to create a new vertex rather
     // than modifying the existing one, since the existing
     // one is likely shared with at least another edge
     if (t1 < 1) {
-        edge.vb = this.createVertex(ax+t1*dx, ay+t1*dy);
-        }
+        edge.vb = this.createVertex(ax + t1 * dx, ay + t1 * dy);
+    }
 
     // va and/or vb were clipped, thus we will need to close
     // cells which use this edge.
-    if ( t0 > 0 || t1 < 1 ) {
+    if (t0 > 0 || t1 < 1) {
         this.cells[edge.lSite.voronoiId].closeMe = true;
         this.cells[edge.rSite.voronoiId].closeMe = true;
     }
 
     return true;
-    };
+};
 
 // Connect/cut edges at bounding box
 Voronoi.prototype.clipEdges = function(bbox) {
@@ -1823,12 +1808,12 @@ Voronoi.prototype.clipEdges = function(bbox) {
         //   it is looking more like a point than a line
         if (!this.connectEdge(edge, bbox) ||
             !this.clipEdge(edge, bbox) ||
-            (abs_fn(edge.va.x-edge.vb.x)<1e-9 && abs_fn(edge.va.y-edge.vb.y)<1e-9)) {
+            (abs_fn(edge.va.x - edge.vb.x) < 1e-9 && abs_fn(edge.va.y - edge.vb.y) < 1e-9)) {
             edge.va = edge.vb = null;
-            edges.splice(iEdge,1);
-            }
+            edges.splice(iEdge, 1);
         }
-    };
+    }
+};
 
 // Close the cells.
 // The cells are bound by the supplied bounding box.
@@ -1855,10 +1840,10 @@ Voronoi.prototype.closeCells = function(bbox) {
         // required to close cells
         if (!cell.prepareHalfedges()) {
             continue;
-            }
+        }
         if (!cell.closeMe) {
             continue;
-            }
+        }
         // find first 'unclosed' point.
         // an 'unclosed' point will be the end point of a halfedge which
         // does not match the start point of the following halfedge
@@ -1871,17 +1856,17 @@ Voronoi.prototype.closeCells = function(bbox) {
         iLeft = 0;
         while (iLeft < nHalfedges) {
             va = halfedges[iLeft].getEndpoint();
-            vz = halfedges[(iLeft+1) % nHalfedges].getStartpoint();
+            vz = halfedges[(iLeft + 1) % nHalfedges].getStartpoint();
             // if end point is not equal to start point, we need to add the missing
             // halfedge(s) to close the cell
-            if (abs_fn(va.x-vz.x)>=1e-9 || abs_fn(va.y-vz.y)>=1e-9) {
+            if (abs_fn(va.x - vz.x) >= 1e-9 || abs_fn(va.y - vz.y) >= 1e-9) {
                 break;
-                }
-            iLeft++;
             }
+            iLeft++;
+        }
         if (iLeft === nHalfedges) {
             continue;
-            }
+        }
         // if we reach this point, cell needs to be closed by walking
         // counterclockwise along the bounding box until it connects
         // to next halfedge in the list
@@ -1889,85 +1874,91 @@ Voronoi.prototype.closeCells = function(bbox) {
         // find entry point:
         switch (true) {
 
-        // walk downward along left side
-        case this.equalWithEpsilon(va.x,xl) && this.lessThanWithEpsilon(va.y,yb):
-            lastBorderSegment = this.equalWithEpsilon(vz.x,xl);
-            vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
-
-        // walk rightward along bottom side
-        case this.equalWithEpsilon(va.y,yb) && this.lessThanWithEpsilon(va.x,xr):
-            lastBorderSegment = this.equalWithEpsilon(vz.y,yb);
-            vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
-
-        // walk upward along right side
-        case this.equalWithEpsilon(va.x,xr) && this.greaterThanWithEpsilon(va.y,yt):
-            lastBorderSegment = this.equalWithEpsilon(vz.x,xr);
-            vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
-
-        // walk leftward along top side
-        case this.equalWithEpsilon(va.y,yt) && this.greaterThanWithEpsilon(va.x,xl):
-            lastBorderSegment = this.equalWithEpsilon(vz.y,yt);
-            vb = this.createVertex(lastBorderSegment ? vz.x : xl, yt);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
-
             // walk downward along left side
-            lastBorderSegment = this.equalWithEpsilon(vz.x,xl);
-            vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
+            case this.equalWithEpsilon(va.x, xl) && this.lessThanWithEpsilon(va.y, yb):
+                lastBorderSegment = this.equalWithEpsilon(vz.x, xl);
+                vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
 
-            // walk rightward along bottom side
-            lastBorderSegment = this.equalWithEpsilon(vz.y,yb);
-            vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            if ( lastBorderSegment ) { break; }
-            va = vb;
+                // walk rightward along bottom side
+            case this.equalWithEpsilon(va.y, yb) && this.lessThanWithEpsilon(va.x, xr):
+                lastBorderSegment = this.equalWithEpsilon(vz.y, yb);
+                vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
 
-            // walk upward along right side
-            lastBorderSegment = this.equalWithEpsilon(vz.x,xr);
-            vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
-            edge = this.createBorderEdge(cell.site, va, vb);
-            iLeft++;
-            halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-            break;
+                // walk upward along right side
+            case this.equalWithEpsilon(va.x, xr) && this.greaterThanWithEpsilon(va.y, yt):
+                lastBorderSegment = this.equalWithEpsilon(vz.x, xr);
+                vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
 
-        default:
-            throw "Voronoi.closeCells() > this makes no sense!";
+                // walk leftward along top side
+            case this.equalWithEpsilon(va.y, yt) && this.greaterThanWithEpsilon(va.x, xl):
+                lastBorderSegment = this.equalWithEpsilon(vz.y, yt);
+                vb = this.createVertex(lastBorderSegment ? vz.x : xl, yt);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
+
+                // walk downward along left side
+                lastBorderSegment = this.equalWithEpsilon(vz.x, xl);
+                vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
+
+                // walk rightward along bottom side
+                lastBorderSegment = this.equalWithEpsilon(vz.y, yb);
+                vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                if (lastBorderSegment) {
+                    break; }
+                va = vb;
+
+                // walk upward along right side
+                lastBorderSegment = this.equalWithEpsilon(vz.x, xr);
+                vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
+                edge = this.createBorderEdge(cell.site, va, vb);
+                iLeft++;
+                halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
+                break;
+
+            default:
+                throw "Voronoi.closeCells() > this makes no sense!";
         }
 
         // At this point, all halfedges should be connected, or else
         // this means something went horribly wrong.
-        if ( abs_fn(vb.x-vz.x)>=1e-9 || abs_fn(vb.y-vz.y)>=1e-9 ) {
+        if (abs_fn(vb.x - vz.x) >= 1e-9 || abs_fn(vb.y - vz.y) >= 1e-9) {
             throw "Voronoi.closeCells() > Could not close the Voronoi cell!\n  (See https://github.com/gorhill/Javascript-Voronoi/issues/15)";
-            }
+        }
 
         // cell.closeMe = false;
-        }
-    };
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Debugging helper
@@ -2002,12 +1993,12 @@ Voronoi.prototype.quantizeSites = function(sites) {
     var Îµ = this.EPSILON,
         n = sites.length,
         site;
-    while ( n-- ) {
+    while (n--) {
         site = sites[n];
         site.x = Math.floor(site.x / Îµ) * Îµ;
         site.y = Math.floor(site.y / Îµ) * Îµ;
-        }
-    };
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Helper: Recycle diagram: all vertex, edge and cell objects are
@@ -2016,15 +2007,14 @@ Voronoi.prototype.quantizeSites = function(sites) {
 // when I change the semantic of what is returned.
 
 Voronoi.prototype.recycle = function(diagram) {
-    if ( diagram ) {
-        if ( diagram instanceof this.Diagram ) {
+    if (diagram) {
+        if (diagram instanceof this.Diagram) {
             this.toRecycle = diagram;
-            }
-        else {
+        } else {
             throw 'Voronoi.recycleDiagram() > Need a Diagram object.';
-            }
         }
-    };
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Top-level Fortune loop
@@ -2043,20 +2033,21 @@ Voronoi.prototype.compute = function(sites, bbox) {
 
     // any diagram data available for recycling?
     // I do that here so that this is included in execution time
-    if ( this.toRecycle ) {
+    if (this.toRecycle) {
         this.vertexJunkyard = this.vertexJunkyard.concat(this.toRecycle.vertices);
         this.edgeJunkyard = this.edgeJunkyard.concat(this.toRecycle.edges);
         this.cellJunkyard = this.cellJunkyard.concat(this.toRecycle.cells);
         this.toRecycle = null;
-        }
+    }
 
     // Initialize site event queue
     var siteEvents = sites.slice(0);
-    siteEvents.sort(function(a,b){
+    siteEvents.sort(function(a, b) {
         var r = b.y - a.y;
-        if (r) {return r;}
+        if (r) {
+            return r; }
         return b.x - a.x;
-        });
+    });
 
     // process queue
     var site = siteEvents.pop(),
@@ -2085,20 +2076,20 @@ Voronoi.prototype.compute = function(sites, bbox) {
                 // remember last site coords to detect duplicate
                 xsitey = site.y;
                 xsitex = site.x;
-                }
-            site = siteEvents.pop();
             }
+            site = siteEvents.pop();
+        }
 
         // remove beach section
         else if (circle) {
             this.removeBeachsection(circle.arc);
-            }
+        }
 
         // all done, quit
         else {
             break;
-            }
         }
+    }
 
     // wrapping-up:
     //   connect dangling edges to bounding box
@@ -2118,13 +2109,14 @@ Voronoi.prototype.compute = function(sites, bbox) {
     diagram.cells = this.cells;
     diagram.edges = this.edges;
     diagram.vertices = this.vertices;
-    diagram.execTime = stopTime.getTime()-startTime.getTime();
+    diagram.execTime = stopTime.getTime() - startTime.getTime();
 
     // clean up
     this.reset();
 
     return diagram;
-    };
+};
+
 var app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
 	$scope.prevSent = [];
     $scope.msgs = [{
@@ -2287,21 +2279,21 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
         }
         $scope.pwdStren = str;
     };
-    // ${$scope.passGud.len>3?'&#10003;':'&#10007;'}
+  
     $scope.explPwd = function() {
-        sandalchest.alert(`<h4>Password Strength</h4>Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters}</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
+        sandalchest.alert('Password Strength',`Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
     };
     $scope.newUsr = function() {
         miscFact.regNewUsr($scope.regUser, $scope.regPwdOne).then(function(r) {
             if (r.data == 'DUPLICATE') {
-                sandalchest.alert('Uh oh! Something went horribly wrong!');
+                sandalchest.alert('Registration Error','Uh oh! Something went horribly wrong!');
             } else {
                 //auto-login;
                 miscFact.login($scope.regUser, $scope.regPwdOne).then(function(d) {
                     if (d.data == 'no') {
-                        sandalchest.alert('Login error: please check your username and/or password');
+                        sandalchest.alert('Registration Error','There was an error while checking your username/password. Please try again.');
                     } else {
-                        sandalchest.alert('Welcome back!', function(p) {
+                        sandalchest.alert('Registration Successful','Welcome!', function(p) {
                             window.location.assign('../');
                         });
                     }
@@ -2312,9 +2304,9 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
-                sandalchest.alert('Login error: please check your username and/or password');
+                sandalchest.alert('Login error','Please check your username and/or password');
             } else {
-                sandalchest.alert('Welcome!', function(p) {
+                sandalchest.alert('Login Successful','Welcome back!', function(p) {
                     window.location.assign('../');
                 });
             }
@@ -2441,8 +2433,10 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         })
     };
     $scope.pickTarg = false;
+    $scope.moveArmies = true;
     var debugMode = false; //allows us to pick our own dudes as targets
     $scope.pickCell = function(ap) {
+        //NEED TO IMPLEMENT ARMY MOVE MODE! ALSO SOCKETS FOR THIS.
         if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
             $scope.srcCell = null;
@@ -2450,6 +2444,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.pickTarg = false;
             return true;
         } else if (!$scope.pickTarg && ap.usr == $scope.user) {
+            //if we're not in target pick mode and this piece's user is us.
             $scope.armyPieces.forEach((p) => { p.status = 0 });
             //picking source cell
             $scope.srcCell = $scope.map.getCellNumByName(ap.country);
@@ -2457,25 +2452,75 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.targCell = null;
             $scope.pickTarg = true;
             return true;
-        } else if ($scope.pickTarg == true && (ap.usr != $scope.user || debugMode)) {
-            if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "!", { speed: 250 })
-                return false;
+        } else if (!$scope.moveArmies) {
+            if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
+                if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
+                    sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 })
+                    return false;
+                }
+                $scope.targCell = $scope.map.getCellNumByName(ap.country);
+                ap.status = 2;
+                $scope.pickTarg = false;
+            } else if ($scope.pickTarg && ap.usr == $scope.user) {
+                sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 })
             }
-            $scope.targCell = $scope.map.getCellNumByName(ap.country);
-            ap.status = 2;
-            $scope.pickTarg = false;
-        } else if ($scope.pickTarg && ap.usr == $scope.user) {
-            sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 })
+        } else {
+            if ($scope.pickTarg && ap.usr == $scope.user) {
+                if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
+                    sandalchest.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 })
+                    return false;
+                }
+                var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
+                if(srcNum<2){
+                    sandalchest.alert('Uh Oh!','You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
+                    return false;
+                }
+                sandalchest.dialog({
+                    buttons: [{
+                        text: 'Move em!',
+                        close: true,
+                        click: function() {
+                            console.log('wanna move',{ num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
+                            socket.emit('moveArmies', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
+                            $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
+                            $scope.srcCell = null;
+                            $scope.targCell = null;
+                            ap.status = 0;
+                            $scope.pickTarg = false;
+                        }
+                    }, {
+                        text: 'Cancel',
+                        close: true,
+                        click: function() {
+                            $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
+                            $scope.srcCell = null;
+                            $scope.targCell = null;
+                            ap.status = 0;
+                            $scope.pickTarg = false;
+                        }
+                    }],
+                    speed: 250
+                }, 'Army Movement', `How many armies do you want to move from ${$scope.map.diagram.cells[$scope.srcCell].country} to ${ap.country}? You can move a maximum of ${srcNum} armies. <br/> <input type="number" id="reqNumMove" value='1' min='1' max='${srcNum}'>`);
+
+            } else if ($scope.pickTarg && ap.usr != $scope.user) {
+                sandalchest.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`)
+            }
         }
-    };
+    }
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {
             console.log('JOINED GAME:', r);
             socket.emit('getGames', { x: true })
         });
     };
-
+    $scope.switchPlayMode = function(){
+        sandalchest.confirm('Switch Modes','Are you sure you wanna stop moving armies and begin the attack phase?',function(res){
+            if(res && res!=null){
+                $scope.moveArmies=false;
+                $scope.$digest();
+            }
+        })
+    }
     $scope.pickMap = function(m, n, old) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -2602,7 +2647,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
             console.log(res)
             if (res && res != null) {
-                fightFact.nextTurn($scope.map,$scope.gameId, $scope.user);
+                fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
         })
     }

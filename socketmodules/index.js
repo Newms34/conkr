@@ -120,10 +120,8 @@ newArmies = function(usrs, map) {
     results.forEach((r) => {
         r ? cd.num-- : ca.num--;
     });
-    if (!cd.num) {
         //zone 'conquered'
-        status = true;
-    }
+    status = !cd.num;
     console.log(`End result: ${ca.country} ${ca.num} vs ${cd.country} ${cd.num}`)
     return {
         ca: ca,

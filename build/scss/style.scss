@@ -86,6 +86,17 @@ canvas,
     bottom: 2px;
     color: #000!important;
 }
+.play-mode-btn {
+    position: fixed;
+    bottom: 2px;
+    transition-duration:.5s;
+    &:hover > span:first-child{
+        display:none;
+    }
+    &:hover > span:nth-child(2){
+        display:inline!important;
+    }
+}
 .nxt-btn{
     position:fixed;
     bottom: 2px;

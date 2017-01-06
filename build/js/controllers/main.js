@@ -117,8 +117,10 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         })
     };
     $scope.pickTarg = false;
+    $scope.moveArmies = true;
     var debugMode = false; //allows us to pick our own dudes as targets
     $scope.pickCell = function(ap) {
+        //NEED TO IMPLEMENT ARMY MOVE MODE! ALSO SOCKETS FOR THIS.
         if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
             $scope.srcCell = null;
@@ -126,6 +128,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.pickTarg = false;
             return true;
         } else if (!$scope.pickTarg && ap.usr == $scope.user) {
+            //if we're not in target pick mode and this piece's user is us.
             $scope.armyPieces.forEach((p) => { p.status = 0 });
             //picking source cell
             $scope.srcCell = $scope.map.getCellNumByName(ap.country);
@@ -133,25 +136,75 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.targCell = null;
             $scope.pickTarg = true;
             return true;
-        } else if ($scope.pickTarg == true && (ap.usr != $scope.user || debugMode)) {
-            if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "!", { speed: 250 })
-                return false;
+        } else if (!$scope.moveArmies) {
+            if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
+                if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
+                    sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 })
+                    return false;
+                }
+                $scope.targCell = $scope.map.getCellNumByName(ap.country);
+                ap.status = 2;
+                $scope.pickTarg = false;
+            } else if ($scope.pickTarg && ap.usr == $scope.user) {
+                sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 })
             }
-            $scope.targCell = $scope.map.getCellNumByName(ap.country);
-            ap.status = 2;
-            $scope.pickTarg = false;
-        } else if ($scope.pickTarg && ap.usr == $scope.user) {
-            sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 })
+        } else {
+            if ($scope.pickTarg && ap.usr == $scope.user) {
+                if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
+                    sandalchest.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 })
+                    return false;
+                }
+                var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
+                if(srcNum<2){
+                    sandalchest.alert('Uh Oh!','You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
+                    return false;
+                }
+                sandalchest.dialog({
+                    buttons: [{
+                        text: 'Move em!',
+                        close: true,
+                        click: function() {
+                            console.log('wanna move',{ num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
+                            socket.emit('moveArmies', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
+                            $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
+                            $scope.srcCell = null;
+                            $scope.targCell = null;
+                            ap.status = 0;
+                            $scope.pickTarg = false;
+                        }
+                    }, {
+                        text: 'Cancel',
+                        close: true,
+                        click: function() {
+                            $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
+                            $scope.srcCell = null;
+                            $scope.targCell = null;
+                            ap.status = 0;
+                            $scope.pickTarg = false;
+                        }
+                    }],
+                    speed: 250
+                }, 'Army Movement', `How many armies do you want to move from ${$scope.map.diagram.cells[$scope.srcCell].country} to ${ap.country}? You can move a maximum of ${srcNum} armies. <br/> <input type="number" id="reqNumMove" value='1' min='1' max='${srcNum}'>`);
+
+            } else if ($scope.pickTarg && ap.usr != $scope.user) {
+                sandalchest.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`)
+            }
         }
-    };
+    }
     $scope.joinGame = function(g) {
         fightFact.joinGame(g, $scope.user).then(function(r) {
             console.log('JOINED GAME:', r);
             socket.emit('getGames', { x: true })
         });
     };
-
+    $scope.switchPlayMode = function(){
+        sandalchest.confirm('Switch Modes','Are you sure you wanna stop moving armies and begin the attack phase?',function(res){
+            if(res && res!=null){
+                $scope.moveArmies=false;
+                $scope.$digest();
+            }
+        })
+    }
     $scope.pickMap = function(m, n, old) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -278,7 +331,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
             console.log(res)
             if (res && res != null) {
-                fightFact.nextTurn($scope.map,$scope.gameId, $scope.user);
+                fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
         })
     }

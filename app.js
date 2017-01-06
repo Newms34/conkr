@@ -44,8 +44,8 @@ io.on('connection', function(socket) {
     //default socket stuff for just message sending.
     //this does not get put in separate rooms.
     socket.on('sendMsg', function(m) {
-        if(m.local && m.local!=null){
-            io.sockets.in(socket.room).emit('newMsg',m)
+        if (m.local && m.local != null) {
+            io.sockets.in(socket.room).emit('newMsg', m)
         }
         io.emit('newMsg', m);
     });
@@ -55,16 +55,28 @@ io.on('connection', function(socket) {
         mongoose.model('Game').findOne({ gameId: d.gameId }, function(err, doc) {
             if (err) return;
             if (!doc) return;
-
+            //NEED TO SAVE GAME!
             if (!actualUsr || actualUsr != claimedUsr) {
                 //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
                 console.log(actualUsr, 'is not', claimedUsr);
+                io.sockets.in(d.gameId).emit('falseUser', { usr: d.usr })
                 return;
             } else if (doc.players[doc.turn] !== d.user) {
                 io.sockets.in(d.gameId).emit('wrongTurn', { usr: d.user }); //user tried to take turn when it wasnt their turn.
             } else {
-                console.log('socket',socket)
-                var cellChanges = sockmod.doFight(d.ca,d.cd,d.ra,d.rd); //ch-ch-ch-changes!
+                console.log('socket', socket)
+                var cellChanges = sockmod.doFight(d.ca, d.cd, d.ra, d.rd); //ch-ch-ch-changes!
+                doc.armies.forEach((a)=>{
+                    if(a.country == cellChanges.ca.country){
+                        a.num = cellChanges.ca.num;
+                    }else if(a.country == cellChanges.cd.country){
+                        a.num = cellChanges.cd.num;
+                        if(cellChanges.status){
+                            a.user = cellChanges.ca.user;
+                        }
+                    }
+                })
+                doc.save();
                 io.sockets.in(d.gameId).emit('rcvDoFight', cellChanges);
             }
         });
@@ -108,29 +120,67 @@ io.on('connection', function(socket) {
         var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
             claimedUsr = d.usr;
         mongoose.model('Game').findOne({ gameId: d.game }, function(err, doc) {
-            if (err){
-                console.log('game find err',err)
+            if (err) {
+                console.log('game find err', err)
                 return;
             }
-            if (!doc){
-                console.log('game not found',doc)
+            if (!doc) {
+                console.log('game not found', doc)
                 return;
             }
             if (!actualUsr || actualUsr != claimedUsr) {
                 //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
                 console.log(actualUsr, 'is not', claimedUsr);
+                io.sockets.in(d.game).emit('falseUser', { usr: d.usr })
                 return;
             } else if (doc.players[doc.turn] !== d.usr) {
                 io.sockets.in(d.game).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
             } else {
                 console.log('Switching turn!')
                 doc.turn++;
-                if (doc.turn>=doc.players.length) doc.turn=0;
+                if (doc.turn >= doc.players.length) doc.turn = 0;
                 //we need to add armies to this new player.
-                doc.armies = sockmod.addArmies(d.conts, doc.armies,doc.players[doc.turn]);
+
+                doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
                 doc.save();
-                io.sockets.in(d.game).emit('turnSwitch',{id:d.game,usr:doc.players[doc.turn]})
-                console.log('Turn for game',d.game,'successfully switched to',doc.players[doc.turn])
+                io.sockets.in(d.game).emit('turnSwitch', { id: d.game, usr: doc.players[doc.turn] })
+                console.log('Turn for game', d.game, 'successfully switched to', doc.players[doc.turn])
+            }
+        });
+    })
+    socket.on('moveArmies', function(d) {
+        var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
+            claimedUsr = d.usr;
+        mongoose.model('Game').findOne({ gameId: d.game }, function(err, doc) {
+            if (err) {
+                console.log('Army move err!', err)
+                return;
+            }
+            if (!doc) {
+                console.log('game not found', doc)
+                return;
+            }
+            if (!actualUsr || actualUsr != claimedUsr) {
+                //basically, we're confirming that the user is who they say they are with socket's equivalent of req.session
+                console.log(actualUsr, 'is not', claimedUsr);
+                io.sockets.in(d.game).emit('falseUser', { usr: d.usr })
+                return;
+            } else if (doc.players[doc.turn] !== d.usr) {
+                io.sockets.in(d.game).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
+            } else {
+                console.log('Moving armies!\nBefore:',doc.armies)
+                doc.armies.forEach((a) => {
+                    if (a.country == d.src.country) {
+                        console.log('From',a)
+                        a.num -= d.num;
+                    } else if (a.country == d.targ.country) {
+                        console.log('To',a)
+                        a.num += d.num;
+                    }
+                });
+                // console.log('\n------\nAnd after:',doc.armies)
+                doc.save();
+                io.sockets.in(d.game).emit('updateArmies', doc);
             }
         });
     })
