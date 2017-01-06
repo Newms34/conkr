@@ -129,9 +129,12 @@ canvas,
 
 .tab-inact {
     background: #23527b!important;
+    color:#aaa;
     cursor: pointer;
+    transition-duration:.5s;
     &:hover {
         background: #488ecb!important;
+        color:#fff;
     }
 }
 

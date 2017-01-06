@@ -42,15 +42,14 @@ Finally, once the game's started, it cycles thru each player in sequence. During
 The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.
 
 ##Technical Stuff
-Conkr uses (or *will* use) the following technologies:
+Conkr uses the following technologies:
 
  - AngularJS for front-end responsiveness.
  - NodeJS and ExpressJS on the back-end for the server.
  - Websockets, via socket.io, to allow quick communication between the server, phones, and game. They also allow me to send information *from* the server *to* the client without prompting, which is something boring old AJAX doesn't really do. 
- - HTML5's Canvas.
+ - HTML5's Canvas. I'm (probably stupidly) storing the maps' actual appearance as dataurls in MongoDB, which allows me to then pull up the map without having to explicitly recalculate it each time.
  - The map &#127758; itself is generated with something called a [Voronoi Diagram](https://en.wikipedia.org/wiki/Voronoi_diagram). I'm not completely sure how this works, but suffice it to say it produces nice, random shapes. There's some arcane math things happening in there somewhere.
- - Socket.io for quick chat communication.
- - MongoDB for storing currently in-progress games.
+ - MongoDB for storing currently all the things! That's maps &#127758;, games, and people (or at least their accounts. People are too much data).
 
 ##Credits
  - Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.
