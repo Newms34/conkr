@@ -25,18 +25,21 @@ After you've created an account, you'll be placed in the main game screen. There
  - Load an existing map &#127758;
  - Join a game
 
-Note that, if you're already in a game when you log in, you will not be given these options (though you can still see the options for map &#127758; creation by clicking 'menu' at the top right).
+Note that, if you're already in a game when you log in, you will not be given these options.
 
-If you've created a game, it will remain 'open', allowing other players to join it, until you close it. For now, as long as a game's open, anyone can join. Eventually, I'll probably give you an option to make private, password-protected games. 
+If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". For now, as long as a game's open, anyone can join. Eventually, I'll probably give you an option to make private, password-protected games. 
 
 Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if *you* are the creator of the game. 
 
 Finally, once the game's started, it cycles thru each player in sequence. During your turn, you:
 
- 1. Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you *cannot* abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. Also, right now you can only move to countries that share a border with yours. I plan to make cross-ocean travel possible later.
+ 1. Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you *cannot* abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. 
  2. You'll then begin the &#9876;Attack phase by clicking the green button at bottom.
  3. The &#9876;Attack phase works similarly to the movement phase, except that your target must be an enemy, adjacent country. As in the movement phase, you *must* have at least 2 armies in the attacking country to perform an attack.
- 4. If you attack a country and kill off the last enemy army, you counquer that country! One of your armies moves in to take up residence and piss off the locals.
+ 4. If you attack a country and kill off the last enemy army, you conquer that country! One of your armies moves in to take up residence and piss off the locals.
+ 5. The end of the game occurs under two circumstances, relative to each player:
+  - If you conquer all countries, congrats, you win! And... nothing happens. So far. Eventually, each win will give a player a score point, and you can brag to your friends about how much you pwned them.
+  - If the last of your countries is conquered, you lose! You'll still be able to watch (and say rude things about) your enemies, but you can no longer influence the battle. Except, you know, by like psychological warfare.
 
 ##Server
 The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.
