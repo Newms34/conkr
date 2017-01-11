@@ -2,7 +2,7 @@
     position:fixed;
     left:2px;
     bottom:5px;
-    z-index:100;
+    z-index:500;
 }
 .chat-win{
     position:fixed;
@@ -12,7 +12,7 @@
     height:250px;
     resize:both;
     background:rgba(0,0,0,.5);
-    z-index:50;
+    z-index:450;
     border-top-left-radius:5px;
     border-top-right-radius:5px;
 }

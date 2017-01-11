@@ -129,7 +129,7 @@ canvas,
 
 .tab-inact {
     background: #23527b!important;
-    color:#aaa;
+    color:#aaa!important;
     cursor: pointer;
     transition-duration:.5s;
     &:hover {
@@ -146,6 +146,7 @@ canvas,
     background: #337ab7;
     display: inline-block;
     margin: 0;
+    color:#fff;
     float: left;
 }
 
@@ -167,7 +168,7 @@ canvas,
 }
 
 #main-bod {
-    background: url("../img/chargebg.jpg");
+    // background: url("../img/chargebg.jpg");
     background-size: cover;
     background-attachment: fixed;
 }
@@ -213,6 +214,7 @@ canvas,
 }
 
 .men-butt {
+    /*Heh...*/
     position: fixed;
     top: 5px;
     right: 5px;
@@ -224,4 +226,17 @@ canvas,
     top: 45px;
     right: 5px;
     z-index: 100;
+}
+
+#ded{
+    /*player ded, q.q*/
+    position:fixed;
+    width:100vw;
+    height:100vh;
+    background:rgba(0,0,0,.3);
+    z-index:400;
+    transform: translateZ(50px);
+}
+.fake-btn{
+    pointer-events:none;
 }

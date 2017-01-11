@@ -71,7 +71,7 @@ var app = angular.module('conkr', ['ngSanitize']).controller('chatController', f
     	}
     });
     $scope.switchTabs = function(dir){
-        console.log($scope.$parent.gameId)
+        console.log($scope.$parent.gameId);
         $scope.chatLocal = !!$scope.$parent.gameId && parseInt(dir);
-    }
+    };
 });

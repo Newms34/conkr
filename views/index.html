@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 
-<body id='main-bod' ng-app='conkr' ng-controller='conkrcon' ng-cloak>
+<body id='main-bod' style='background:url({{isDead?"../img/loss.jpg":"../img/chargebg.jpg"}})' ng-app='conkr' ng-controller='conkrcon' ng-cloak>
     <button class='btn btn-success chat-butt' ng-click='showChat = !showChat'>&#128172;</button>
     <button class='btn btn-primary men-butt' ng-click='gameMenu=!gameMenu' ng-disabled='!map'>menu</button>
     <button class='btn btn-danger log-butt' ng-click='logout()'>logout</button>
@@ -25,74 +25,84 @@
                 <h3>My Games</h3></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
-            <div class='col-md-12 no-room'>
-                <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map</div>
-                <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map</div>
-            </div>
-            <hr>
-            <div ng-show='newNew' class='panel panel-info panel-body'>
-                <div class='row form-group'>
-                    <div class='col-md-3'>
-                        <label for='numCouns'>Average number of countries: </label>
+            <div ng-show='canJoin'>
+            TEST STUFF
+                <div class='col-md-12'>
+                    <div class='alert alert-danger'>
+                        <h4>Hey! You gotta finish the game you're in before you start a new one!</h4>
                     </div>
-                    <div class='col-md-7'>
-                        <input type="number" name='numCouns' ng-model='numCountries'>
-                    </div>
-                    <div class='col-md-2'>
-                        <button class='btn btn-sm btn-danger' ng-click='avgCounInfo()'>?</button>
-                    </div>
-                </div>
-                <hr/>
-                <div class='row form-group'>
-                    <div class='col-md-3'>
-                        <label for='smoothing'>Smoothing:</label>
-                    </div>
-                    <div class='col-md-7'>
-                        <input type="range" min=0 max=100 name='smoothing' ng-model='smoothing'>
-                    </div>
-                    <div class='col-md-2'>
-                        <button class='btn btn-sm btn-danger' ng-click='smoothInfo()'>?</button>
-                    </div>
-                </div>
-                <hr/>
-                <div class='row form-group col-md-4 col-md-offset-4'>
-                    <button ng-click='newMap()' class='btn btn-primary'>Do it!</button>
                 </div>
             </div>
-            <div ng-show='!newNew' class='panel panel-info panel-body'>
-                <table class='table table-striped load-map-table'>
-                    <thead>
-                        <tr class='info'>
-                            <th>Map Id</th>
-                            <th>Countries</th>
-                            <th>Number of Countries</th>
-                            <th>&nbsp;</th>
-                            <th>&nbsp;</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td ng-show='potentialMaps.length===0' class='alert alert-danger'>
-                                <h4>No maps yet!</h4>
-                            </td>
-                        </tr>
-                        <tr ng-repeat='m in potentialMaps'>
-                            <td>{{m.id}}</td>
-                            <td>{{m.mapData.countryNames.join(', ')}}</td>
-                            <td>{{m.mapData.countryNames.length}}</td>
-                            <td>
-                                <button class='btn btn-primary' ng-click='deleteMap(m.id)' ng-disabled='m.hasGames' title="Delete this map.">Delete</button>
-                            </td>
-                            <td>
-                                <button class='btn btn-primary' ng-click='pickMap(m.mapData,m.id)'>Load</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div ng-show='!canJoin'>
+                <div class='col-md-12 no-room'>
+                    <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map</div>
+                    <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map</div>
+                </div>
+                <hr>
+                <div ng-show='newNew' class='panel panel-info panel-body'>
+                    <div class='row form-group'>
+                        <div class='col-md-3'>
+                            <label for='numCouns'>Average number of countries: </label>
+                        </div>
+                        <div class='col-md-7'>
+                            <input type="number" name='numCouns' ng-model='numCountries'>
+                        </div>
+                        <div class='col-md-2'>
+                            <button class='btn btn-sm btn-danger' ng-click='avgCounInfo()'>?</button>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class='row form-group'>
+                        <div class='col-md-3'>
+                            <label for='smoothing'>Smoothing:</label>
+                        </div>
+                        <div class='col-md-7'>
+                            <input type="range" min=0 max=100 name='smoothing' ng-model='smoothing'>
+                        </div>
+                        <div class='col-md-2'>
+                            <button class='btn btn-sm btn-danger' ng-click='smoothInfo()'>?</button>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class='row form-group col-md-4 col-md-offset-4'>
+                        <button ng-click='newMap()' class='btn btn-primary'>Do it!</button>
+                    </div>
+                </div>
+                <div ng-show='!newNew' class='panel panel-info panel-body'>
+                    <table class='table table-striped load-map-table'>
+                        <thead>
+                            <tr class='info'>
+                                <th>Map Id</th>
+                                <th>Countries</th>
+                                <th>Number of Countries</th>
+                                <th>&nbsp;</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td ng-show='potentialMaps.length===0' class='alert alert-danger'>
+                                    <h4>No maps yet!</h4>
+                                </td>
+                            </tr>
+                            <tr ng-repeat='m in potentialMaps'>
+                                <td>{{m.id}}</td>
+                                <td>{{m.mapData.countryNames.join(', ')}}</td>
+                                <td>{{m.mapData.countryNames.length}}</td>
+                                <td>
+                                    <button class='btn btn-primary' ng-click='deleteMap(m.id)' ng-disabled='m.hasGames' title="Delete this map.">Delete</button>
+                                </td>
+                                <td>
+                                    <button class='btn btn-primary' ng-click='pickMap(m.mapData,m.id)'>Load</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==1'>
-            <h4>Load a game:</h4>
+            <h4>Load/Join a game:</h4>
             <table class='table table-striped' ng-show='canJoin'>
                 <thead>
                     <tr>
@@ -110,7 +120,8 @@
                         <td>{{p.mapId}}</td>
                         <td>{{p.players.join(', ')}}</td>
                         <td><span ng-if='p.inPlay'>no</span><span ng-if='!p.inPlay'>yes</span></td>
-                        <td><input type="password" id='gamePwdCand' ng-model='p.gamePwdCand' ng-show='p.protected'/><span ng-show='!p.protected'>Public game</span></td>
+                        <td>
+                            <input type="password" id='gamePwdCand' ng-model='p.gamePwdCand' ng-show='p.protected' /><span ng-show='!p.protected'>Public game</span></td>
                         <td>
                             <button class='btn btn-success' ng-disabled='p.inPlay || p.players.indexOf(user)>-1' ng-click='joinGame(p.gameId,p.gamePwdCand)'>Join Game</button>
                         </td>
@@ -118,11 +129,18 @@
                 </tbody>
             </table>
             <div class='alert alert-danger' ng-show='!canJoin'>
-                <h4>Hey! You can't join a game while you're already in one!</h4></div>
+                <h4>Hey! You can't join a game while you're already in one!</h4>
+            </div>
+            <div class='alert alert-info' ng-show='!allGames.length'>
+                <h4>No one has created any games yet.<hr/>Click <button class='btn btn-primary fake-btn'>New Game</button> up above to create one!</h4>
+            </div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==2'>
             <h4>Games I've Created:</h4>
-            <table class='table table-striped'>
+            <div class='alert alert-info' ng-show='!usrGames().length;'>
+                <h4>You haven't created any games yet!<hr/>Click <button class='btn btn-primary fake-btn'>New Game</button> up above to create one!</h4>
+            </div>
+            <table class='table table-striped' ng-show='userGames().length'>
                 <thead>
                     <tr>
                         <th>Game ID</th>
@@ -153,11 +171,13 @@
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
-        <div class='country-army' ng-class = "{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span><br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
+        <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
+            <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
-    <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||!moveArmies'>&#9876;Attack!</button>
-    <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!"><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
-    <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-click='nextTurn();' >End Turn</button>
+    <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||!moveArmies||!btns'>&#9876;Attack!</button>
+    <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!"><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
+    <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-show='btns' ng-click='nextTurn();'>End Turn</button>
+    <div id='ded' ng-show='isDead'></div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -165,7 +185,7 @@
     <script src="/angular/angular.min.js"></script>
     <script src="/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/socket.io-client/dist/socket.io.min.js"></script>
-    <script src="./js/all.min.js"></script>
+    <script src="./js/all.js"></script>
 </body>
 
 </html>

@@ -13,7 +13,7 @@ app.factory('mapFact', function($rootScope, $http) {
             });
         },
         loadOneMap: function(id) {
-            console.log('attempting to get map', id)
+            console.log('attempting to get map', id);
             return $http.get('/map/loadMap/' + id).then(function(r) {
                 return r;
             });
@@ -22,10 +22,9 @@ app.factory('mapFact', function($rootScope, $http) {
             //OLD VERSION of isNeighbor, only returns true if start and destination are immediate neigbors
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
-                throw new Error('cells not found!')
-                return;
+                throw new Error('cells not found!');
             }
-            console.log('Cells', c, 'source cell', c[s], 'target', c[d])
+            console.log('Cells', c, 'source cell', c[s], 'target', c[d]);
             for (var i = 0; i < c[s].halfedges.length; i++) {
                 if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
                     continue;
@@ -50,8 +49,7 @@ app.factory('mapFact', function($rootScope, $http) {
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
                 //error reading cells, not found
-                throw new Error('cells not found!')
-                return;
+                throw new Error('cells not found!');
             }
             //all stuff should 'exist' now. We can continue
             var startSite = {
@@ -80,7 +78,7 @@ app.factory('mapFact', function($rootScope, $http) {
                 if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
                     return true;
                 } else {
-                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y))
+                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y));
                 }
             }
             //finished testing immediate neighbors. Now test ocean neighbors
@@ -113,7 +111,7 @@ app.factory('mapFact', function($rootScope, $http) {
         delMap: function(id) {
             return $http.delete('/map/del/' + id, function(r) {
                 return r;
-            })
+            });
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
@@ -374,7 +372,7 @@ app.factory('mapFact', function($rootScope, $http) {
                             // // gradArr[gradArr.length - 1].addColorStop(0, edgeGradLine.start);
                             // // gradArr[gradArr.length - 1].addColorStop(1, edgeGradLine.end);
                             // ctx.strokeStyle = gradArr[gradArr.length - 1];
-                            ctx.strokeStyle = '#003259'
+                            ctx.strokeStyle = '#003259';
                             v = edge.va;
                             ctx.moveTo(v.x, v.y);
                             v = edge.vb;
@@ -522,7 +520,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         return;
                     }
                     var ctx = this.canvas.getContext('2d');
-                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx)
+                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx);
                     ctx.globalAlpha = 1;
                     // edges
                     ctx.beginPath();
@@ -538,7 +536,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     // ctx.fillStyle = '#0c0';
                     // ctx.strokeStyle = '#9c9';
                     ctx.fillStyle = this.landPattern;
-                    ctx.strokeStyle = '#AB9B69'
+                    ctx.strokeStyle = '#AB9B69';
                     ctx.fill();
                     ctx.stroke();
                     // site
@@ -552,7 +550,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     var landImg = new Image(),
                         me = this,
                         ctx = this.canvas.getContext("2d");
-                    landImg.src = '../img/grass.jpg'
+                    landImg.src = '../img/grass.jpg';
                     landImg.onload = function() {
                         me.landPattern = ctx.createPattern(this, "repeat");
                         for (var n = 0; n < me.diagram.cells.length; n++) {
@@ -561,7 +559,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         me.makeCellNames();
                         me.getCellNames();
                         me.doCellSites();
-                    }
+                    };
                 },
                 getCellByName: function(n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
@@ -581,7 +579,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         this.findNeighbors(i, true);
                     }
-                    console.log(this.allConts)
+                    console.log(this.allConts);
                     return this.allConts;
                 },
                 doneCouns: [], //if a country's in here, don't re-add it.

@@ -33,7 +33,7 @@ app.factory('miscFact', function($rootScope, $http) {
         checkInGame:function(u){
             return $http.get('/user/checkInGame/'+u).then(function(r){
                 return r;
-            })
+            });
         }
     };
 });

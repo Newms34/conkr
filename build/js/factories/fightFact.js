@@ -8,7 +8,7 @@ app.factory('fightFact', function($rootScope, $http) {
             }
         }
         return false;
-    }
+    };
     return {
         getMaxArmy: function(c, m) {
             var attackPenalty = m ? 1 : 0;
@@ -17,9 +17,9 @@ app.factory('fightFact', function($rootScope, $http) {
         },
         delGame: function(id) {
             return $http.get('/game/del/'+id).then(function(r) {
-                console.log('factory back from back end game del')
+                console.log('factory back from back end game del');
                 return r;
-            })
+            });
         },
         doFight: function(usr, ca, cd, ra, rd, id) {
             socket.emit('sendDoFight', {
@@ -32,7 +32,7 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         nextTurn: function(map, game, usr) {
-            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr })
+            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr });
         },
         newGame: function(n, p, pwd) {
             return $http.post('/game/new', { id: n, player: p, pwd: pwd }).then(function(p) {

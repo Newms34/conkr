@@ -2190,11 +2190,11 @@ var app = angular.module('conkr', ['ngSanitize']).controller('chatController', f
     	}
     });
     $scope.switchTabs = function(dir){
-        console.log($scope.$parent.gameId)
+        console.log($scope.$parent.gameId);
         $scope.chatLocal = !!$scope.$parent.gameId && parseInt(dir);
-    }
+    };
 });
-app.controller('loginCont', function($scope, miscFact,$timeout) {
+app.controller('loginCont', function($scope, miscFact, $timeout) {
     $scope.logMode = true;
     $scope.pwdStren = 0;
     $scope.passGud = {
@@ -2215,7 +2215,7 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
     };
     $scope.getAbtHeight = function() {
         $timeout(function() {
-            document.querySelector('.abt-bg').style.height = $('#abt-stuff').height()/0.9+'px';
+            document.querySelector('.abt-bg').style.height = $('#abt-stuff').height() / 0.9 + 'px';
         }, 0, false);
 
     };
@@ -2279,23 +2279,23 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
         }
         $scope.pwdStren = str;
     };
-  
+
     $scope.explPwd = function() {
-        sandalchest.alert('Password Strength',`Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
+        sandalchest.alert('Password Strength', `Password Criteria:<ul class='pwd-list'><li><span id='pwd-len-btn' style='background:hsl(${120*($scope.passGud.len)/16},100%,40%);'></span> ${!$scope.passGud.len?'Less than 4':'At least '+$scope.passGud.len} characters</li><li>${$scope.passGud.caps?'&#10003;':'&#10007;'} Contains a capital letter</li><li>${$scope.passGud.lower?'&#10003;':'&#10007;'} Contains a lowercase letter</li><li>${$scope.passGud.num?'&#10003;':'&#10007;'} Contains a number</li><li>${$scope.passGud.symb?'&#10003;':'&#10007;'} Contains a non-alphanumeric symbol (i.e., '@', or '#')</li><li>${!$scope.passGud.badWrd?'&#10003;':'&#10007;'} Does <i>not</i> contain any common sequences, like 'abc' or '123' or 'password'.</li><li>${!$scope.passGud.sameUn?'&#10003;':'&#10007;'} Is <i>not</i> the same as your username.</li></ul>`);
     };
     $scope.newUsr = function() {
         miscFact.regNewUsr($scope.regUser, $scope.regPwdOne).then(function(r) {
             if (r.data == 'DUPLICATE') {
-                sandalchest.alert('Registration Error','Uh oh! Something went horribly wrong!');
+                sandalchest.alert('Registration Error', 'Uh oh! Something went horribly wrong!');
             } else {
                 //auto-login;
                 miscFact.login($scope.regUser, $scope.regPwdOne).then(function(d) {
                     if (d.data == 'no') {
-                        sandalchest.alert('Registration Error','There was an error while checking your username/password. Please try again.');
+                        sandalchest.alert('Registration Error', 'There was an error while checking your username/password. Please try again.', { speed: 250 });
                     } else {
-                        sandalchest.alert('Registration Successful','Welcome!', function(p) {
+                        sandalchest.alert('Registration Successful', 'Welcome!', function(p) {
                             window.location.assign('../');
-                        });
+                        }, { speed: 250 });
                     }
                 });
             }
@@ -2304,11 +2304,11 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
     $scope.log = function() {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
-                sandalchest.alert('Login error','Please check your username and/or password<hr/><i>Note:</i> While Conkr is under development, data may be deleted at any time!');
+                sandalchest.alert('Login error', 'Please check your username and/or password<hr/><i>Note:</i> While Conkr is under development, data may be deleted at any time!', { speed: 250 });
             } else {
-                sandalchest.alert('Login Successful','Welcome back!', function(p) {
+                sandalchest.alert('Login Successful', 'Welcome back!', function(p) {
                     window.location.assign('../');
-                });
+                }, { speed: 250 });
             }
         });
     };
@@ -2317,20 +2317,29 @@ app.controller('loginCont', function($scope, miscFact,$timeout) {
 var socket = io(),
     socketRoom = null;
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
+    $scope.isDead=false;
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
         miscFact.checkInGame(r.data.name).then(function(m) {
-            console.log('PLAYER IS IN GAME:', m)
             if (m.data.game) {
                 //load map this player's in.
                 $scope.reloadGame(m.data.game);
+                $scope.gameSettingsPanel=2;
+                $scope.isDead = !m.data.alive;
                 $scope.canJoin = false; //player cannot join a game while they're in one
             }
-        })
+        });
     });
+    $scope.btns=true;
+    $scope.allGames=[];
+    $scope.usrGames = function(){
+        return $scope.allGames.filter((g)=>{
+            return g.creator==$scope.user;
+        });
+    }
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
@@ -2343,15 +2352,14 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         });
         //next, set correct game id
         $scope.gameId = g.gameId;
-        console.log('GAME', g)
+        console.log('GAME', g);
             //finally, map stuff!
         mapFact.loadOneMap(g.mapId).then(function(m) {
-            console.log('result of attempt to get 1 map', m)
+            console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
             $scope.gameReady = true;
-        })
-
-    }
+        });
+    };
     $scope.logout = function() {
         miscFact.logout().then(function() {
             window.location.assign('./login');
@@ -2385,10 +2393,10 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.map.init();
         $scope.gameMenu = false;
         sandalchest.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
-            console.log('R FROM MAP CONFIRM', r)
+            console.log('R FROM MAP CONFIRM', r);
             if (r) {
                 $scope.map.save().then(function(sr) {
-                    console.log('ASKING IF NEW GAME')
+                    console.log('ASKING IF NEW GAME');
                     sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
                         buttons: [{
                             text: 'Create Game',
@@ -2400,7 +2408,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                                     $scope.gameId = g.data.id;
                                     socket.emit('getGamePieces', { id: g.data.id });
                                     console.log('Done! Game made!');
-                                    socket.emit('getGames', { x: true })
+                                    $scope.gameSettingsPanel=2;
+                                    socket.emit('getGames', { x: true });
                                 });
                             }
                         }, {
@@ -2424,21 +2433,20 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.pwdExpl = function() {
         sandalchest.alert('Protected Games', 'If you include a password, only players who have that password can join. Leave this blank if you want a public game!', {
             rotation: -5
-        })
-    }
-    socket.emit('getGames', { x: true })
+        });
+    };
+    socket.emit('getGames', { x: true });
     $scope.loadMaps = function() {
         //load all OLD maps for a NEW game!
         mapFact.loadMaps().then(function(r) {
             console.log('MAPS', r);
             $scope.potentialMaps = r.data;
-            $scope.$digest();
         });
     };
     socket.on('replaceMap', function() {
         //force reload of maps, since one got updated or deleted or something.
         $scope.loadMaps();
-    })
+    });
     socket.on('allGames', function(g) {
         //this socket cmd basically refreshes the list of games.
         //now we check each game, and see if the old game we were in still exists. 
@@ -2447,38 +2455,43 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (gi.gameId==$scope.gameId){
                 $scope.canJoin=false;
             }
-        })
+        });
         if($scope.canJoin) $scope.gameId=null;
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
         $scope.loadMaps();
         $scope.$digest();
     });
+    socket.on('deadPlayer',function(p){
+        if(p.player===$scope.player) {
+            sandalchest.alert('Dead',`Sorry, ${$scope.user}, you've died!`,function(e){
+                $scope.btns=false;
+            });
+        }
+    });
     $scope.deleteMap = function(id) {
         sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
                 mapFact.delMap(id).then(function(r){
-                    if(r.data='logErr') return;
-                    
+                    if(r.data=='logErr') return;
                 });
             }
-        })
+        });
     };
     $scope.delGame = function(id) {
         sandalchest.confirm('Delete Game', 'Are you sure you wanna delete this game? This isn\'t reversable!', function(delConf) {
             if (delConf) {
                 fightFact.delGame(id).then(function(r) {
-                    console.log('back from delGame thing')
+                    console.log('back from delGame thing');
                     if (r.data == 'wrongUser') {
-                        sandalchest.alert('Hey! You can\'t delete that game!')
+                        sandalchest.alert('Hey! You can\'t delete that game!');
                     } else {
-                        console.log('REMOVED GAME! REFRESHING DATA')
-                        socket.emit('getGames', { x: true })
-                        
+                        console.log('REMOVED GAME! REFRESHING DATA');
+                        socket.emit('getGames', { x: true });
                     }
                 });
             }
-        })
+        });
     };
     $scope.pickTarg = false;
     $scope.moveArmies = true;
@@ -2493,7 +2506,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true;
         } else if (!$scope.pickTarg && ap.usr == $scope.user) {
             //if we're not in target pick mode and this piece's user is us.
-            $scope.armyPieces.forEach((p) => { p.status = 0 });
+            $scope.armyPieces.forEach((p) => { 
+                p.status = 0; 
+            });
             //picking source cell
             $scope.srcCell = $scope.map.getCellNumByName(ap.country);
             ap.status = 1;
@@ -2503,19 +2518,19 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         } else if (!$scope.moveArmies) {
             if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                    sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 })
+                    sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 });
                     return false;
                 }
                 $scope.targCell = $scope.map.getCellNumByName(ap.country);
                 ap.status = 2;
                 $scope.pickTarg = false;
             } else if ($scope.pickTarg && ap.usr == $scope.user) {
-                sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 })
+                sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 });
             }
         } else {
             if ($scope.pickTarg && ap.usr == $scope.user) {
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                    sandalchest.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 })
+                    sandalchest.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 });
                     return false;
                 }
                 var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
@@ -2528,7 +2543,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         text: 'Move em!',
                         close: true,
                         click: function() {
-                            console.log('wanna move', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId })
+                            console.log('wanna move', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
                             socket.emit('moveArmies', { num: parseInt(document.querySelector('#reqNumMove').value), usr: $scope.user, src: $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country), targ: ap, game: $scope.gameId });
                             $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).status = 0;
                             $scope.srcCell = null;
@@ -2551,37 +2566,37 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 }, 'Army Movement', `How many armies do you want to move from ${$scope.map.diagram.cells[$scope.srcCell].country} to ${ap.country}? You can move a maximum of ${srcNum} armies. <br/> <input type="number" id="reqNumMove" value='1' min='1' max='${srcNum}'>`);
 
             } else if ($scope.pickTarg && ap.usr != $scope.user) {
-                sandalchest.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`)
+                sandalchest.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`);
             }
         }
-    }
+    };
     $scope.joinGame = function(g, pwd) {
         fightFact.joinGame(g, $scope.user, pwd).then(function(r) {
             if (r.data == 'gameLogErr') {
-                sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!')
+                sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!');
                 return false;
             }
             console.log('JOINED GAME:', r);
-            socket.emit('getGames', { x: true })
+            socket.emit('getGames', { x: true });
         });
     };
     $scope.neighborTest = function(s, d) {
         console.log('tested cells are neighbors: ', mapFact.isNeighbor($scope.map.diagram.cells, s, d));
-    }
+    };
     $scope.switchPlayMode = function() {
         sandalchest.confirm('Switch Modes', 'Are you sure you wanna stop moving armies and begin the attack phase?', function(res) {
-            if (res && res != null) {
+            if (res && res !== null) {
                 $scope.moveArmies = false;
                 $scope.$digest();
             }
-        })
-    }
+        });
+    };
     $scope.pickMap = function(m, n, old) {
         //load an OLD map for a NEW game
         //map is a new map created just now
         //OR, if 'old' is true, reload an old map and use for old game
         //(i.e., rejoin player to game)
-        console.log('pikmap data', m, n, old)
+        console.log('pikmap data', m, n, old);
         $scope.map = mapFact.GetVoronoi(m.bbox.yb, m.bbox.xr, m.countryNames.length, 20);
         for (var p in m) {
             $scope.map[p] = m[p];
@@ -2602,7 +2617,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                             $scope.gameId = g.data.id;
                             socket.emit('getGamePieces', { id: g.data.id });
                             console.log('Done! Game made!');
-                            socket.emit('getGames', { x: true })
+                            $scope.gameSettingsPanel=2;
+                            socket.emit('getGames', { x: true });
                         });
                         $scope.armyPieces = [];
                     }
@@ -2614,25 +2630,25 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     }
                 }],
                 speed: 250
-            })
+            });
         } else {
-            socket.emit('putInRoom', { id: $scope.gameId })
+            socket.emit('putInRoom', { id: $scope.gameId });
             $scope.armyPieces = [];
         }
     };
     socket.on('updateArmies', function(d) {
-        console.log('UPDATE ARMIES', d)
+        console.log('UPDATE ARMIES', d);
         d.players.forEach((p, i) => {
             $scope.currGamePlayers[p] = d.avas[i];
-        })
+        });
         $scope.armyPieces = fightFact.placeArmies($scope.map, d.armies, $scope.currGamePlayers);
         $scope.$digest();
-    })
+    });
     socket.on('gameReady', function(d) {
         $scope.gameIsReady = true;
-        socket.emit('getGamePieces', d)
+        socket.emit('getGamePieces', d);
         console.log('AT GAMEREADY, D IS', d);
-    })
+    });
     $scope.toggleNewMode = function(n) {
         $scope.newNew = n > 0;
         if (!$scope.newNew) {
@@ -2643,17 +2659,17 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         sandalchest.confirm(`Start Game ${id}`, `Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`, function(r) {
             if (r) {
                 fightFact.startGame(id).then(function(r) {
-                    socket.emit('gameStarted', r)
+                    socket.emit('gameStarted', r);
                 });
             }
         });
     };
     socket.on('putInGame', (c) => {
-        console.log('PUT IN GAME', c)
+        console.log('PUT IN GAME', c);
         if (c.data.players.indexOf($scope.user) > -1) {
-            socket.emit('putInRoom', c.data)
+            socket.emit('putInRoom', c.data);
         }
-    })
+    });
     $scope.avgCounInfo = function() {
         sandalchest.alert('Country Number', 'Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
     };
@@ -2672,9 +2688,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         }
         if (rd > ra) ra = rd; //defender cannot defend with more armies than attacker attacks with
         if (mapFact.isNeighbor($scope.map.diagram.cells, s, d)) {
-            fightFact.doFight($scope.user, $scope.getAPByName($scope.map.diagram.cells[s].name), $scope.getAPByName($scope.map.diagram.cells[d].name), ra, rd, $scope.gameId)
+            fightFact.doFight($scope.user, $scope.getAPByName($scope.map.diagram.cells[s].name), $scope.getAPByName($scope.map.diagram.cells[d].name), ra, rd, $scope.gameId);
         }
-    }
+    };
     $scope.getAPByName = function(name) {
         for (var i = 0; i < $scope.armyPieces.length; i++) {
             if ($scope.armyPieces[i].country == name) {
@@ -2682,23 +2698,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         }
         return false;
-    }
+    };
     $scope.startAttack = function() {
-        console.log('SOURCE CELL', $scope.map.diagram.cells[$scope.srcCell])
+        console.log('SOURCE CELL', $scope.map.diagram.cells[$scope.srcCell]);
         if ((!$scope.srcCell && $scope.srcCell !== 0) || (!$scope.targCell && $scope.targCell !== 0)) {
-            sandalchest.alert('Attack Issue', 'You need both an attacker and a target!')
+            sandalchest.alert('Attack Issue', 'You need both an attacker and a target!');
         } else if ($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name) && $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 2) {
-            sandalchest.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`)
+            sandalchest.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`);
         } else {
             var maxPain = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 5 ? $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num - 1 : 3;
             sandalchest.prompt('Army Strength', `How many armies do you wanna attack with? You can attack with at most ${maxPain} armies.`, function(res) {
                 res = parseInt(res);
-                if (isNaN(res) || res == 0) {
+                if (isNaN(res) || res === 0) {
                     return false;
                 }
                 console.log($scope.map.diagram.cells[$scope.srcCell].name, 'attacking', $scope.map.diagram.cells[$scope.targCell].name, 'with', res, 'armies.');
                 $scope.doAttack($scope.srcCell, $scope.targCell, res);
-            })
+            });
         }
     };
     socket.on('rcvDoFight', function(res) {
@@ -2715,17 +2731,17 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         replProps.forEach((p) => {
             defr[p] = res.cd[p];
             atkr[p] = res.ca[p];
-        })
-        $scope.$apply()
+        });
+        $scope.$apply();
     });
     $scope.nextTurn = function() {
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
-            console.log(res)
-            if (res && res != null) {
+            console.log(res);
+            if (res && res !== null) {
                 fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
-        })
-    }
+        });
+    };
 });
 
 app.factory('fightFact', function($rootScope, $http) {
@@ -2738,7 +2754,7 @@ app.factory('fightFact', function($rootScope, $http) {
             }
         }
         return false;
-    }
+    };
     return {
         getMaxArmy: function(c, m) {
             var attackPenalty = m ? 1 : 0;
@@ -2747,9 +2763,9 @@ app.factory('fightFact', function($rootScope, $http) {
         },
         delGame: function(id) {
             return $http.get('/game/del/'+id).then(function(r) {
-                console.log('factory back from back end game del')
+                console.log('factory back from back end game del');
                 return r;
-            })
+            });
         },
         doFight: function(usr, ca, cd, ra, rd, id) {
             socket.emit('sendDoFight', {
@@ -2762,7 +2778,7 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         nextTurn: function(map, game, usr) {
-            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr })
+            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr });
         },
         newGame: function(n, p, pwd) {
             return $http.post('/game/new', { id: n, player: p, pwd: pwd }).then(function(p) {
@@ -2848,7 +2864,7 @@ app.factory('mapFact', function($rootScope, $http) {
             });
         },
         loadOneMap: function(id) {
-            console.log('attempting to get map', id)
+            console.log('attempting to get map', id);
             return $http.get('/map/loadMap/' + id).then(function(r) {
                 return r;
             });
@@ -2857,10 +2873,9 @@ app.factory('mapFact', function($rootScope, $http) {
             //OLD VERSION of isNeighbor, only returns true if start and destination are immediate neigbors
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
-                throw new Error('cells not found!')
-                return;
+                throw new Error('cells not found!');
             }
-            console.log('Cells', c, 'source cell', c[s], 'target', c[d])
+            console.log('Cells', c, 'source cell', c[s], 'target', c[d]);
             for (var i = 0; i < c[s].halfedges.length; i++) {
                 if (!c[s].halfedges[i].edge.lSite || !c[s].halfedges[i].edge.rSite) {
                     continue;
@@ -2885,8 +2900,7 @@ app.factory('mapFact', function($rootScope, $http) {
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
                 //error reading cells, not found
-                throw new Error('cells not found!')
-                return;
+                throw new Error('cells not found!');
             }
             //all stuff should 'exist' now. We can continue
             var startSite = {
@@ -2915,7 +2929,7 @@ app.factory('mapFact', function($rootScope, $http) {
                 if (testSite.x == c[d].site.x && testSite.y == c[d].site.y) {
                     return true;
                 } else {
-                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y))
+                    surroundingOceanCandidates.push(this.isWater(c, testSite.x, testSite.y));
                 }
             }
             //finished testing immediate neighbors. Now test ocean neighbors
@@ -2948,7 +2962,7 @@ app.factory('mapFact', function($rootScope, $http) {
         delMap: function(id) {
             return $http.delete('/map/del/' + id, function(r) {
                 return r;
-            })
+            });
         },
         GetVoronoi: function(hi, wid, numCells, schmooz) {
             var newVor = {
@@ -3209,7 +3223,7 @@ app.factory('mapFact', function($rootScope, $http) {
                             // // gradArr[gradArr.length - 1].addColorStop(0, edgeGradLine.start);
                             // // gradArr[gradArr.length - 1].addColorStop(1, edgeGradLine.end);
                             // ctx.strokeStyle = gradArr[gradArr.length - 1];
-                            ctx.strokeStyle = '#003259'
+                            ctx.strokeStyle = '#003259';
                             v = edge.va;
                             ctx.moveTo(v.x, v.y);
                             v = edge.vb;
@@ -3357,7 +3371,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         return;
                     }
                     var ctx = this.canvas.getContext('2d');
-                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx)
+                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx);
                     ctx.globalAlpha = 1;
                     // edges
                     ctx.beginPath();
@@ -3373,7 +3387,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     // ctx.fillStyle = '#0c0';
                     // ctx.strokeStyle = '#9c9';
                     ctx.fillStyle = this.landPattern;
-                    ctx.strokeStyle = '#AB9B69'
+                    ctx.strokeStyle = '#AB9B69';
                     ctx.fill();
                     ctx.stroke();
                     // site
@@ -3387,7 +3401,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     var landImg = new Image(),
                         me = this,
                         ctx = this.canvas.getContext("2d");
-                    landImg.src = '../img/grass.jpg'
+                    landImg.src = '../img/grass.jpg';
                     landImg.onload = function() {
                         me.landPattern = ctx.createPattern(this, "repeat");
                         for (var n = 0; n < me.diagram.cells.length; n++) {
@@ -3396,7 +3410,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         me.makeCellNames();
                         me.getCellNames();
                         me.doCellSites();
-                    }
+                    };
                 },
                 getCellByName: function(n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
@@ -3416,7 +3430,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         this.findNeighbors(i, true);
                     }
-                    console.log(this.allConts)
+                    console.log(this.allConts);
                     return this.allConts;
                 },
                 doneCouns: [], //if a country's in here, don't re-add it.
@@ -3520,7 +3534,7 @@ app.factory('miscFact', function($rootScope, $http) {
         checkInGame:function(u){
             return $http.get('/user/checkInGame/'+u).then(function(r){
                 return r;
-            })
+            });
         }
     };
 });

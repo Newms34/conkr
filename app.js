@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
         }
         io.emit('newMsg', m);
     });
-    socket.on('refreshMap',function(r){
+    socket.on('refreshMap', function(r) {
         io.emit('replaceMap');
     })
     socket.on('sendDoFight', function(d) {
@@ -69,12 +69,12 @@ io.on('connection', function(socket) {
             } else {
                 console.log('socket', socket)
                 var cellChanges = sockmod.doFight(d.ca, d.cd, d.ra, d.rd); //ch-ch-ch-changes!
-                doc.armies.forEach((a)=>{
-                    if(a.country == cellChanges.ca.country){
+                doc.armies.forEach((a) => {
+                    if (a.country == cellChanges.ca.country) {
                         a.num = cellChanges.ca.num;
-                    }else if(a.country == cellChanges.cd.country){
+                    } else if (a.country == cellChanges.cd.country) {
                         a.num = cellChanges.cd.num;
-                        if(cellChanges.status){
+                        if (cellChanges.status) {
                             a.user = cellChanges.ca.user;
                         }
                     }
@@ -113,7 +113,7 @@ io.on('connection', function(socket) {
     })
     socket.on('getGamePieces', function(id) {
         console.log('GET GAME PIECES', id)
-        var theId = id.id||id.gameId;
+        var theId = id.id || id.gameId;
         mongoose.model('Game').findOne({ 'gameId': theId }, function(err, doc) {
             console.log('found game', id, ' and now sending game pieces')
             io.sockets.in(theId).emit('updateArmies', doc);
@@ -146,8 +146,21 @@ io.on('connection', function(socket) {
                 //we need to add armies to this new player.
 
                 doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
+                while (!doc.armies) {
+                    //this player extinct!
+                    //note that we're putting this in a loop, since it's entirely possible for a very powerful player to eliminate multiple enemies in ONE turn.
+                    io.sockets.in(d.game).emit('deadPlayer', { p: doc.players[doc.turn] })
+                    doc.deadPlayers.push(doc.players.slice(doc.turn, 1));
+                    if (doc.turn >= doc.players.length) doc.turn = 0;
+                    doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
+                }
                 doc.save();
-                io.sockets.in(d.game).emit('turnSwitch', { id: d.game, usr: doc.players[doc.turn] })
+                if (actualUsr == doc.players[doc.turn]) {
+                    io.sockets.in(d.game).emit('endGame', { winner: actualUsr })
+
+                } else {
+                    io.sockets.in(d.game).emit('turnSwitch', { id: d.game, usr: doc.players[doc.turn] })
+                }
                 console.log('Turn for game', d.game, 'successfully switched to', doc.players[doc.turn])
             }
         });
@@ -172,13 +185,13 @@ io.on('connection', function(socket) {
             } else if (doc.players[doc.turn] !== d.usr) {
                 io.sockets.in(d.game).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
             } else {
-                console.log('Moving armies!\nBefore:',doc.armies)
+                console.log('Moving armies!\nBefore:', doc.armies)
                 doc.armies.forEach((a) => {
                     if (a.country == d.src.country) {
-                        console.log('From',a)
+                        console.log('From', a)
                         a.num -= d.num;
                     } else if (a.country == d.targ.country) {
-                        console.log('To',a)
+                        console.log('To', a)
                         a.num += d.num;
                     }
                 });

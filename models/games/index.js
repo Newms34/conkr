@@ -9,6 +9,7 @@ var skillSchema = new mongoose.Schema({
         num: Number //number (i.e., strength) of army
     }],
     players: [String], //list of players for convenience
+    deadPlayers:[String],//list of players who have been defeated (i.e., had their last army conquered)
     gameId: String, //ID of game
     creator: String, //ID of creator
     avas: [Number], //avatar(number) of each player.
