@@ -25,14 +25,14 @@
                 <h3>My Games</h3></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
-            <div ng-show='canJoin'>
+            <div ng-show='!canJoin'>
                 <div class='col-md-12'>
                     <div class='alert alert-danger'>
                         <h4>Hey! You gotta finish the game you're in before you start a new one!</h4>
                     </div>
                 </div>
             </div>
-            <div ng-show='!canJoin'>
+            <div ng-show='canJoin'>
                 <div class='col-md-12 no-room'>
                     <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map</div>
                     <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map</div>
