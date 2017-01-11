@@ -58,3 +58,4 @@ Conkr uses the following technologies:
  - Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.
  - Conkr was written by me, [Dave](https://github.com/Newms34). 
  - Other various libraries/technologies are from their respective creators. I'm just using them.
+ - As usual, if you see something that's yours, and you don't want me to use it, let me know!

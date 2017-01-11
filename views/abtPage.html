@@ -1,56 +1,106 @@
 <div id='abt-stuff'>
 <!-- This is actually a copy of the readme.md on github! -->
     <h1 id="conkrariskport">Conkr - A Risk™ port;</h1>
-    <h2 id="contents">Contents:</h2>
-    <ul>
-        <li><a href="#about">&#128712;About</a></li>
-        <li><a href="#warning">&#9888;Warning</a></li>
-        <li><a href="#usage">&#128377;Usage</a></li>
-        <li><a href="#server">&#128421;Server</a></li>
-        <li><a href="#technical-stuff">&#128202;Technical Stuff</a></li>
-        <li><a href="#credits">&#128203;Credits</a></li>
-    </ul>
-    <h1 id="about">About</h1>
-    <p>It's multiplayer Risk™! With random country generation! Or at least it will be eventually!</p>
-    <h2 id="warning">Warning</h2>
-    <p>Please note that Conkr is still very much a work in progress. As such, players should keep two warnings in mind:</p>
-    <ul>
-        <li>There will be &#128027; bugs. If something horrible happens, try <em>not</em> to panic, and send me a (nice!) message about it.</li>
-        <li>I will likely reset the database numerous times before release, due to updates in models, &#128027; bugs, etc., which will include resets of user accounts, active games, and/or maps. I'll try to do this as <em>rarely</em> as possible, but be warned!</li>
-    </ul>
-    <h1 id="usage">Usage</h1>
-    <p>After you've created an account, you'll be placed in the main game screen. There, you have a number of options:</p>
-    <ul>
-        <li>Create a new map &#127758;</li>
-        <li>Load an existing map &#127758;</li>
-        <li>Join a game</li>
-    </ul>
-    <p>Note that, if you're already in a game when you log in, you will not be given these options (though you can still see the options for map &#127758; creation by clicking 'menu' at the top right).</p>
-    <p>If you've created a game, it will remain 'open', allowing other players to join it, until you close it. For now, as long as a game's open, anyone can join. Eventually, I'll probably give you an option to make private, password-protected games. </p>
-    <p>Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if <em>you</em> are the creator of the game. </p>
-    <p>Finally, once the game's started, it cycles thru each player in sequence. During your turn, you:</p>
-    <ol>
-        <li>Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you <em>cannot</em> abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. Also, right now you can only move to countries that share a border with yours. I plan to make cross-ocean travel possible later.</li>
-        <li>You'll then begin the &#9876;Attack phase by clicking the green button at bottom.</li>
-        <li>The &#9876;Attack phase works similarly to the movement phase, except that your target must be an enemy, adjacent country. As in the movement phase, you <em>must</em> have at least 2 armies in the attacking country to perform an attack.</li>
-        <li>If you attack a country and kill off the last enemy army, you counquer that country! One of your armies moves in to take up residence and piss off the locals.</li>
-    </ol>
-    <h2 id="server">Server</h2>
-    <p>The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.</p>
-    <h2 id="technicalstuff">Technical Stuff</h2>
-    <p>Conkr uses (or <em>will</em> use) the following technologies:</p>
-    <ul>
-        <li>AngularJS for front-end responsiveness.</li>
-        <li>NodeJS and ExpressJS on the back-end for the server.</li>
-        <li>Websockets, via socket.io, to allow quick communication between the server, phones, and game. They also allow me to send information <em>from</em> the server <em>to</em> the client without prompting, which is something boring old AJAX doesn't really do. </li>
-        <li>HTML5's Canvas. I'm (probably stupidly) storing the maps' actual appearance as dataurls in MongoDB, which allows me to then pull up the map without having to explicitly recalculate it each time.</li>
-        <li>The map &#127758; itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. I'm not completely sure how this works, but suffice it to say it produces nice, random shapes. There's some arcane math things happening in there somewhere.</li>
-        <li>MongoDB for storing currently all the things! That's maps &#127758;, games, and people (or at least their accounts. People are too much data).</li>
-    </ul>
-    <h2 id="credits">Credits</h2>
-    <ul>
-        <li>Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.</li>
-        <li>Conkr was written by me, <a href="https://github.com/Newms34">Dave</a>. </li>
-        <li>Other various libraries/technologies are from their respective creators. I'm just using them.</li>
-    </ul>
+
+<h2 id="contents">Contents:</h2>
+
+<ul>
+<li><a href="#about">&#128712;About</a></li>
+
+<li><a href="#warning">&#9888;Warning</a></li>
+
+<li><a href="#usage">&#128377;Usage</a></li>
+
+<li><a href="#server">&#128421;Server</a></li>
+
+<li><a href="#technical-stuff">&#128202;Technical Stuff</a></li>
+
+<li><a href="#credits">&#128203;Credits</a></li>
+</ul>
+
+<h1 id="about">About</h1>
+
+<p>It's multiplayer Risk™! With random country generation! Or at least it will be eventually!</p>
+
+<h2 id="warning">Warning</h2>
+
+<p>Please note that Conkr is still very much a work in progress. As such, players should keep two warnings in mind:</p>
+
+<ul>
+<li>There will be &#128027; bugs. If something horrible happens, try <em>not</em> to panic, and send me a (nice!) message about it.</li>
+
+<li>I will likely reset the database numerous times before release, due to updates in models, &#128027; bugs, etc., which will include resets of user accounts, active games, and/or maps. I'll try to do this as <em>rarely</em> as possible, but be warned!</li>
+</ul>
+
+<h1 id="usage">Usage</h1>
+
+<p>After you've created an account, you'll be placed in the main game screen. There, you have a number of options:</p>
+
+<ul>
+<li>Create a new map &#127758;</li>
+
+<li>Load an existing map &#127758;</li>
+
+<li>Join a game</li>
+</ul>
+
+<p>Note that, if you're already in a game when you log in, you will not be given these options.</p>
+
+<p>If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". For now, as long as a game's open, anyone can join. Eventually, I'll probably give you an option to make private, password-protected games. </p>
+
+<p>Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if <em>you</em> are the creator of the game. </p>
+
+<p>Finally, once the game's started, it cycles thru each player in sequence. During your turn, you:</p>
+
+<ol>
+<li>Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you <em>cannot</em> abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. </li>
+
+<li>You'll then begin the &#9876;Attack phase by clicking the green button at bottom.</li>
+
+<li>The &#9876;Attack phase works similarly to the movement phase, except that your target must be an enemy, adjacent country. As in the movement phase, you <em>must</em> have at least 2 armies in the attacking country to perform an attack.</li>
+
+<li>If you attack a country and kill off the last enemy army, you conquer that country! One of your armies moves in to take up residence and piss off the locals.</li>
+
+<li>The end of the game occurs under two circumstances, relative to each player:</li>
+</ol>
+
+<ul>
+<li>If you conquer all countries, congrats, you win! And... nothing happens. So far. Eventually, each win will give a player a score point, and you can brag to your friends about how much you pwned them.</li>
+
+<li>If the last of your countries is conquered, you lose! You'll still be able to watch (and say rude things about) your enemies, but you can no longer influence the battle. Except, you know, by like psychological warfare.</li>
+</ul>
+
+<h2 id="server">Server</h2>
+
+<p>The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.</p>
+
+<h2 id="technicalstuff">Technical Stuff</h2>
+
+<p>Conkr uses the following technologies:</p>
+
+<ul>
+<li>AngularJS for front-end responsiveness.</li>
+
+<li>NodeJS and ExpressJS on the back-end for the server.</li>
+
+<li>Websockets, via socket.io, to allow quick communication between the server, phones, and game. They also allow me to send information <em>from</em> the server <em>to</em> the client without prompting, which is something boring old AJAX doesn't really do. </li>
+
+<li>HTML5's Canvas. I'm (probably stupidly) storing the maps' actual appearance as dataurls in MongoDB, which allows me to then pull up the map without having to explicitly recalculate it each time.</li>
+
+<li>The map &#127758; itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. I'm not completely sure how this works, but suffice it to say it produces nice, random shapes. There's some arcane math things happening in there somewhere.</li>
+
+<li>MongoDB for storing currently all the things! That's maps &#127758;, games, and people (or at least their accounts. People are too much data).</li>
+</ul>
+
+<h2 id="credits">Credits</h2>
+
+<ul>
+<li>Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.</li>
+
+<li>Conkr was written by me, <a href="https://github.com/Newms34">Dave</a>. </li>
+
+<li>Other various libraries/technologies are from their respective creators. I'm just using them.</li>
+
+<li>As usual, if you see something that's yours, and you don't want me to use it, let me know!</li>
+</ul>
 </div>
