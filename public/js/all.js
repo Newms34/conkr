@@ -2755,7 +2755,7 @@ app.controller('statCon', function($scope, miscFact) {
     $scope.getScores = function() {
         miscFact.getAllUsers().then(function(r) {
             r = r.sort((a, b) => {
-                return a.totalScore - b.totalScore;
+                return b.totalScore - a.totalScore;
             });
             console.log('Users:', r);
             var currPlace = 1,
