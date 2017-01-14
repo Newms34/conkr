@@ -26,5 +26,7 @@ Can we do private games? i.e., give game a pwd so that only players with the pwd
 
 CAN NOW MOVE ACROSS THE WATER!
 should we delay movement(i.e., one turn "travel" time)? probly not, as not sure how i'd handle attacks
-Do we wanna disable clicking New Game or Load Game tabs while player is hosting a game?
+
+Need to find a way to prevent player from creating a game, starting it, and immediately winning (to auto-rank up)
+
 */

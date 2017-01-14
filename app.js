@@ -146,11 +146,13 @@ io.on('connection', function(socket) {
                 //we need to add armies to this new player.
 
                 doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
+                var multPlayers = false;
                 while (!doc.armies) {
                     //this player extinct!
                     //note that we're putting this in a loop, since it's entirely possible for a very powerful player to eliminate multiple enemies in ONE turn.
                     io.sockets.in(d.game).emit('deadPlayer', { p: doc.players[doc.turn] })
                     doc.deadPlayers.push(doc.players.slice(doc.turn, 1));
+                    multPlayers = true; //A player was deleted. This means the last remaining player won (and didnt just create a game to level themselves)
                     if (doc.turn >= doc.players.length) doc.turn = 0;
                     doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
                 }
@@ -158,13 +160,19 @@ io.on('connection', function(socket) {
                 if (actualUsr == doc.players[doc.turn]) {
                     io.sockets.in(d.game).emit('endGame', { winner: actualUsr })
                     //now update usr model to add 1 win!
-                    mongoose.model('User').findOne({name:d.usr},function(err,doc){
-                        doc.totalScore++;
-                        doc.save();
-                        io.emit('newScores');
-                    })
+                    //Note that this only happens if we've eliminated another player, which prevents the user from simply 'winning' one-person games to cheat level
+                    if (multPlayers) {
+                        mongoose.model('User').findOne({ name: d.usr }, function(err, doc) {
+                            doc.totalScore++;
+                            doc.save();
+                            io.emit('newScores');
+                        })
+                    }
                 } else {
-                    io.sockets.in(d.game).emit('turnSwitch', { id: d.game, usr: doc.players[doc.turn] })
+                    io.sockets.in(d.game).emit('turnSwitch', {
+                        id: d.game,
+                        usr: doc.players[doc.turn]
+                    })
                 }
                 console.log('Turn for game', d.game, 'successfully switched to', doc.players[doc.turn])
             }
@@ -200,7 +208,6 @@ io.on('connection', function(socket) {
                         a.num += d.num;
                     }
                 });
-                // console.log('\n------\nAnd after:',doc.armies)
                 doc.save();
                 io.sockets.in(d.game).emit('updateArmies', doc);
             }
