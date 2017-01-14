@@ -1,17 +1,17 @@
 app.factory('mapFact', function($rootScope, $http) {
     String.prototype.capit = function(){
         return this.slice(0,1).toUpperCase()+this.slice(1);
-    }
+    };
     var smoothAmt = 100,
         countries = [
+        //different combinations of the following array elements are used to generate country names.
             ["b","c","d","f","g","h","i","j","k","l","m","n","p","q","r","s","t","v","w","x","y","z","","","","",""],
             ["a","e","i","o","u"],
             ["br","cr","dr","fr","gr","pr","str","tr","bl","cl","fl","gl","pl","sl","sc","sk","sm","sn","sp","st","sw","ch","sh","th","wh"],
             ["ae","ai","ao","au","a","ay","ea","ei","eo","eu","e","ey","ua","ue","ui","uo","u","uy","ia","ie","iu","io","iy","oa","oe","ou","oi","o","oy"],
             ["stan","dor","vania","nia","lor","cor","dal","bar","sal","ra","la","lia","jan","rus","ze","tan","wana","sil","so","na","le","bia","ca","ji","ce","ton","ssau","sau","sia","ca","ya","ye","yae","tho","stein","ria","nia","burg","nia","gro","que","gua","qua","rhiel","cia","les","dan","nga","land"],
             ["ia","a","en","ar","istan","aria","ington","ua","ijan","ain","ium","us","esh","os","ana","il","ad","or","ea","eau","ax","on","ana","ary","ya","ye","yae","ait","ein","urg","al","ines","ela"]
-            // names: ['Nasteaburg', 'Dutralor', 'Eslos', 'Oglyae', 'Cruiria', 'Whuadal', 'Ethua', 'Estaria', 'Shiod', 'Skesh', 'Froe', 'Glen', 'Yacluoria', 'Desmayyae', 'Oskana', 'Echea', 'Pleiles', 'Ploussau', 'Usnea', 'Oprijan', 'Fleol', 'Spijan', 'Flie Stril', 'Iecheidal', 'Beplayburg', 'Raprana', 'Qescyae', 'Smeuqua', 'Tresil', 'Ospary', 'Eflary', 'Bloek', 'Pral', 'Cluyx Smea', 'Cegriydal', 'Ethoeque', 'Pacril', 'Justril', 'Stoynga', 'Swuyque', 'Osnyae', 'Estron', 'Flauh', 'Clyae', 'Theul Plar', 'Osmoirus', 'Osliuji', 'Qetrington', 'Cuflus', 'Brioca', 'Skuocia', 'Ashad', 'Ecrar', 'Snoyg', 'Drington', 'Cresh', 'Cutraynia', 'Qechiavania', 'Pechary', 'Jadrar', 'Striurus', 'Smoiburg', 'Aspil', 'Ascington', 'Thain', 'Brex', 'Prax', 'Gusmaonga', 'Jestruibia', 'Woscyae', 'Vascea', 'Dreyssau', 'Flecia', 'Aglos', 'Estyae', 'Shiyk', 'Thesh', 'Glaeq', 'Slea', 'Fasmiulia', 'Pagluorhiel', 'Wachil', 'Wegrya', 'Snobar', 'Smeobar', 'Athana', 'Ogresh', 'Smait', 'Whus', 'Zusleuland', 'Ofleilor', 'Beflington', 'Cusmyae', 'Swobia', 'Thiostan', 'Uclain', 'Adryae', 'Frio', 'Spington', 'Gloir', 'Star', 'Fustredor', 'Pucrourhiel', 'Quplana', 'Tasnye', 'Spoubia', 'Griycia', 'Uchos', 'Achyae', 'Gruoz', 'Smijan', 'Swiur', 'Crary']
-        ],
+          ],
         countryPrefs = ['Republic of', 'Kingdom of', 'Empire of','United Lands of','Dominion of','Holy empire of'];
 
     return {
@@ -288,7 +288,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         default:
                             nm=countries[2][Math.floor(Math.random()*countries[2].length)]+countries[3][Math.floor(Math.random()*countries[3].length)]+countries[0][Math.floor(Math.random()*countries[0].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[5][Math.floor(Math.random()*countries[5].length)];
                     }
-                    return nm
+                    return nm;
                 },
                 makeCellNames: function() {
                     for (var n = 0; n < this.diagram.cells.length; n++) {

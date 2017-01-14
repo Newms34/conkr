@@ -2117,7 +2117,7 @@ Voronoi.prototype.compute = function(sites, bbox) {
     return diagram;
 };
 
-var app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
+const app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
 	$scope.prevSent = [];
     $scope.msgs = [{
     	now:new Date().toLocaleTimeString(),
@@ -2317,7 +2317,7 @@ app.controller('loginCont', function($scope, miscFact, $timeout) {
 var socket = io(),
     socketRoom = null;
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
-    $scope.isDead=false;
+    $scope.isDead = false;
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
@@ -2327,19 +2327,19 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (m.data.game) {
                 //load map this player's in.
                 $scope.reloadGame(m.data.game);
-                $scope.gameSettingsPanel=2;
+                $scope.gameSettingsPanel = 2;
                 $scope.isDead = !m.data.alive;
                 $scope.canJoin = false; //player cannot join a game while they're in one
             }
         });
     });
-    $scope.btns=true;
-    $scope.allGames=[];
-    $scope.usrGames = function(){
-        return $scope.allGames.filter((g)=>{
-            return g.creator==$scope.user;
+    $scope.btns = true;
+    $scope.allGames = [];
+    $scope.usrGames = function() {
+        return $scope.allGames.filter((g) => {
+            return g.creator == $scope.user;
         });
-    }
+    };
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
@@ -2353,7 +2353,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         //next, set correct game id
         $scope.gameId = g.gameId;
         console.log('GAME', g);
-            //finally, map stuff!
+        //finally, map stuff!
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
@@ -2386,6 +2386,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.potentialMaps = [];
     $scope.loadedMapImg = null;
     $scope.user = null;
+    $scope.pStatShow = false;
     $scope.newMap = function() {
         var smootz = 101 - $scope.smoothing,
             numZones = Math.round($scope.numCountries / 0.3);
@@ -2408,7 +2409,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                                     $scope.gameId = g.data.id;
                                     socket.emit('getGamePieces', { id: g.data.id });
                                     console.log('Done! Game made!');
-                                    $scope.gameSettingsPanel=2;
+                                    $scope.gameSettingsPanel = 2;
                                     socket.emit('getGames', { x: true });
                                 });
                             }
@@ -2450,30 +2451,30 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     socket.on('allGames', function(g) {
         //this socket cmd basically refreshes the list of games.
         //now we check each game, and see if the old game we were in still exists. 
-        $scope.canJoin=true;
-        g.forEach((gi)=>{
-            if (gi.gameId==$scope.gameId){
-                $scope.canJoin=false;
+        $scope.canJoin = true;
+        g.forEach((gi) => {
+            if (gi.gameId == $scope.gameId) {
+                $scope.canJoin = false;
             }
         });
-        if($scope.canJoin) $scope.gameId=null;
+        if ($scope.canJoin) $scope.gameId = null;
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
         $scope.loadMaps();
         $scope.$digest();
     });
-    socket.on('deadPlayer',function(p){
-        if(p.player===$scope.player) {
-            sandalchest.alert('Dead',`Sorry, ${$scope.user}, you've died!`,function(e){
-                $scope.btns=false;
+    socket.on('deadPlayer', function(p) {
+        if (p.player === $scope.player) {
+            sandalchest.alert('Dead', `Sorry, ${$scope.user}, you've died!`, function(e) {
+                $scope.btns = false;
             });
         }
     });
     $scope.deleteMap = function(id) {
         sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
-                mapFact.delMap(id).then(function(r){
-                    if(r.data=='logErr') return;
+                mapFact.delMap(id).then(function(r) {
+                    if (r.data == 'logErr') return;
                 });
             }
         });
@@ -2506,8 +2507,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true;
         } else if (!$scope.pickTarg && ap.usr == $scope.user) {
             //if we're not in target pick mode and this piece's user is us.
-            $scope.armyPieces.forEach((p) => { 
-                p.status = 0; 
+            $scope.armyPieces.forEach((p) => {
+                p.status = 0;
             });
             //picking source cell
             $scope.srcCell = $scope.map.getCellNumByName(ap.country);
@@ -2617,7 +2618,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                             $scope.gameId = g.data.id;
                             socket.emit('getGamePieces', { id: g.data.id });
                             console.log('Done! Game made!');
-                            $scope.gameSettingsPanel=2;
+                            $scope.gameSettingsPanel = 2;
                             socket.emit('getGames', { x: true });
                         });
                         $scope.armyPieces = [];
@@ -2744,6 +2745,50 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     };
 });
 
+app.controller('statCon', function($scope, miscFact) {
+    $scope.pStats = [];
+
+    //this prevents us from closing the stats window by clicking INSIDE the window
+    document.querySelector('#stat-main').onclick = function(e) {
+        e.stopPropagation();
+    };
+    $scope.getScores = function() {
+        miscFact.getAllUsers().then(function(r) {
+            r = r.sort((a, b) => {
+                return a.totalScore - b.totalScore;
+            });
+            console.log('Users:', r);
+            var currPlace = 1,
+                prevScore = r[0].totalScore,
+                currPlayers=[];
+            r.forEach((pl) => {
+                if (pl.totalScore < prevScore) {
+                    //new score. Push in old rank
+                    $scope.pStats.push({
+                        names:currPlayers.join(','),
+                        place:currPlace,
+                        score:prevScore
+                    });
+                    currPlayers=[];
+                    currPlace++;
+                    prevScore = pl.totalScore;
+                }
+                currPlayers.push(pl.name);
+            });
+            //push in the last one!
+            $scope.pStats.push({
+                        names:currPlayers.join(', '),
+                        place:currPlace,
+                        score:prevScore
+                    });
+        });
+    };
+    socket.on('newScores', function(r) {
+        $scope.getScore();
+    });
+    $scope.getScores();
+});
+
 app.factory('fightFact', function($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
     var getCellCoords = function(m, c) {
@@ -2852,17 +2897,17 @@ app.factory('fightFact', function($rootScope, $http) {
 app.factory('mapFact', function($rootScope, $http) {
     String.prototype.capit = function(){
         return this.slice(0,1).toUpperCase()+this.slice(1);
-    }
+    };
     var smoothAmt = 100,
         countries = [
+        //different combinations of the following array elements are used to generate country names.
             ["b","c","d","f","g","h","i","j","k","l","m","n","p","q","r","s","t","v","w","x","y","z","","","","",""],
             ["a","e","i","o","u"],
             ["br","cr","dr","fr","gr","pr","str","tr","bl","cl","fl","gl","pl","sl","sc","sk","sm","sn","sp","st","sw","ch","sh","th","wh"],
             ["ae","ai","ao","au","a","ay","ea","ei","eo","eu","e","ey","ua","ue","ui","uo","u","uy","ia","ie","iu","io","iy","oa","oe","ou","oi","o","oy"],
             ["stan","dor","vania","nia","lor","cor","dal","bar","sal","ra","la","lia","jan","rus","ze","tan","wana","sil","so","na","le","bia","ca","ji","ce","ton","ssau","sau","sia","ca","ya","ye","yae","tho","stein","ria","nia","burg","nia","gro","que","gua","qua","rhiel","cia","les","dan","nga","land"],
             ["ia","a","en","ar","istan","aria","ington","ua","ijan","ain","ium","us","esh","os","ana","il","ad","or","ea","eau","ax","on","ana","ary","ya","ye","yae","ait","ein","urg","al","ines","ela"]
-            // names: ['Nasteaburg', 'Dutralor', 'Eslos', 'Oglyae', 'Cruiria', 'Whuadal', 'Ethua', 'Estaria', 'Shiod', 'Skesh', 'Froe', 'Glen', 'Yacluoria', 'Desmayyae', 'Oskana', 'Echea', 'Pleiles', 'Ploussau', 'Usnea', 'Oprijan', 'Fleol', 'Spijan', 'Flie Stril', 'Iecheidal', 'Beplayburg', 'Raprana', 'Qescyae', 'Smeuqua', 'Tresil', 'Ospary', 'Eflary', 'Bloek', 'Pral', 'Cluyx Smea', 'Cegriydal', 'Ethoeque', 'Pacril', 'Justril', 'Stoynga', 'Swuyque', 'Osnyae', 'Estron', 'Flauh', 'Clyae', 'Theul Plar', 'Osmoirus', 'Osliuji', 'Qetrington', 'Cuflus', 'Brioca', 'Skuocia', 'Ashad', 'Ecrar', 'Snoyg', 'Drington', 'Cresh', 'Cutraynia', 'Qechiavania', 'Pechary', 'Jadrar', 'Striurus', 'Smoiburg', 'Aspil', 'Ascington', 'Thain', 'Brex', 'Prax', 'Gusmaonga', 'Jestruibia', 'Woscyae', 'Vascea', 'Dreyssau', 'Flecia', 'Aglos', 'Estyae', 'Shiyk', 'Thesh', 'Glaeq', 'Slea', 'Fasmiulia', 'Pagluorhiel', 'Wachil', 'Wegrya', 'Snobar', 'Smeobar', 'Athana', 'Ogresh', 'Smait', 'Whus', 'Zusleuland', 'Ofleilor', 'Beflington', 'Cusmyae', 'Swobia', 'Thiostan', 'Uclain', 'Adryae', 'Frio', 'Spington', 'Gloir', 'Star', 'Fustredor', 'Pucrourhiel', 'Quplana', 'Tasnye', 'Spoubia', 'Griycia', 'Uchos', 'Achyae', 'Gruoz', 'Smijan', 'Swiur', 'Crary']
-        ],
+          ],
         countryPrefs = ['Republic of', 'Kingdom of', 'Empire of','United Lands of','Dominion of','Holy empire of'];
 
     return {
@@ -3139,7 +3184,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         default:
                             nm=countries[2][Math.floor(Math.random()*countries[2].length)]+countries[3][Math.floor(Math.random()*countries[3].length)]+countries[0][Math.floor(Math.random()*countries[0].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[5][Math.floor(Math.random()*countries[5].length)];
                     }
-                    return nm
+                    return nm;
                 },
                 makeCellNames: function() {
                     for (var n = 0; n < this.diagram.cells.length; n++) {
@@ -3572,6 +3617,11 @@ app.factory('miscFact', function($rootScope, $http) {
         checkInGame:function(u){
             return $http.get('/user/checkInGame/'+u).then(function(r){
                 return r;
+            });
+        },
+        getAllUsers:function(){
+            return $http.get('/user/allUsers/').then(function(usrs){
+                return usrs.data;
             });
         }
     };

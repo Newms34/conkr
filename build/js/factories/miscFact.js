@@ -34,6 +34,11 @@ app.factory('miscFact', function($rootScope, $http) {
             return $http.get('/user/checkInGame/'+u).then(function(r){
                 return r;
             });
+        },
+        getAllUsers:function(){
+            return $http.get('/user/allUsers/').then(function(usrs){
+                return usrs.data;
+            });
         }
     };
 });

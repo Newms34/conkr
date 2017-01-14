@@ -148,3 +148,9 @@ router.get('/checkInGame/:usr',function(req,res,next){
         res.send({game:gameIn,alive:alive})
     })
 })
+router.get('/allUsers/',function(req,res,next){
+    mongoose.model('User').find({},function(err,docs){
+        if(err) return next(err);
+        res.send(docs)
+    })
+})

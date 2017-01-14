@@ -223,6 +223,13 @@ canvas,
 
 .log-butt {
     position: fixed;
+    top: 85px;
+    right: 5px;
+    z-index: 100;
+}
+
+.stat-butt {
+    position: fixed;
     top: 45px;
     right: 5px;
     z-index: 100;

@@ -5,10 +5,7 @@ var usrSchema = new mongoose.Schema({
     name: String, //name of the user
     totalScore: Number,
     pass: String,
-    salt: String,
-    inProgGames: [{
-        id: String
-    }]
+    salt: String
 }, { collection: 'User' });
 
 // generateSalt, encryptPassword and the pre 'save' and 'correctPassword' operations

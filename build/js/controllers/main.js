@@ -1,7 +1,7 @@
 var socket = io(),
     socketRoom = null;
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
-    $scope.isDead=false;
+    $scope.isDead = false;
     //before anything, check to see if we're logged in!
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
@@ -11,19 +11,19 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (m.data.game) {
                 //load map this player's in.
                 $scope.reloadGame(m.data.game);
-                $scope.gameSettingsPanel=2;
+                $scope.gameSettingsPanel = 2;
                 $scope.isDead = !m.data.alive;
                 $scope.canJoin = false; //player cannot join a game while they're in one
             }
         });
     });
-    $scope.btns=true;
-    $scope.allGames=[];
-    $scope.usrGames = function(){
-        return $scope.allGames.filter((g)=>{
-            return g.creator==$scope.user;
+    $scope.btns = true;
+    $scope.allGames = [];
+    $scope.usrGames = function() {
+        return $scope.allGames.filter((g) => {
+            return g.creator == $scope.user;
         });
-    }
+    };
     $scope.win = {
         w: $(window).width() * 0.95,
         h: $(window).height() * 0.95
@@ -37,7 +37,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         //next, set correct game id
         $scope.gameId = g.gameId;
         console.log('GAME', g);
-            //finally, map stuff!
+        //finally, map stuff!
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
@@ -70,6 +70,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.potentialMaps = [];
     $scope.loadedMapImg = null;
     $scope.user = null;
+    $scope.pStatShow = false;
     $scope.newMap = function() {
         var smootz = 101 - $scope.smoothing,
             numZones = Math.round($scope.numCountries / 0.3);
@@ -92,7 +93,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                                     $scope.gameId = g.data.id;
                                     socket.emit('getGamePieces', { id: g.data.id });
                                     console.log('Done! Game made!');
-                                    $scope.gameSettingsPanel=2;
+                                    $scope.gameSettingsPanel = 2;
                                     socket.emit('getGames', { x: true });
                                 });
                             }
@@ -134,30 +135,30 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     socket.on('allGames', function(g) {
         //this socket cmd basically refreshes the list of games.
         //now we check each game, and see if the old game we were in still exists. 
-        $scope.canJoin=true;
-        g.forEach((gi)=>{
-            if (gi.gameId==$scope.gameId){
-                $scope.canJoin=false;
+        $scope.canJoin = true;
+        g.forEach((gi) => {
+            if (gi.gameId == $scope.gameId) {
+                $scope.canJoin = false;
             }
         });
-        if($scope.canJoin) $scope.gameId=null;
+        if ($scope.canJoin) $scope.gameId = null;
         console.log('FROM ALL GAMES', g);
         $scope.allGames = g;
         $scope.loadMaps();
         $scope.$digest();
     });
-    socket.on('deadPlayer',function(p){
-        if(p.player===$scope.player) {
-            sandalchest.alert('Dead',`Sorry, ${$scope.user}, you've died!`,function(e){
-                $scope.btns=false;
+    socket.on('deadPlayer', function(p) {
+        if (p.player === $scope.player) {
+            sandalchest.alert('Dead', `Sorry, ${$scope.user}, you've died!`, function(e) {
+                $scope.btns = false;
             });
         }
     });
     $scope.deleteMap = function(id) {
         sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
-                mapFact.delMap(id).then(function(r){
-                    if(r.data=='logErr') return;
+                mapFact.delMap(id).then(function(r) {
+                    if (r.data == 'logErr') return;
                 });
             }
         });
@@ -190,8 +191,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true;
         } else if (!$scope.pickTarg && ap.usr == $scope.user) {
             //if we're not in target pick mode and this piece's user is us.
-            $scope.armyPieces.forEach((p) => { 
-                p.status = 0; 
+            $scope.armyPieces.forEach((p) => {
+                p.status = 0;
             });
             //picking source cell
             $scope.srcCell = $scope.map.getCellNumByName(ap.country);
@@ -301,7 +302,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                             $scope.gameId = g.data.id;
                             socket.emit('getGamePieces', { id: g.data.id });
                             console.log('Done! Game made!');
-                            $scope.gameSettingsPanel=2;
+                            $scope.gameSettingsPanel = 2;
                             socket.emit('getGames', { x: true });
                         });
                         $scope.armyPieces = [];

@@ -1,0 +1,15 @@
+<div ng-controller='statCon'>
+    <h3>Leaderboard <button class='btn btn-sm btn-danger pull-right' ng-click='$parent.$parent.pStatShow=false;'>x</button></h3>
+    <table class='table table-inverse'>
+        <thead>
+            <tr>
+                <th>Place</th><th>Player(s)</th><th>Games Won</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat='p in pStats'>
+            <td>{{p.place}}</td><td>{{p.names}}</td><td>{{p.score}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

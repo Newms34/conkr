@@ -157,7 +157,12 @@ io.on('connection', function(socket) {
                 doc.save();
                 if (actualUsr == doc.players[doc.turn]) {
                     io.sockets.in(d.game).emit('endGame', { winner: actualUsr })
-
+                    //now update usr model to add 1 win!
+                    mongoose.model('User').findOne({name:d.usr},function(err,doc){
+                        doc.totalScore++;
+                        doc.save();
+                        io.emit('newScores');
+                    })
                 } else {
                     io.sockets.in(d.game).emit('turnSwitch', { id: d.game, usr: doc.players[doc.turn] })
                 }
