@@ -2305,10 +2305,15 @@ app.controller('loginCont', function($scope, miscFact, $timeout) {
         miscFact.login($scope.logUsr, $scope.logPwd).then(function(d) {
             if (d.data == 'no') {
                 sandalchest.alert('Login error', 'Please check your username and/or password<hr/><i>Note:</i> While Conkr is under development, data may be deleted at any time!', { speed: 250 });
-            } else {
-                sandalchest.alert('Login Successful', 'Welcome back!', function(p) {
+            } else if(!localStorage.conkrNoWelcome){
+                sandalchest.alert('Login Successful', 'Welcome back!<br/><br/><small><input type="checkbox" id="noWelcome"/> Don&rsquo;t show this again</small>', function(p) {
+                    if(document.querySelector('#noWelcome').checked){
+                        localStorage.conkrNoWelcome = true;
+                    }
                     window.location.assign('../');
                 }, { speed: 250 });
+            }else{
+                window.location.assign('../');
             }
         });
     };
