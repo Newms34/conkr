@@ -1,3 +1,91 @@
+const hints = [{
+    txt: 'Login or Register to get started!',
+    bottom: 20,
+    point: 'log-btn'
+}, {
+    txt: 'Wanna chat with other players? Click here!',
+    bottom: 30,
+    point: 'chat-btn'
+}, {
+    txt: 'Let&rsquo;s start by making a new map! Pick an average number of countries and a smoothing amount, and then click here.',
+    bottom: 30,
+    point: 'make-map'
+}, {
+    txt: 'Go ahead and start a new game. Feel free to set a password if you want!',
+    bottom: 30,
+    point: 'start-new-game-btn'
+}, {
+    txt: 'Your friends can join your game by clicking here, and then clicking the "Join Game" button. Note: You won&rsquo;t be able to join any games, since you&rsquo;re in one!',
+    bottom: 30,
+    point: 'load-game-tab'
+}, {
+    txt: 'Now click the Menu button to get back to main menu.',
+    bottom: 30,
+    point: 'men-butt'
+}, {
+    txt: 'Once you&rsquo;re ready to start, click My Games, and then click Start Game.',
+    bottom: 30,
+    point: 'my-games-tab'
+}, {
+    txt: 'This is the play field. Right now, you&rsquo;re in Move Mode. In this mode, you can move your armies between occupied countries. You can move as many armies as you want, as long as the origin and destination countries share a border, <i>and</i> the origin country contains more than one (1) army. You can also attack across one ocean block.',
+    bottom: 30,
+    point: 'game-parts'
+}, {
+    txt: 'Once you&rsquo;re done, click here to begin Attack Mode.',
+    bottom: 30,
+    point: 'move-mode-btn'
+}, {
+    txt: 'You&rsquo;re now in Attack Mode! Click one of your armies, and then click another player in an adjacent country. Click Attack, and you&rsquo;ll be prompted for how many armies you wish to involve in the attack. As in Move Mode, you must have at least two armies in order to attack, and your armies must share a border with the target country!',
+    bottom: 30,
+    point: 'game-parts'
+}, {
+    txt: 'Once you&rsquo;re done laying waste to those foolish enough to stand in your way, click here to let the next player go. Keep in mind that before their turn, each player will be given additional armies based on how many territories they own.',
+    bottom: 30,
+    point: 'end-turn-btn'
+}];
+const remHint = function(f,cb) {
+    var bg = document.querySelector('#hint-bg-div');
+    if (f) localStorage.conkrHints = hints.length;
+    bg.parentNode.removeChild(bg);
+    if(typeof cb == 'function') cb();
+}
+const hintMaker = function(n,cb) {
+    // if (localStorage.conkrHints && parseInt(localStorage.conkrHints) >= (n + 1)) {
+    //     return;
+    // }
+    var bgDiv = document.createElement('div'),
+        hintDiv = document.createElement('div'),
+        leftPoint = document.querySelector('#' + hints[n].point).offsetLeft,
+        topPoint = document.querySelector('#' + hints[n].point).offsetTop,
+        pntr = document.createElement('div');
+    hintDiv.innerHTML = '<h3>&#128161; Hint</h3>' + hints[n].txt + '<hr/><small><input type="checkbox" id="no-more-hints"> No more hints, please!</small><hr/><button class="btn btn-primary" id="close-hint" onclick="remHint()">Got it!</button>';
+    hintDiv.className = 'hint-msg';
+    hintDiv.style.top = hints[n].bottom + '%';
+    hintDiv.onclick = function(e) {
+        e.stopPropagation();
+    }
+    bgDiv.onclick = function(){
+    	remHint(document.querySelector('#no-more-hints').checked,cb)
+    };
+    bgDiv.className = 'hint-bg';
+    bgDiv.style.height = window.outerHeight+'px';
+    bgDiv.id = 'hint-bg-div';
+    bgDiv.append(hintDiv);
+    document.body.append(bgDiv);
+    pntr.style.width = Math.sqrt(Math.pow(Math.abs(leftPoint - hintDiv.offsetLeft),2)+Math.pow(Math.abs(topPoint - hintDiv.offsetTop),2))+'px';
+    pntr.className = 'hint-pointer';
+    // alert('DATA',hintDiv.offsetTop,hintDiv.offsetLeft, topPoint,leftPoint)
+    var amt = Math.atan((hintDiv.offsetTop-topPoint)/(hintDiv.offsetLeft-leftPoint))*180/Math.PI;
+    if(hintDiv.offsetLeft-leftPoint>0) amt+=180;
+    pntr.style.transform = 'rotate('+amt+'deg)';
+    hintDiv.append(pntr);
+    document.querySelector('#hint-bg-div div.hint-msg button').onclick = function(e){
+        e.stopPropagation();
+    	remHint(document.querySelector('#no-more-hints').checked,cb)
+    }
+    localStorage.conkrHints = n+1;
+};
+
 /*jslint vars: true, nomen: true, plusplus: true, continue:true, forin:true */
 /*global Node, BoundsNode */
 
@@ -2197,6 +2285,7 @@ const app = angular.module('conkr', ['ngSanitize']).controller('chatController',
 app.controller('loginCont', function($scope, miscFact, $timeout) {
     $scope.logMode = true;
     $scope.pwdStren = 0;
+    hintMaker(0);
     $scope.passGud = {
         len: 0,
         caps: false,
@@ -2328,14 +2417,20 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
-        miscFact.checkInGame(r.data.name).then(function(m) {
-            if (m.data.game) {
-                //load map this player's in.
-                $scope.reloadGame(m.data.game);
-                $scope.gameSettingsPanel = 2;
-                $scope.isDead = !m.data.alive;
-                $scope.canJoin = false; //player cannot join a game while they're in one
-            }
+        hintMaker(1, function() {
+            miscFact.checkInGame(r.data.name).then(function(m) {
+                if (m.data.game) {
+                    //load map this player's in.
+                    $scope.reloadGame(m.data.game);
+                    $scope.gameSettingsPanel = 2;
+                    $scope.isDead = !m.data.alive;
+                    $scope.canJoin = false; //player cannot join a game while they're in one
+                } else {
+                    //not in game!
+                    hintMaker(2);
+                }
+            });
+
         });
     });
     $scope.btns = true;
@@ -2363,6 +2458,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
             $scope.gameReady = true;
+            hintMaker(7,function(){
+                hintMaker(8);
+            });
         });
     };
     $scope.logout = function() {
@@ -2403,20 +2501,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (r) {
                 $scope.map.save().then(function(sr) {
                     console.log('ASKING IF NEW GAME');
-                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()" id='start-new-game-btn'>?</button>`, {
                         buttons: [{
                             text: 'Create Game',
                             close: true,
                             click: function() {
                                 //use sr.id to make a new game.
                                 var ngpwd = document.querySelector('#newGamePwd').value;
-                                fightFact.newGame(sr.data.id, $scope.user, ngpwd).then(function(g) {
-                                    $scope.gameId = g.data.id;
-                                    socket.emit('getGamePieces', { id: g.data.id });
-                                    console.log('Done! Game made!');
-                                    $scope.gameSettingsPanel = 2;
-                                    socket.emit('getGames', { x: true });
-                                });
+                                hintMaker(4, function() {
+                                    fightFact.newGame(sr.data.id, $scope.user, ngpwd).then(function(g) {
+                                        $scope.gameId = g.data.id;
+                                        socket.emit('getGamePieces', { id: g.data.id });
+                                        console.log('Done! Game made!');
+                                        $scope.gameSettingsPanel = 2;
+                                        socket.emit('getGames', { x: true });
+                                        hintMaker(5)
+                                    });
+                                })
                             }
                         }, {
                             text: 'Cancel',
@@ -2427,6 +2528,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         }],
                         speed: 250
                     });
+                    hintMaker(3);
                 });
             } else {
                 //user doesnt like this map(Q_Q). reset
@@ -2501,9 +2603,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     };
     $scope.pickTarg = false;
     $scope.moveArmies = true;
-    var debugMode = false; //allows us to pick our own dudes as targets
+    var debugMode = false; //allows us to pick our own dudes as targets, allowing testing of attack mode without another player
     $scope.pickCell = function(ap) {
-        //NEED TO IMPLEMENT ARMY MOVE MODE! ALSO SOCKETS FOR THIS.
         if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
             $scope.srcCell = null;
@@ -2594,9 +2695,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (res && res !== null) {
                 $scope.moveArmies = false;
                 $scope.$digest();
+                hintMaker(9)
             }
         });
     };
+    $scope.checkMenuHint = function(){
+        hintMaker(6);
+    }
     $scope.pickMap = function(m, n, old) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -2619,13 +2724,16 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     click: function() {
                         //use sr.id to make a new game.
                         var ngpwd = document.querySelector('#newGamePwd').value;
+                        hintMaker(4,function(){
                         fightFact.newGame(n, $scope.user, ngpwd).then(function(g) {
                             $scope.gameId = g.data.id;
                             socket.emit('getGamePieces', { id: g.data.id });
                             console.log('Done! Game made!');
                             $scope.gameSettingsPanel = 2;
                             socket.emit('getGames', { x: true });
+                            hintMaker(5);
                         });
+                        })
                         $scope.armyPieces = [];
                     }
                 }, {
@@ -2637,6 +2745,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 }],
                 speed: 250
             });
+            hintMaker(3);
         } else {
             socket.emit('putInRoom', { id: $scope.gameId });
             $scope.armyPieces = [];
@@ -2666,6 +2775,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (r) {
                 fightFact.startGame(id).then(function(r) {
                     socket.emit('gameStarted', r);
+                    window.location.reload();
                 });
             }
         });
@@ -2721,6 +2831,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 console.log($scope.map.diagram.cells[$scope.srcCell].name, 'attacking', $scope.map.diagram.cells[$scope.targCell].name, 'with', res, 'armies.');
                 $scope.doAttack($scope.srcCell, $scope.targCell, res);
             });
+            hintMaker(10)
         }
     };
     socket.on('rcvDoFight', function(res) {

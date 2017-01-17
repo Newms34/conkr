@@ -7,14 +7,20 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
-        miscFact.checkInGame(r.data.name).then(function(m) {
-            if (m.data.game) {
-                //load map this player's in.
-                $scope.reloadGame(m.data.game);
-                $scope.gameSettingsPanel = 2;
-                $scope.isDead = !m.data.alive;
-                $scope.canJoin = false; //player cannot join a game while they're in one
-            }
+        hintMaker(1, function() {
+            miscFact.checkInGame(r.data.name).then(function(m) {
+                if (m.data.game) {
+                    //load map this player's in.
+                    $scope.reloadGame(m.data.game);
+                    $scope.gameSettingsPanel = 2;
+                    $scope.isDead = !m.data.alive;
+                    $scope.canJoin = false; //player cannot join a game while they're in one
+                } else {
+                    //not in game!
+                    hintMaker(2);
+                }
+            });
+
         });
     });
     $scope.btns = true;
@@ -42,6 +48,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
             $scope.gameReady = true;
+            hintMaker(7,function(){
+                hintMaker(8);
+            });
         });
     };
     $scope.logout = function() {
@@ -82,20 +91,23 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (r) {
                 $scope.map.save().then(function(sr) {
                     console.log('ASKING IF NEW GAME');
-                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()" id='start-new-game-btn'>?</button>`, {
                         buttons: [{
                             text: 'Create Game',
                             close: true,
                             click: function() {
                                 //use sr.id to make a new game.
                                 var ngpwd = document.querySelector('#newGamePwd').value;
-                                fightFact.newGame(sr.data.id, $scope.user, ngpwd).then(function(g) {
-                                    $scope.gameId = g.data.id;
-                                    socket.emit('getGamePieces', { id: g.data.id });
-                                    console.log('Done! Game made!');
-                                    $scope.gameSettingsPanel = 2;
-                                    socket.emit('getGames', { x: true });
-                                });
+                                hintMaker(4, function() {
+                                    fightFact.newGame(sr.data.id, $scope.user, ngpwd).then(function(g) {
+                                        $scope.gameId = g.data.id;
+                                        socket.emit('getGamePieces', { id: g.data.id });
+                                        console.log('Done! Game made!');
+                                        $scope.gameSettingsPanel = 2;
+                                        socket.emit('getGames', { x: true });
+                                        hintMaker(5)
+                                    });
+                                })
                             }
                         }, {
                             text: 'Cancel',
@@ -106,6 +118,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         }],
                         speed: 250
                     });
+                    hintMaker(3);
                 });
             } else {
                 //user doesnt like this map(Q_Q). reset
@@ -180,9 +193,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     };
     $scope.pickTarg = false;
     $scope.moveArmies = true;
-    var debugMode = false; //allows us to pick our own dudes as targets
+    var debugMode = false; //allows us to pick our own dudes as targets, allowing testing of attack mode without another player
     $scope.pickCell = function(ap) {
-        //NEED TO IMPLEMENT ARMY MOVE MODE! ALSO SOCKETS FOR THIS.
         if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
             $scope.srcCell = null;
@@ -273,9 +285,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (res && res !== null) {
                 $scope.moveArmies = false;
                 $scope.$digest();
+                hintMaker(9)
             }
         });
     };
+    $scope.checkMenuHint = function(){
+        hintMaker(6);
+    }
     $scope.pickMap = function(m, n, old) {
         //load an OLD map for a NEW game
         //map is a new map created just now
@@ -298,13 +314,16 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     click: function() {
                         //use sr.id to make a new game.
                         var ngpwd = document.querySelector('#newGamePwd').value;
+                        hintMaker(4,function(){
                         fightFact.newGame(n, $scope.user, ngpwd).then(function(g) {
                             $scope.gameId = g.data.id;
                             socket.emit('getGamePieces', { id: g.data.id });
                             console.log('Done! Game made!');
                             $scope.gameSettingsPanel = 2;
                             socket.emit('getGames', { x: true });
+                            hintMaker(5);
                         });
+                        })
                         $scope.armyPieces = [];
                     }
                 }, {
@@ -316,6 +335,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 }],
                 speed: 250
             });
+            hintMaker(3);
         } else {
             socket.emit('putInRoom', { id: $scope.gameId });
             $scope.armyPieces = [];
@@ -345,6 +365,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (r) {
                 fightFact.startGame(id).then(function(r) {
                     socket.emit('gameStarted', r);
+                    window.location.reload();
                 });
             }
         });
@@ -400,6 +421,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 console.log($scope.map.diagram.cells[$scope.srcCell].name, 'attacking', $scope.map.diagram.cells[$scope.targCell].name, 'with', res, 'armies.');
                 $scope.doAttack($scope.srcCell, $scope.targCell, res);
             });
+            hintMaker(10)
         }
     };
     socket.on('rcvDoFight', function(res) {

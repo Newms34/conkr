@@ -9,8 +9,8 @@
 </head>
 
 <body id='main-bod' style='background:url({{isDead?"../img/loss.jpg":"../img/chargebg.jpg"}})' ng-app='conkr' ng-controller='conkrcon' ng-cloak>
-    <button class='btn btn-success chat-butt' ng-click='showChat = !showChat'>&#128172;</button>
-    <button class='btn btn-primary men-butt' ng-click='gameMenu=!gameMenu' ng-disabled='!map'>&#128203; Menu</button>
+    <button class='btn btn-success chat-butt' ng-click='showChat = !showChat' id='chat-btn'>&#128172;</button>
+    <button class='btn btn-primary men-butt' ng-click='gameMenu=!gameMenu;checkMenuHint();' ng-disabled='!map' id='men-butt'>&#128203; Menu</button>
     <button class='btn btn-danger log-butt' ng-click='logout()'>&#128682; Logout</button>
     <button class='btn btn-primary stat-butt' ng-click='pStatShow = true'>&#127942; Ranks</button>
     <div class='chat-win' ng-show='showChat'>
@@ -22,11 +22,11 @@
     <div class='panel panel-primary col-md-5 col-md-offset-3' ng-show='gameMenu'>
         <div class='panel-heading'>
             <div class='tab tab-left' ng-class="{'tab-inact':gameSettingsPanel!=0}" ng-click='gameSettingsPanel=0'>
-                <h3>New Game</h3></div>
-            <div class='tab' ng-class="{'tab-inact':gameSettingsPanel!=1}" ng-click='gameSettingsPanel=1'>
-                <h3>Load Game</h3></div>
-            <div class='tab tab-right' ng-class="{'tab-inact':gameSettingsPanel!=2}" ng-click='gameSettingsPanel=2'>
-                <h3>My Games</h3></div>
+                <h3>New Game &#127918;</h3></div>
+            <div class='tab' ng-class="{'tab-inact':gameSettingsPanel!=1}" ng-click='gameSettingsPanel=1' id='load-game-tab'>
+                <h3>Load Game &#127918;</h3></div>
+            <div class='tab tab-right' ng-class="{'tab-inact':gameSettingsPanel!=2}" ng-click='gameSettingsPanel=2' id='my-games-tab'>
+                <h3>My Games &#127918;</h3></div>
         </div>
         <div class='panel-body' ng-show='gameSettingsPanel==0'>
             <div ng-show='!canJoin'>
@@ -38,8 +38,8 @@
             </div>
             <div ng-show='canJoin'>
                 <div class='col-md-12 no-room'>
-                    <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map</div>
-                    <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map</div>
+                    <div class='new-tab n-t-left' ng-class="{'tab-inact':!newNew}" ng-click='toggleNewMode(1)'>Make new map &#127758;</div>
+                    <div class='new-tab n-t-right' ng-class="{'tab-inact':newNew}" ng-click='toggleNewMode(0)'>Load map &#127758;</div>
                 </div>
                 <hr>
                 <div ng-show='newNew' class='panel panel-info panel-body'>
@@ -68,7 +68,7 @@
                     </div>
                     <hr/>
                     <div class='row form-group col-md-4 col-md-offset-4'>
-                        <button ng-click='newMap()' class='btn btn-primary'>Do it!</button>
+                        <button ng-click='newMap()' class='btn btn-primary' id='make-map'>Do it!</button>
                     </div>
                 </div>
                 <div ng-show='!newNew' class='panel panel-info panel-body'>
@@ -143,7 +143,7 @@
             <div class='alert alert-info' ng-show='!usrGames().length;'>
                 <h4>You haven't created any games yet!<hr/>Click <button class='btn btn-primary fake-btn'>New Game</button> up above to create one!</h4>
             </div>
-            <table class='table table-striped' ng-show='userGames().length'>
+            <table class='table table-striped' ng-show='usrGames().length'>
                 <thead>
                     <tr>
                         <th>Game ID</th>
@@ -177,9 +177,9 @@
         <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
             <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
     </div>
-    <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||!moveArmies||!btns'>&#9876;Attack!</button>
-    <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!"><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
-    <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-show='btns' ng-click='nextTurn();'>End Turn</button>
+    <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||moveArmies||!btns'>&#9876;Attack!</button>
+    <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!" id='move-mode-btn'><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
+    <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-show='btns' ng-click='nextTurn();' id='end-turn-btn'>End Turn</button>
     <div id='ded' ng-show='isDead'></div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>

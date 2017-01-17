@@ -1,6 +1,7 @@
 app.controller('loginCont', function($scope, miscFact, $timeout) {
     $scope.logMode = true;
     $scope.pwdStren = 0;
+    hintMaker(0);
     $scope.passGud = {
         len: 0,
         caps: false,

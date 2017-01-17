@@ -18,7 +18,7 @@
         <div class='panel-heading'>
             <div class='new-tab n-t-left' ng-class="{'tab-inact':!logMode}" ng-click='logMode=true'>
                 <h4>Login</h4></div>
-            <div class='new-tab n-t-right' ng-class="{'tab-inact':logMode}" ng-click='logMode=false'>
+            <div class='new-tab n-t-right' id='reg-btn' ng-class="{'tab-inact':logMode}" ng-click='logMode=false'>
                 <h4>Register</h4></div>
         </div>
         <div class='panel-body' ng-show='logMode'>
@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class='form-group row'>
-                <button  type="submit" class='btn btn-primary col-md-2 col-md-offset-5' ng-click='log()'>&#128275; Login</button>
+                <button  type="submit" class='btn btn-primary col-md-2 col-md-offset-5' ng-click='log()' id='log-btn'>&#128275; Login</button>
             </div>
         </div>
         <div class='panel-body' ng-show='!logMode'>
