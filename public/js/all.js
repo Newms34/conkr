@@ -50,9 +50,9 @@ const remHint = function(f,cb) {
     if(typeof cb == 'function') cb();
 }
 const hintMaker = function(n,cb) {
-    // if (localStorage.conkrHints && parseInt(localStorage.conkrHints) >= (n + 1)) {
-    //     return;
-    // }
+    if (localStorage.conkrHints && parseInt(localStorage.conkrHints) >= (n + 1)) {
+        return;
+    }
     var bgDiv = document.createElement('div'),
         hintDiv = document.createElement('div'),
         leftPoint = document.querySelector('#' + hints[n].point).offsetLeft,
