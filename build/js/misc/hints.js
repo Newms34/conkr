@@ -72,11 +72,11 @@ const hintMaker = function(n,cb) {
     bgDiv.id = 'hint-bg-div';
     bgDiv.append(hintDiv);
     document.body.append(bgDiv);
-    pntr.style.width = Math.sqrt(Math.pow(Math.abs(leftPoint - hintDiv.offsetLeft),2)+Math.pow(Math.abs(topPoint - hintDiv.offsetTop),2))+'px';
+    var pntrLen = Math.sqrt(Math.pow(Math.abs(leftPoint - hintDiv.offsetLeft),2)+Math.pow(Math.abs(topPoint - hintDiv.offsetTop),2));
+    pntr.style.width = pntrLen+'px';
     pntr.className = 'hint-pointer';
-    // alert('DATA',hintDiv.offsetTop,hintDiv.offsetLeft, topPoint,leftPoint)
-    var amt = Math.atan((hintDiv.offsetTop-topPoint)/(hintDiv.offsetLeft-leftPoint))*180/Math.PI;
-    if(hintDiv.offsetLeft-leftPoint>0) amt+=180;
+    var amt = Math.asin((topPoint-hintDiv.offsetTop)/pntrLen)*180/Math.PI;
+    if(leftPoint<hintDiv.offsetLeft) amt=180-amt;
     pntr.style.transform = 'rotate('+amt+'deg)';
     hintDiv.append(pntr);
     document.querySelector('#hint-bg-div div.hint-msg button').onclick = function(e){
