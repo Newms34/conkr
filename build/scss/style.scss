@@ -276,3 +276,13 @@ canvas,
     left:20;
     top:0;
 }
+.hint-pnt-arrow{
+    position:absolute;
+    right:-8px;
+    top:-4px;
+    width:0;
+    height:0;
+    border-left: 20px solid #fed;
+    border-bottom: 7.5px solid transparent;
+    border-top: 7.5px solid transparent;
+}

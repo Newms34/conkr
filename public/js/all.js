@@ -79,6 +79,9 @@ const hintMaker = function(n,cb) {
     if(leftPoint<hintDiv.offsetLeft) amt=180-amt;
     pntr.style.transform = 'rotate('+amt+'deg)';
     hintDiv.append(pntr);
+    var arrowDiv = document.createElement('div');
+    arrowDiv.className = 'hint-pnt-arrow';
+    pntr.append(arrowDiv);
     document.querySelector('#hint-bg-div div.hint-msg button').onclick = function(e){
         e.stopPropagation();
     	remHint(document.querySelector('#no-more-hints').checked,cb)
