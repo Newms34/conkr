@@ -26,6 +26,15 @@ Can we do private games? i.e., give game a pwd so that only players with the pwd
 CAN NOW MOVE ACROSS THE WATER!
 should we delay movement(i.e., one turn "travel" time)? probly not, as not sure how i'd handle attacks
 
-Should include some first-timer instructions, like how to create a game, what to do after creation (i.e., start it), etc. 
-Theses will be a series of hints, each of which will increase a localStorage 'conkrHints' var by a certain amount. User can skip by clicking a "skip tutorial" button.
+do we wanna add different 'terrains'? obv these would have different defensive/offensive bonuses. Possible land types:
+mountain: no-sight, +def
+plains: sight, +off
+swamp: sight,+def
+forest: no-sight
+urban: no-sight,+off
+
+-ambush? heal (regen 1 army)? sight/sight loss (can't tell # of armies in adjacent cell)?
+
+how do i implement defense/offense?:
+-have small (like, .1) chance for roll to ignore status of dice. who gets this 'ignore' chance is based on who has the higher stat (def or off) in a battle
 */

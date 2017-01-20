@@ -174,8 +174,11 @@
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
-        <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
-            <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: {{ap.num}}</div>
+        <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.terr!="plains" && ap.terr!="swamp" && ap.usr!=user ?ap.hideName:ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
+            <br/>
+            <span ng-bind-html='getTerrStats(ap.terr)'></span>
+            <!-- ADD ||ap.usr == user -->
+            <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: <span ng-show='ap.terr=="plains" ||ap.terr=="swamp" ||ap.usr == user'>{{ap.num}}</span><span ng-hide='ap.terr=="plains" ||ap.terr=="swamp" ||ap.usr == user'>?</span></div>
     </div>
     <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||moveArmies||!btns'>&#9876;Attack!</button>
     <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!" id='move-mode-btn'><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>

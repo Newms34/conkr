@@ -137,7 +137,7 @@ router.get('/startGame/:id', function(req, res, next) {
                 res.send('errMap');
             }
             doc.players = doc.players.shuffle()
-            var couns = mdoc.mapData.countryNames;
+            var couns = mdoc.mapData.cellCenters;
             var players = doc.players;
             if (!doc.avas) doc.avas = [];
             doc.armies = sockmod.getInitArmies(couns, players);

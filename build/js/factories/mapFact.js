@@ -1,18 +1,18 @@
-app.factory('mapFact', function($rootScope, $http) {
-    String.prototype.capit = function(){
-        return this.slice(0,1).toUpperCase()+this.slice(1);
+app.factory('mapFact', function($rootScope, $http, $q) {
+    String.prototype.capit = function() {
+        return this.slice(0, 1).toUpperCase() + this.slice(1);
     };
     var smoothAmt = 100,
         countries = [
-        //different combinations of the following array elements are used to generate country names.
-            ["b","c","d","f","g","h","i","j","k","l","m","n","p","q","r","s","t","v","w","x","y","z","","","","",""],
-            ["a","e","i","o","u"],
-            ["br","cr","dr","fr","gr","pr","str","tr","bl","cl","fl","gl","pl","sl","sc","sk","sm","sn","sp","st","sw","ch","sh","th","wh"],
-            ["ae","ai","ao","au","a","ay","ea","ei","eo","eu","e","ey","ua","ue","ui","uo","u","uy","ia","ie","iu","io","iy","oa","oe","ou","oi","o","oy"],
-            ["stan","dor","vania","nia","lor","cor","dal","bar","sal","ra","la","lia","jan","rus","ze","tan","wana","sil","so","na","le","bia","ca","ji","ce","ton","ssau","sau","sia","ca","ya","ye","yae","tho","stein","ria","nia","burg","nia","gro","que","gua","qua","rhiel","cia","les","dan","nga","land"],
-            ["ia","a","en","ar","istan","aria","ington","ua","ijan","ain","ium","us","esh","os","ana","il","ad","or","ea","eau","ax","on","ana","ary","ya","ye","yae","ait","ein","urg","al","ines","ela"]
-          ],
-        countryPrefs = ['Republic of', 'Kingdom of', 'Empire of','United Lands of','Dominion of','Holy empire of'];
+            //different combinations of the following array elements are used to generate country names.
+            ["b", "c", "d", "f", "g", "h", "i", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "", "", "", "", ""],
+            ["a", "e", "i", "o", "u"],
+            ["br", "cr", "dr", "fr", "gr", "pr", "str", "tr", "bl", "cl", "fl", "gl", "pl", "sl", "sc", "sk", "sm", "sn", "sp", "st", "sw", "ch", "sh", "th", "wh"],
+            ["ae", "ai", "ao", "au", "a", "ay", "ea", "ei", "eo", "eu", "e", "ey", "ua", "ue", "ui", "uo", "u", "uy", "ia", "ie", "iu", "io", "iy", "oa", "oe", "ou", "oi", "o", "oy"],
+            ["stan", "dor", "vania", "nia", "lor", "cor", "dal", "bar", "sal", "ra", "la", "lia", "jan", "rus", "ze", "tan", "wana", "sil", "so", "na", "le", "bia", "ca", "ji", "ce", "ton", "ssau", "sau", "sia", "ca", "ya", "ye", "yae", "tho", "stein", "ria", "nia", "burg", "nia", "gro", "que", "gua", "qua", "rhiel", "cia", "les", "dan", "nga", "land"],
+            ["ia", "a", "en", "ar", "istan", "aria", "ington", "ua", "ijan", "ain", "ium", "us", "esh", "os", "ana", "il", "ad", "or", "ea", "eau", "ax", "on", "ana", "ary", "ya", "ye", "yae", "ait", "ein", "urg", "al", "ines", "ela"]
+        ],
+        countryPrefs = ['Republic of', 'Kingdom of', 'Empire of', 'United Lands of', 'Dominion of', 'Holy empire of'];
 
     return {
         loadMaps: function() {
@@ -242,7 +242,8 @@ app.factory('mapFact', function($rootScope, $http) {
                             this.cellCenters.push({
                                 x: c.site.x,
                                 y: c.site.y,
-                                name: c.name || c.country
+                                name: c.name || c.country,
+                                terr:c.terrType||'plains'
                             });
                         }
                     });
@@ -262,7 +263,7 @@ app.factory('mapFact', function($rootScope, $http) {
                     };
                     img.src = im;
                 },
-                makeAName: function(){
+                makeAName: function() {
                     /*name patterns (from http://fantasynamegenerators.com/scripts/landNames.js):
                     0,1,2,3,4
                     0,1,2,5
@@ -270,30 +271,32 @@ app.factory('mapFact', function($rootScope, $http) {
                     1,2,5
                     2,3,0,2,5
                     */
-                    var nm='';
-                    var whichPtrn = Math.floor(Math.random()*5);
-                    switch(whichPtrn){
+                    var nm = '';
+                    var whichPtrn = Math.floor(Math.random() * 5);
+                    switch (whichPtrn) {
                         case 0:
-                            nm=countries[0][Math.floor(Math.random()*countries[0].length)]+countries[1][Math.floor(Math.random()*countries[1].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[3][Math.floor(Math.random()*countries[3].length)]+countries[4][Math.floor(Math.random()*countries[4].length)];
+                            nm = countries[0][Math.floor(Math.random() * countries[0].length)] + countries[1][Math.floor(Math.random() * countries[1].length)] + countries[2][Math.floor(Math.random() * countries[2].length)] + countries[3][Math.floor(Math.random() * countries[3].length)] + countries[4][Math.floor(Math.random() * countries[4].length)];
                             break;
                         case 1:
-                            nm=countries[0][Math.floor(Math.random()*countries[0].length)]+countries[1][Math.floor(Math.random()*countries[1].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[5][Math.floor(Math.random()*countries[5].length)];
+                            nm = countries[0][Math.floor(Math.random() * countries[0].length)] + countries[1][Math.floor(Math.random() * countries[1].length)] + countries[2][Math.floor(Math.random() * countries[2].length)] + countries[5][Math.floor(Math.random() * countries[5].length)];
                             break;
                         case 2:
-                            nm=countries[2][Math.floor(Math.random()*countries[2].length)]+countries[3][Math.floor(Math.random()*countries[3].length)]+countries[4][Math.floor(Math.random()*countries[4].length)];
+                            nm = countries[2][Math.floor(Math.random() * countries[2].length)] + countries[3][Math.floor(Math.random() * countries[3].length)] + countries[4][Math.floor(Math.random() * countries[4].length)];
                             break;
                         case 3:
-                            nm=countries[1][Math.floor(Math.random()*countries[1].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[5][Math.floor(Math.random()*countries[5].length)];
+                            nm = countries[1][Math.floor(Math.random() * countries[1].length)] + countries[2][Math.floor(Math.random() * countries[2].length)] + countries[5][Math.floor(Math.random() * countries[5].length)];
                             break;
                         default:
-                            nm=countries[2][Math.floor(Math.random()*countries[2].length)]+countries[3][Math.floor(Math.random()*countries[3].length)]+countries[0][Math.floor(Math.random()*countries[0].length)]+countries[2][Math.floor(Math.random()*countries[2].length)]+countries[5][Math.floor(Math.random()*countries[5].length)];
+                            nm = countries[2][Math.floor(Math.random() * countries[2].length)] + countries[3][Math.floor(Math.random() * countries[3].length)] + countries[0][Math.floor(Math.random() * countries[0].length)] + countries[2][Math.floor(Math.random() * countries[2].length)] + countries[5][Math.floor(Math.random() * countries[5].length)];
                     }
                     return nm;
                 },
                 makeCellNames: function() {
+                    console.log('CELL LENGTH', this.diagram.cells.length)
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
                         var newName = null;
+                        console.log('GIVING CELL NAME FOR', n)
                         if (cell.isLand) {
                             var isUnique = false;
                             while (!isUnique) {
@@ -359,9 +362,26 @@ app.factory('mapFact', function($rootScope, $http) {
                     this.diagram = this.voronoi.compute(sites, this.bbox);
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         if (Math.random() > 0.7) {
+                            //we're using earth-like ratios here, where 70% of earth is water
                             this.diagram.cells[i].isLand = true;
-                            console.log('cell', i, 'is land');
+                            switch (Math.floor(Math.random() * 5)) {
+                                case 0:
+                                    this.diagram.cells[i].terrType = 'forest';
+                                    break;
+                                case 1:
+                                    this.diagram.cells[i].terrType = 'mountain';
+                                    break;
+                                case 2:
+                                    this.diagram.cells[i].terrType = 'urban';
+                                    break;
+                                case 3:
+                                    this.diagram.cells[i].terrType = 'swamp';
+                                    break;
+                                default:
+                                    this.diagram.cells[i].terrType = 'plains';
+                            }
                         } else {
+                            this.diagram.cells[i].terrType = 'water';
                             this.diagram.cells[i].isLand = false;
                         }
                     }
@@ -546,7 +566,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         }
                     }
                 },
-                renderCell: function(id) {
+                renderCell: function(id, ptrn) {
                     if (id === undefined) {
                         return;
                     }
@@ -558,7 +578,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         return;
                     }
                     var ctx = this.canvas.getContext('2d');
-                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx);
+                    console.log('RENDERING CELL', id, 'FOR CONTEXT', ctx, 'WITH PATTERN', ptrn);
                     ctx.globalAlpha = 1;
                     // edges
                     ctx.beginPath();
@@ -571,9 +591,7 @@ app.factory('mapFact', function($rootScope, $http) {
                         v = this.getEndpoint(halfedges[iHalfedge]);
                         ctx.lineTo(v.x, v.y);
                     }
-                    // ctx.fillStyle = '#0c0';
-                    // ctx.strokeStyle = '#9c9';
-                    ctx.fillStyle = this.landPattern;
+                    ctx.fillStyle = ptrn;
                     ctx.strokeStyle = '#AB9B69';
                     ctx.fill();
                     ctx.stroke();
@@ -585,19 +603,69 @@ app.factory('mapFact', function($rootScope, $http) {
                     ctx.fill();
                 },
                 doAllCells: function() {
-                    var landImg = new Image(),
+                    var landTypes = ['plains', 'swamp', 'forest', 'mountain', 'urban'],
+                        landImgProms = [],
+                        imgArr = [],
                         me = this,
                         ctx = this.canvas.getContext("2d");
-                    landImg.src = '../img/grass.jpg';
-                    landImg.onload = function() {
-                        me.landPattern = ctx.createPattern(this, "repeat");
-                        for (var n = 0; n < me.diagram.cells.length; n++) {
-                            if (me.diagram.cells[n].isLand) me.renderCell(n);
+                    // for (var i = 0; i < landTypes.length; i++) {
+                    //     imgArr[i] = new Image();
+                    //     imgArr[i].src = '../img/terrains/' + landTypes[i] + '.jpg';
+                    // }
+
+                    // function resolvePromises(n) {
+                    //     return $q.when(n);
+                    // }
+                    // landImgProms = imgArr.map(resolvePromises);
+                    // $q.all(landImgProms).then(function(terrImgs) {
+                    //     terrImgs.forEach(function(t) {
+                    //         var thisTerr = t.src.slice(t.src.lastIndexOf('/') + 1, t.src.lastIndexOf('.')) || 'plains';
+                    //         var thePtrn = ctx.createPattern(t, "repeat");
+                    //         console.log('IMAGE PATTERN',thePtrn,t)
+                    //         for (var n = 0; n < me.diagram.cells.length; n++) {
+                    //             // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
+                    //             if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
+                    //                 me.renderCell(n, thePtrn);
+                    //             }
+                    //         }
+                    //     })
+                    //     me.makeCellNames();
+                    //     me.getCellNames();
+                    //     me.doCellSites();
+                    // });
+                    var imsDone = 0;
+                    for (var i = 0; i < landTypes.length; i++) {
+                        imgArr[i] = new Image();
+                        imgArr[i].src = '../img/terrains/' + landTypes[i] + '.jpg';
+                        imgArr[i].onload = function() {
+                            var thePtrn = ctx.createPattern(this, "repeat"),
+                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')) || 'plains';
+                            for (var n = 0; n < me.diagram.cells.length; n++) {
+                                // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
+                                if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
+                                    me.renderCell(n, thePtrn);
+                                }
+                            }
+                            imsDone++;
+                            console.log('IMAGES DONE:',imsDone,'of',landTypes.length)
+                            if (imsDone == landTypes.length) {
+                                me.makeCellNames();
+                                me.getCellNames();
+                                me.doCellSites();
+                            }
                         }
-                        me.makeCellNames();
-                        me.getCellNames();
-                        me.doCellSites();
-                    };
+                    }
+
+                    // var
+                    //     ctx = this.canvas.getContext("2d");
+                    // plainsImg.src = '../img/grass.jpg';
+                    // plainsImg.onload = function() {
+                    //     me.landPattern = ctx.createPattern(this, "repeat");
+                    //     for (var n = 0; n < me.diagram.cells.length; n++) {
+                    //         if (me.diagram.cells[n].isLand) me.renderCell(n);
+                    //     }
+
+                    // };
                 },
                 getCellByName: function(n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {

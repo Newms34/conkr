@@ -1,14 +1,14 @@
 app.factory('fightFact', function($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
     var getCellCoords = function(m, c) {
-        console.log('Getting cell coords for', c);
-        for (var i = 0; i < m.length; i++) {
-            if (m[i].name == c) {
-                return m[i].site;
+            console.log('Getting cell coords for', c);
+            for (var i = 0; i < m.length; i++) {
+                if (m[i].name == c) {
+                    return m[i].site;
+                }
             }
-        }
-        return false;
-    };
+            return false;
+        };
     return {
         getMaxArmy: function(c, m) {
             var attackPenalty = m ? 1 : 0;
@@ -16,7 +16,7 @@ app.factory('fightFact', function($rootScope, $http) {
             return Math.floor(c.army.num - attackPenalty);
         },
         delGame: function(id) {
-            return $http.get('/game/del/'+id).then(function(r) {
+            return $http.get('/game/del/' + id).then(function(r) {
                 console.log('factory back from back end game del');
                 return r;
             });
@@ -40,14 +40,12 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         placeArmies: function(m, a, l) {
-            //shouldn't base just be 0,0?
             //m:map, a: army, l: labels (unicode) organized by playaz
             var pieces = [];
             for (var n = 0; n < a.length; n++) {
                 var site = getCellCoords(m.diagram.cells, a[n].country);
                 var boxwid = document.querySelector('canvas').getContext("2d").measureText(a[n].country).width * 1.2;
-                // alert('BOX WID',boxwid)
-                pieces.push({
+                var newPiece = {
                     country: a[n].country,
                     num: a[n].num,
                     lbl: l[a[n].user],
@@ -55,9 +53,12 @@ app.factory('fightFact', function($rootScope, $http) {
                     x: site.x - (boxwid / 2) - 8,
                     y: site.y,
                     fullName: a[n].user + ' - ' + a[n].country + ' - ' + a[n].num + (a[n].num > 1 ? " armies" : " army"),
+                    hideName: a[n].user + ' - ' + a[n].country + ' - Unknown armies',
                     wid: boxwid,
+                    terr: a[n].terr,
                     status: 0 //0 = unpicked (neither target nor source), 1 = source (attacking from this loc), 2 = target (attacking this loc)
-                });
+                }
+                pieces.push(newPiece);
             }
             return pieces;
         },

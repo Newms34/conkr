@@ -48,7 +48,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
             $scope.gameReady = true;
-            hintMaker(7,function(){
+            hintMaker(7, function() {
                 hintMaker(8);
             });
         });
@@ -66,6 +66,18 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.$digest();
             $('#msgInp').focus();
         }
+    };
+
+    $scope.getTerrStats = function(terr) {
+        //this is NOT used for actually calculating terrain effects, as the actual combat calcs are done on the back-end. Instead, it simply creates labels for the user to tell what the effects of each terrain is.
+        var terrLbls = {
+            'swamp': '&#128065; &#128737;',
+            'plains': '&#128065; &#128481;',
+            'forest': '&#10006;',
+            'mountain': '&#10006; &#128737;',
+            'urban': '&#10006; &#128481;'
+        };
+        return terrLbls[terr];
     };
     $scope.gameMenu = true;
     $scope.currGamePlayers = {};
@@ -289,7 +301,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         });
     };
-    $scope.checkMenuHint = function(){
+    $scope.checkMenuHint = function() {
         hintMaker(6);
     }
     $scope.pickMap = function(m, n, old) {
@@ -314,15 +326,15 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     click: function() {
                         //use sr.id to make a new game.
                         var ngpwd = document.querySelector('#newGamePwd').value;
-                        hintMaker(4,function(){
-                        fightFact.newGame(n, $scope.user, ngpwd).then(function(g) {
-                            $scope.gameId = g.data.id;
-                            socket.emit('getGamePieces', { id: g.data.id });
-                            console.log('Done! Game made!');
-                            $scope.gameSettingsPanel = 2;
-                            socket.emit('getGames', { x: true });
-                            hintMaker(5);
-                        });
+                        hintMaker(4, function() {
+                            fightFact.newGame(n, $scope.user, ngpwd).then(function(g) {
+                                $scope.gameId = g.data.id;
+                                socket.emit('getGamePieces', { id: g.data.id });
+                                console.log('Done! Game made!');
+                                $scope.gameSettingsPanel = 2;
+                                socket.emit('getGames', { x: true });
+                                hintMaker(5);
+                            });
                         })
                         $scope.armyPieces = [];
                     }

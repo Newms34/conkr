@@ -51,6 +51,9 @@ const remHint = function(f,cb) {
 }
 const hintMaker = function(n,cb) {
     if (localStorage.conkrHints && parseInt(localStorage.conkrHints) >= (n + 1)) {
+        if(typeof cb=='function'){
+            cb();
+        }
         return;
     }
     var bgDiv = document.createElement('div'),

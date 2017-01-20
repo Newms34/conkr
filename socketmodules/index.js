@@ -131,12 +131,15 @@ newArmies = function(usrs, map) {
 }, getInitArmies = function(c, p) {
     var arr = [];
     c.forEach((n) => {
+        console.log('N IS',n,'END N')
         arr.push({
             user: p[Math.floor(Math.random() * p.length)],
-            country: n,
-            num: 1
+            country: n.name,
+            num: 1,
+            terr:n.terr
         });
     });
+    console.log('Armies:',arr);
     return arr;
 }, getAuthUsr = function(settings, rawDough) {
     //get the authorized username from the client sessions cookie. This allows us to authenticate that the person doing an attack is, in fact, the person doing the attack.

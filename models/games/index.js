@@ -6,7 +6,8 @@ var skillSchema = new mongoose.Schema({
     armies: [{
         user: String, //userId
         country: String, //country name
-        num: Number //number (i.e., strength) of army
+        num: Number, //number (i.e., strength) of army
+        terr:String
     }],
     players: [String], //list of players for convenience
     deadPlayers:[String],//list of players who have been defeated (i.e., had their last army conquered)

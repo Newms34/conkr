@@ -15,7 +15,7 @@ var skillSchema = new mongoose.Schema({
         diagram:{},
         doneCouns:[],
         currCont:String,
-        cellCenters: [{ x: Number, y: Number, name:String}],
+        cellCenters: [{ x: Number, y: Number, name:String, terr:String}],
         img:String
     },
     creator:String,
@@ -23,3 +23,5 @@ var skillSchema = new mongoose.Schema({
 }, { collection: 'Map' });
 
 mongoose.model('Map', skillSchema);
+
+// db.Map.find({},{'mapData.countryNames':1,'mapData.diagram':1,'mapData.sites':1,'mapData.doneCouns':1,'mapData.cellCenters':1})
