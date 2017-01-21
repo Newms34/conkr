@@ -115,7 +115,16 @@ newArmies = function(usrs, map) {
     //number of 'conflicts' (i.e., one A army vs 1 D army is determined by min number of aRolls and dRolls.length)
     conflicts = (Math.min(aRolls.length, dRolls.length));
     for (i = 0; i < conflicts; i++) {
-        results.push(aRolls[i] > dRolls[i]); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
+        var attackWin = aRolls[i] > dRolls[i];//true: offensive army wins. False: defensive army wins (or tie, in which case defender wins).
+        //note that for attack modifiers, we ONLY look at the defending cell.
+        if (cd.terr=='plains'||cd.terr=='urban' && Math.random()<.15){
+            //attack bonus!
+            attackWin=true;
+        }else if(cd.terr=='mountain'||cd.terr=='swamp' && Math.random()<.12){
+            //def bonus!
+            attackWin=false;
+        }
+        results.push(attackWin); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
     }
     results.forEach((r) => {
         r ? cd.num-- : ca.num--;

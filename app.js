@@ -111,6 +111,30 @@ io.on('connection', function(socket) {
             io.emit('allGames', docs);
         })
     })
+    socket.on('armiesAdded', function(d) {
+        var theId = d.id || d.gameId;
+        console.log('Armies added, updating game',d.gameId)
+        mongoose.model('Game').findOne({ 'gameId': theId }, function(err, doc) {
+            console.log('found game!')
+            var findArmy = function(c) {
+                for (var i = 0; i < doc.armies.length; i++) {
+                    if (doc.armies[i].country == c) {
+                        return doc.armies[i];
+                    }
+                }
+                return false;
+            }
+            d.armies.forEach((a) => {
+                var DBArmy = findArmy(a.country);
+                console.log(DBArmy,a.num)
+                DBArmy.num = a.num;  
+            });
+            // doc.armies = d.armies;
+            doc.save(function(err, g) {
+                io.sockets.in(theId).emit('updateArmies', g);
+            })
+        })
+    })
     socket.on('getGamePieces', function(id) {
         console.log('GET GAME PIECES', id)
         var theId = id.id || id.gameId;
@@ -121,9 +145,11 @@ io.on('connection', function(socket) {
     })
     socket.on('nextTurn', function(d) {
         //this function, on confirms, switches the turn of a particular game to the next user.
+        console.log('requesting next turn')
         var actualUsr = sockmod.getAuthUsr(cookieSettings, cookie.parse(socket.handshake.headers.cookie).session),
             claimedUsr = d.usr;
         mongoose.model('Game').findOne({ gameId: d.game }, function(err, doc) {
+            console.log('player #', doc.turn, 'is', doc.players[doc.turn])
             if (err) {
                 console.log('game find err', err)
                 return;
@@ -138,14 +164,17 @@ io.on('connection', function(socket) {
                 io.sockets.in(d.game).emit('falseUser', { usr: d.usr })
                 return;
             } else if (doc.players[doc.turn] !== d.usr) {
+                console.log('wrongTurn!');
                 io.sockets.in(d.game).emit('wrongTurn', { usr: d.user }); //user tried to switch turns when it wasnt their turn.
             } else {
                 console.log('Switching turn!')
                 doc.turn++;
-                if (doc.turn >= doc.players.length) doc.turn = 0;
+                if (doc.turn >= doc.players.length) {
+                    doc.turn = 0;
+                }
                 //we need to add armies to this new player.
-
-                doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
+                console.log('Doc turn now', doc.turn)
+                newArmies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
                 var multPlayers = false;
                 while (!doc.armies) {
                     //this player extinct!
@@ -156,25 +185,32 @@ io.on('connection', function(socket) {
                     if (doc.turn >= doc.players.length) doc.turn = 0;
                     doc.armies = sockmod.addArmies(d.conts, doc.armies, doc.players[doc.turn]);
                 }
-                doc.save();
-                if (actualUsr == doc.players[doc.turn]) {
-                    io.sockets.in(d.game).emit('endGame', { winner: actualUsr })
-                    //now update usr model to add 1 win!
-                    //Note that this only happens if we've eliminated another player, which prevents the user from simply 'winning' one-person games to cheat level
-                    if (multPlayers) {
-                        mongoose.model('User').findOne({ name: d.usr }, function(err, doc) {
-                            doc.totalScore++;
-                            doc.save();
-                            io.emit('newScores');
+                doc.save(function(err, upd) {
+                    console.log('After save,', err, upd)
+                    if (actualUsr == upd.players[upd.turn]) {
+                        //no more users, so end game.
+                        io.sockets.in(d.game).emit('endGame', { winner: actualUsr })
+                            //now update usr model to add 1 win!
+                            //Note that this only happens if we've eliminated another player, which prevents the user from simply 'winning' one-person games to cheat level
+                        if (multPlayers) {
+                            mongoose.model('User').findOne({ name: d.usr }, function(err, udoc) {
+                                udoc.totalScore++;
+                                udoc.save();
+                                io.emit('newScores');
+                            })
+                        }
+                    } else {
+                        //e
+                        //notify front ends of turn switch
+                        console.log('Turn for game', d.game, 'successfully switched to', upd.players[upd.turn], '. Remaining players', upd.players)
+                        io.sockets.in(d.game).emit('turnSwitch', {
+                            id: d.game,
+                            usr: upd.players[upd.turn],
+                            armies: upd.armies,
+                            newA: newArmies
                         })
                     }
-                } else {
-                    io.sockets.in(d.game).emit('turnSwitch', {
-                        id: d.game,
-                        usr: doc.players[doc.turn]
-                    })
-                }
-                console.log('Turn for game', d.game, 'successfully switched to', doc.players[doc.turn])
+                });
             }
         });
     })

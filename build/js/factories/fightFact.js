@@ -32,6 +32,7 @@ app.factory('fightFact', function($rootScope, $http) {
             });
         },
         nextTurn: function(map, game, usr) {
+            console.log('in fightfact, next turn',map,game,usr,map.getContinents())
             socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr });
         },
         newGame: function(n, p, pwd) {

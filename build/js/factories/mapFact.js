@@ -696,7 +696,6 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         if (this.currCont && this.currCont.length) this.allConts.push(this.currCont);
                         this.currCont = [];
                     }
-                    m = false;
                     var names = [this.diagram.cells[c].name];
                     console.log('for cell', c, 'names starts as', names);
                     if (!this.diagram.cells[c].name) {

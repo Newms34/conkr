@@ -207,7 +207,40 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.moveArmies = true;
     var debugMode = false; //allows us to pick our own dudes as targets, allowing testing of attack mode without another player
     $scope.pickCell = function(ap) {
-        if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
+        if ($scope.currPlayer && $scope.currPlayer != $scope.user) {
+            return true; //not this player's turn
+        }
+        if ($scope.addMode && ap.usr == $scope.user) {
+            sandalchest.dialog({
+                buttons: [{
+                    text: 'Add em!',
+                    close: true,
+                    click: function() {
+                        var numNew = parseInt(document.querySelector('#numNewArms').value);
+                        ap.num += numNew;
+                        $scope.newArmies -= numNew;
+                        if (!$scope.newArmies) {
+                            $scope.addMode = false;
+                            console.log('emitting to back end, new armies:',$scope.armyPieces)
+                            socket.emit('armiesAdded', {
+                                gameId: $scope.gameId,
+                                armies: $scope.armyPieces
+                            });
+                        } else {
+                            $scope.$digest();
+                        }
+                    }
+                }, {
+                    text: 'Cancel',
+                    close: true,
+                    click: function() {
+
+                    }
+                }],
+                speed: 250
+            }, 'Add Armies', `How many armies do you want to add to ${ap.country}?<br/><input type='number' id='numNewArms' max='${$scope.newArmies}'`);
+            return true;
+        } else if ($scope.srcCell && $scope.map.diagram.cells[$scope.srcCell].country == ap.country && ap.status > 0) {
             ap.status = 0;
             $scope.srcCell = null;
             $scope.targCell = null;
@@ -359,6 +392,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.currGamePlayers[p] = d.avas[i];
         });
         $scope.armyPieces = fightFact.placeArmies($scope.map, d.armies, $scope.currGamePlayers);
+        $scope.currPlayer = d.players[d.turn];
         $scope.$digest();
     });
     socket.on('gameReady', function(d) {
@@ -455,10 +489,19 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     });
     $scope.nextTurn = function() {
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
-            console.log(res);
             if (res && res !== null) {
                 fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
         });
     };
+    socket.on('turnSwitch', function(t) {
+        $scope.currPlayer = t.usr;
+        if (t.usr == $scope.user) {
+            //allow player to add armies.
+            $scope.newArmies = t.newA;
+            $scope.addMode = true;
+            sandalchest.alert('new armies:', t.newA.toString())
+        }
+        $scope.$digest();
+    })
 });

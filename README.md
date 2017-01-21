@@ -27,7 +27,7 @@ After you've created an account, you'll be placed in the main game screen. There
 
 Note that, if you're already in a game when you log in, you will not be given these options.
 
-If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". For now, as long as a game's open, anyone can join. Eventually, I'll probably give you an option to make private, password-protected games. 
+If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". If you want, you can also give your game a password to make it private.
 
 Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if *you* are the creator of the game. 
 

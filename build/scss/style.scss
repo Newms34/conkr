@@ -286,3 +286,12 @@ canvas,
     border-bottom: 7.5px solid transparent;
     border-top: 7.5px solid transparent;
 }
+.other-player{
+    background:#fed;
+    bottom:0px;
+    padding:8px;
+    position:fixed;
+    & span{
+        font-weight:bold;
+    }
+}
