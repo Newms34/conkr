@@ -141,7 +141,7 @@ router.get('/startGame/:id', function(req, res, next) {
             var players = doc.players;
             if (!doc.avas) doc.avas = [];
             doc.armies = sockmod.getInitArmies(couns, players);
-            var allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128059, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
+            var allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
             //pick an avatar (animal) for each player
             players.forEach((p) => {
                 var pik = Math.floor(Math.random() * allAnims.length);

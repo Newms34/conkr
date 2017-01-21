@@ -75,6 +75,7 @@ io.on('connection', function(socket) {
                     } else if (a.country == cellChanges.cd.country) {
                         a.num = cellChanges.cd.num;
                         if (cellChanges.status) {
+                            a.newArmy = true;//This disallows negative effects on first turn
                             a.user = cellChanges.ca.user;
                         }
                     }
@@ -201,6 +202,21 @@ io.on('connection', function(socket) {
                         }
                     } else {
                         //e
+                        upd.armies.forEach((ar)=>{
+                            if(ar.newArmy){
+                                ar.newArmy = false;
+                                return;
+                            }else{
+                                //if player's in a swamp terrain, the noxious fumes can kill 1 army per turn (as long as there's more than 1 army in the zone). If they're in an urban terrain, they can recruit locals to help
+                                if(ar.terr=='swamp' && ar.num>1 && Math.random()<.1){
+                                    ar.num--;
+                                }else if (ar.terr=='urban' && ar.num<20 && Math.random()<.1){
+                                    ar.num++;
+                                }else if(ar.terr=='forest' && ar.num>1 && Math.random()<.04){
+                                    ar.num--;
+                                }
+                            }
+                        })
                         //notify front ends of turn switch
                         console.log('Turn for game', d.game, 'successfully switched to', upd.players[upd.turn], '. Remaining players', upd.players)
                         io.sockets.in(d.game).emit('turnSwitch', {
