@@ -33,11 +33,11 @@ swamp: sight,+def
 forest: no-sight
 urban: no-sight,+off
 
-other possible locations: bog, cave, river... 
+other possible locations: cave (no vis,+def), river (slow? -def?) , village (recruit, vis, +off) 
 
 -idea for slow effect: army gets defense penalty if defending on the turn after they moved in. slow for swamp. 
  - other next-turn effects? damage over time? possibly very smol % chance to reduce # armies by 1 (leaving at least 1 army) each turn.
 
-how do i implement defense/offense?:
--have small (like, .1) chance for roll to ignore status of dice. who gets this 'ignore' chance is based on who has the higher stat (def or off) in a battle
+effect so far: +off, +def, blind (no vis), poison, animal attacks, recruit
+
 */

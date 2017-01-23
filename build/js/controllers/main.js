@@ -71,11 +71,11 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.getTerrStats = function(terr) {
         //this is NOT used for actually calculating terrain effects, as the actual combat calcs are done on the back-end. Instead, it simply creates labels for the user to tell what the effects of each terrain is.
         var terrLbls = {
-            'swamp': '&#128065; &#128737;',
+            'swamp': '&#128065; &#128737; &#9760;',
             'plains': '&#128065; &#128481;',
-            'forest': '&#10006;',
+            'forest': '&#10006; &#128059;',
             'mountain': '&#10006; &#128737;',
-            'urban': '&#10006; &#128481;'
+            'urban': '&#10006; &#128481; &#128587;'
         };
         return terrLbls[terr];
     };
@@ -479,8 +479,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         if (res.status) {
             //zone 'conkrd', so replace defending user with attacking user
             res.cd.usr = res.ca.usr;
+            socket.emit('getGamePieces',{id:$scope.gameId})
         }
-        console.log('from rcvDoFight, we get', defr, atkr);
+        console.log('from rcvDoFight, we get',res, defr, atkr);
         replProps.forEach((p) => {
             defr[p] = res.cd[p];
             atkr[p] = res.ca[p];

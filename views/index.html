@@ -180,12 +180,12 @@
             <!-- ADD ||ap.usr == user -->
             <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: <span ng-show='ap.terr=="plains" ||ap.terr=="swamp" ||ap.usr == user'>{{ap.num}}</span><span ng-hide='ap.terr=="plains" ||ap.terr=="swamp" ||ap.usr == user'>?</span></div>
     </div>
-    <div ng-show='!currPlayer||currPlayer==user'>
+    <div ng-if='!currPlayer||currPlayer==user'>
         <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||moveArmies||!btns'>&#9876;Attack!</button>
-        <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-show='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!" id='move-mode-btn'><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
-        <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-show='btns' ng-click='nextTurn();' id='end-turn-btn'>End Turn</button>
+        <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-if='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!" id='move-mode-btn'><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
+        <button class='btn btn-primary col-md-1 col-md-offset-6 nxt-btn' ng-if='btns' ng-click='nextTurn();' id='end-turn-btn'>End Turn</button>
     </div>
-    <div ng-show='currPlayer && currPlayer!=user' class='col-md-2 col-md-offset-5 other-player'>
+    <div ng-if='currPlayer && currPlayer!=user' class='col-md-2 col-md-offset-5 other-player'>
         Player <span>{{currPlayer}}</span>'s turn!
     </div>
     <div id='ded' ng-show='isDead'></div>

@@ -67,7 +67,6 @@ io.on('connection', function(socket) {
             } else if (doc.players[doc.turn] !== d.user) {
                 io.sockets.in(d.gameId).emit('wrongTurn', { usr: d.user }); //user tried to take turn when it wasnt their turn.
             } else {
-                console.log('socket', socket)
                 var cellChanges = sockmod.doFight(d.ca, d.cd, d.ra, d.rd); //ch-ch-ch-changes!
                 doc.armies.forEach((a) => {
                     if (a.country == cellChanges.ca.country) {
@@ -76,10 +75,11 @@ io.on('connection', function(socket) {
                         a.num = cellChanges.cd.num;
                         if (cellChanges.status) {
                             a.newArmy = true;//This disallows negative effects on first turn
-                            a.user = cellChanges.ca.user;
+                            a.user = cellChanges.ca.usr;
                         }
                     }
                 })
+                console.log('CHANGE STUFF',cellChanges,doc.armies)
                 doc.save();
                 io.sockets.in(d.gameId).emit('rcvDoFight', cellChanges);
             }
@@ -89,10 +89,6 @@ io.on('connection', function(socket) {
         var armyChanges = sockmod.newArmies;
         io.sockets.in(socket.room).emit('rcvAddArmies', armyChanges);
     });
-    socket.on('testRoom', function(t) {
-        console.log('TEST ROOM', t)
-        io.sockets.in(socket.room).emit('roomTestCli', { t: t, msg: 'hi from server!' + socket.room })
-    })
     socket.on('gameStarted', function(doc) {
         //game has been started. send message to all players, so they can connect
         io.emit('putInGame', doc);

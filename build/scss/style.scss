@@ -28,6 +28,7 @@ canvas,
     opacity: .4;
     transition-duration: .5s;
     cursor: pointer;
+    border-radius:5px;
     &:hover,
     &:hover span {
         opacity: 1!important;

@@ -99,38 +99,44 @@ newArmies = function(usrs, map) {
         status = false; //final status (true=conkr'd)
     for (var i = 0; i < ra; i++) {
         //roll attacker
-        aRolls.push(Math.ceil(Math.floor() * 6));
+        aRolls.push(Math.ceil(Math.random() * 6));
     }
     aRolls.sort((a, b) => {
-        return a > b
+        return b - a;
     });
     if (aRolls.length > 2) aRolls.pop(); //for attacker, only first two die count. Pop off the lowest one if it's included.
     for (i = 0; i < rd; i++) {
         //roll defender
-        dRolls.push(Math.ceil(Math.floor() * 6));
+        dRolls.push(Math.ceil(Math.random() * 6));
     }
     dRolls.sort((a, b) => {
-        return a > b
+        return b - a;
     });
     //number of 'conflicts' (i.e., one A army vs 1 D army is determined by min number of aRolls and dRolls.length)
     conflicts = (Math.min(aRolls.length, dRolls.length));
     for (i = 0; i < conflicts; i++) {
-        var attackWin = aRolls[i] > dRolls[i];//true: offensive army wins. False: defensive army wins (or tie, in which case defender wins).
+        var attackWin = aRolls[i] > dRolls[i]; //true: offensive army wins. False: defensive army wins (or tie, in which case defender wins).
         //note that for attack modifiers, we ONLY look at the defending cell.
-        if (cd.terr=='plains'||cd.terr=='urban' && Math.random()<.15){
+        if (cd.terr == 'plains' || cd.terr == 'urban' && Math.random() < .15) {
             //attack bonus!
-            attackWin=true;
-        }else if(cd.terr=='mountain'||cd.terr=='swamp' && Math.random()<.12){
+            attackWin = true;
+        } else if (cd.terr == 'mountain' || cd.terr == 'swamp' && Math.random() < .12) {
             //def bonus!
-            attackWin=false;
+            attackWin = false;
         }
         results.push(attackWin); //basically, if attacker number is higher, they win. Otherwise (also in tie), defender wins.
     }
+    console.log('RESULTS', results, aRolls, dRolls)
     results.forEach((r) => {
         r ? cd.num-- : ca.num--;
     });
-        //zone 'conquered'
-    status = !cd.num;
+    //zone 'conquered'
+    status = cd.num==0;
+    if (status){
+        //if zone is conquered, move number of attacking armies in to 'occupy'.
+        ca.num-=ra;
+        cd.num=ra;
+    }
     console.log(`End result: ${ca.country} ${ca.num} vs ${cd.country} ${cd.num}`)
     return {
         ca: ca,
@@ -140,15 +146,15 @@ newArmies = function(usrs, map) {
 }, getInitArmies = function(c, p) {
     var arr = [];
     c.forEach((n) => {
-        console.log('N IS',n,'END N')
+        console.log('N IS', n, 'END N')
         arr.push({
             user: p[Math.floor(Math.random() * p.length)],
             country: n.name,
             num: 1,
-            terr:n.terr
+            terr: n.terr
         });
     });
-    console.log('Armies:',arr);
+    console.log('Armies:', arr);
     return arr;
 }, getAuthUsr = function(settings, rawDough) {
     //get the authorized username from the client sessions cookie. This allows us to authenticate that the person doing an attack is, in fact, the person doing the attack.
