@@ -3,17 +3,18 @@ Gulp is a node package that concatenates your files. It basically can convert a 
 More importantly, it also means our user's browser only needs to fetch ONE file (all.min.js), instead of... however many i create. 
 */
 
-var gulp = require('gulp');
-var jshint = require('gulp-jshint');
-var sass = require('gulp-sass');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var kid = require('child_process');
-var ps = require('ps-node');
-var gutil = require('gulp-util');
-var cleany = require('gulp-clean-css')
-var babel = require('gulp-babel');
+const gulp = require('gulp');
+const jshint = require('gulp-jshint');
+const sass = require('gulp-sass');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
+const kid = require('child_process');
+const ps = require('ps-node');
+const gutil = require('gulp-util');
+const cleany = require('gulp-clean-css');
+const babel = require('gulp-babel');
+const ngAnnotate = require('gulp-ng-annotate');
 // Lint Task
 gulp.task('lint', function() {
     return gulp.src(['build/js/controllers/*.js','build/js/factories/*.js'])
@@ -36,7 +37,8 @@ gulp.task('scripts', function() {
         .pipe(gulp.dest('public/js'))
         .pipe(rename('all.min.js'))
         .pipe(babel({presets: ['es2015']}))
-        .pipe(uglify({ mangle: false }).on('error', gutil.log))
+        .pipe(ngAnnotate())
+        .pipe(uglify().on('error', gutil.log))
         .pipe(gulp.dest('public/js'));
 });
 
