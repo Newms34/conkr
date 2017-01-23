@@ -28,7 +28,8 @@
     "angular": "^1.6.1",
     "socket.io-client": "^1.7.2",
     "sandal-chest": "*",
-    "angular-sanitize": "^1.6.1"
+    "angular-sanitize": "^1.6.1",
+    "angular-bootstrap-contextmenu": "^0.9.9"
   },
   "resolutions": {
     "angular": "^1.6.1"

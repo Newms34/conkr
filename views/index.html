@@ -174,7 +174,7 @@
     </div>
     <canvas width="{{win.w}}" height="{{win.h}}" ng-show='!gameMenu'></canvas>
     <div id='game-parts' style='width:{{win.w}}px; height:{{win.h}}px;' ng-show='!gameMenu'>
-        <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.terr!="plains" && ap.terr!="swamp" && ap.usr!=user ?ap.hideName:ap.fullName}}' ng-click='pickCell(ap);'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
+        <div class='country-army' ng-class="{'src-cell':ap.status==1,'targ-cell':ap.status==2}" ng-repeat='ap in armyPieces' style='left:{{ap.x}}px;top:{{ap.y-14}}px;min-width:{{ap.wid}}px;' title='{{ap.terr!="plains" && ap.terr!="swamp" && ap.usr!=user ?ap.hideName:ap.fullName}}' ng-click='pickCell(ap);' context-menu='armyRightClick(ap)'><span style='opacity:0;' ng-class="{'perma-on-lbl':ap.status>0}">{{ap.country}}</span>
             <br/>
             <span ng-bind-html='getTerrStats(ap.terr)'></span>
             <!-- ADD ||ap.usr == user -->
@@ -189,12 +189,19 @@
         Player <span>{{currPlayer}}</span>'s turn!
     </div>
     <div id='ded' ng-show='isDead'></div>
+    <div id='loading' ng-show='loading'>
+        <div class='col-md-3 col-md-offset-4'>LOADING...
+            <hr/>
+            <div id='spinner'></div>
+        </div>
+    </div>
     <script src='https://cdn.socket.io/socket.io-1.2.0.js'></script>
     <script src="/jquery/dist/jquery.min.js"></script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/sandal-chest/sandal-chest.js"></script>
     <script src="/angular/angular.min.js"></script>
     <script src="/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="/angular-bootstrap-contextmenu/contextMenu.js"></script>
     <script src="/socket.io-client/dist/socket.io.min.js"></script>
     <script src="./js/all.min.js"></script>
 </body>

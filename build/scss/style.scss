@@ -296,3 +296,33 @@ canvas,
         font-weight:bold;
     }
 }
+#loading{
+    width:100vw;
+    height:100vh;
+    font-size:xx-large;
+    text-align:center;
+    color:#fff;
+    background:rgba(0,0,0,.95);
+    z-index:1000;
+    top:0;
+    left:0;
+    position:fixed;
+    & div{
+        top:30%;
+        text-align:center;
+    }
+}
+#spinner{
+    position:relative;
+  border-radius:50%;
+  left:30%;
+  width:100px;
+  height:100px;
+  box-shadow:6px 0 9px -4px #4F6F95,-6px 0 9px -4px #59832E inset;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin{
+  from{transform: rotate(0deg);}
+  to{transform:rotate(360deg)}
+}

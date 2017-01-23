@@ -2211,7 +2211,7 @@ Voronoi.prototype.compute = function(sites, bbox) {
     return diagram;
 };
 
-const app = angular.module('conkr', ['ngSanitize']).controller('chatController', function($scope, mapFact, miscFact) {
+const app = angular.module('conkr', ['ngSanitize','ui.bootstrap.contextMenu']).controller('chatController', function($scope, mapFact, miscFact) {
 	$scope.prevSent = [];
     $scope.msgs = [{
     	now:new Date().toLocaleTimeString(),
@@ -2419,12 +2419,14 @@ var socket = io(),
 app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
     $scope.isDead = false;
     //before anything, check to see if we're logged in!
+    $scope.loading = true;
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
         $scope.user = r.data.name;
         hintMaker(1, function() {
             miscFact.checkInGame(r.data.name).then(function(m) {
+
                 if (m.data.game) {
                     //load map this player's in.
                     $scope.reloadGame(m.data.game);
@@ -2432,6 +2434,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                     $scope.isDead = !m.data.alive;
                     $scope.canJoin = false; //player cannot join a game while they're in one
                 } else {
+                    $scope.loading = false;
+                    $scope.$digest();
                     //not in game!
                     hintMaker(2);
                 }
@@ -2463,6 +2467,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
+            $scope.loading=false;
+                $scope.$digest();
             $scope.gameReady = true;
             hintMaker(7, function() {
                 hintMaker(8);
@@ -2595,6 +2601,47 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             });
         }
     });
+    $scope.armyRightClick = function(ap) {
+        var terrEffs = {
+            'mountain': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#10006; No Visibility - Defending army number hidden'],
+            'urban': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defending army to gain +1 army each turn (max of 10 armies)'],
+            'swamp': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defending army to lose 1 army per turn (may not lose all armies)'],
+            'plains': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#128065; Visibility - Defending army numbers known'],
+            'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defending army to lose 1 army per turn (may not lose all armies)']
+        }
+        return [
+            [function() {
+                return '<strong>Country:</strong> ' + ap.country;
+            }, function() {
+
+            }],
+            [function() {
+                return '<strong>User:</strong> &#' + ap.lbl + '; ' + ap.usr;
+            }, function() {
+
+            }],
+            [function() {
+                return '<strong>Number of Armies:</strong> ' + ap.num;
+            }, function() {
+
+            }],
+            [function() {
+                return '<strong>Terrain:</strong> ' + ap.terr;
+            }, function() {
+
+            }],
+            [function() {
+                var terrEff = '<ul>';
+                terrEffs[ap.terr].forEach((ef) => {
+                    terrEff += '<li>' + ef + '</li>';
+                })
+                console.log(terrEff)
+                return terrEff + '</ul>'
+            }, function() {
+
+            }]
+        ]
+    }
     $scope.deleteMap = function(id) {
         sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
@@ -2637,7 +2684,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                         $scope.newArmies -= numNew;
                         if (!$scope.newArmies) {
                             $scope.addMode = false;
-                            console.log('emitting to back end, new armies:',$scope.armyPieces)
+                            console.log('emitting to back end, new armies:', $scope.armyPieces)
                             socket.emit('armiesAdded', {
                                 gameId: $scope.gameId,
                                 armies: $scope.armyPieces
@@ -2895,9 +2942,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         if (res.status) {
             //zone 'conkrd', so replace defending user with attacking user
             res.cd.usr = res.ca.usr;
-            socket.emit('getGamePieces',{id:$scope.gameId})
+            socket.emit('getGamePieces', { id: $scope.gameId })
         }
-        console.log('from rcvDoFight, we get',res, defr, atkr);
+        console.log('from rcvDoFight, we get', res, defr, atkr);
         replProps.forEach((p) => {
             defr[p] = res.cd[p];
             atkr[p] = res.ca[p];
