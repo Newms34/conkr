@@ -204,17 +204,22 @@ io.on('connection', function(socket) {
                                 return;
                             }else{
                                 //if player's in a swamp terrain, the noxious fumes can kill 1 army per turn (as long as there's more than 1 army in the zone). If they're in an urban terrain, they can recruit locals to help
-                                if(ar.terr=='swamp' && ar.num>1 && Math.random()<.1){
+                                if((ar.terr=='swamp' ||ar.terr =='frozen swamp') && ar.num>1 && Math.random()<.1){
                                     ar.num--;
-                                }else if (ar.terr=='urban' && ar.num<20 && Math.random()<.1){
+                                }else if ((ar.terr=='city' ||ar.terr =='frozen city')&& ar.num<20 && Math.random()<.1){
                                     ar.num++;
-                                }else if(ar.terr=='forest' && ar.num>1 && Math.random()<.04){
+                                }else if((ar.terr=='forest' ||ar.terr =='boreal forest') && ar.num>1 && Math.random()<.04){
                                     ar.num--;
+                                }
+                                if ((ar.terr=='frozen swamp'||ar.terr=='frozen city'||ar.terr=='tundra'||ar.terr=='mountain'||ar.terr=='boreal forest') && Math.random<.05){
+                                    ar.num--;
+                                    //very small chance to lose one army per turn due to cold weatherbitz
                                 }
                             }
                         })
                         //notify front ends of turn switch
                         console.log('Turn for game', d.game, 'successfully switched to', upd.players[upd.turn], '. Remaining players', upd.players)
+                        upd.save();
                         io.sockets.in(d.game).emit('turnSwitch', {
                             id: d.game,
                             usr: upd.players[upd.turn],

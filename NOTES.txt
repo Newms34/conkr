@@ -40,4 +40,14 @@ other possible locations: cave (no vis,+def), river (slow? -def?) , village (rec
 
 effect so far: +off, +def, blind (no vis), poison, animal attacks, recruit
 
+latitude based climate:
+ percent north or south as chance for zone to be snowbound. 
+
+WARM:		COLD:
+Urban		Frozen City
+Forest		Arboreal Forest
+Plains		Tundra
+Swamp		Frozen Swamp
+Hills 		Mountain
+
 */

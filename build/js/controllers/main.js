@@ -27,6 +27,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
 
         });
     });
+    $scope.biomeTypes = {
+        warm: ['city', 'swamp', 'forest', 'plains', 'hills'],
+        cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
+    };
+    $scope.isInvis = function(ap) {
+        return ap.terr == 'city'|| ap.terr == 'forest'||ap.terr == 'hills'||ap.terr == 'frozen city'||ap.terr == 'boreal forest'|| ap.terr == 'mountain';
+    };
     $scope.btns = true;
     $scope.allGames = [];
     $scope.usrGames = function() {
@@ -51,8 +58,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
-            $scope.loading=false;
-                $scope.$digest();
+            $scope.loading = false;
+            $scope.$digest();
             $scope.gameReady = true;
             hintMaker(7, function() {
                 hintMaker(8);
@@ -80,8 +87,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             'swamp': '&#128065; &#128737; &#9760;',
             'plains': '&#128065; &#128481;',
             'forest': '&#10006; &#128059;',
-            'mountain': '&#10006; &#128737;',
-            'urban': '&#10006; &#128481; &#128587;'
+            'hills': '&#10006; &#128737;',
+            'city': '&#10006; &#128481; &#128587;',
+            'frozen swamp': '&#10052; &#128065; &#128737; &#9760;',
+            'tundra': '&#10052; &#128065; &#128481;',
+            'boreal forest': '&#10052; &#10006; &#128059;',
+            'mountain': '&#10052; &#10006; &#128737;',
+            'frozen city': '&#10052; &#10006; &#128481; &#128587;'
         };
         return terrLbls[terr];
     };
@@ -187,11 +199,16 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     });
     $scope.armyRightClick = function(ap) {
         var terrEffs = {
-            'mountain': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#10006; No Visibility - Defending army number hidden'],
-            'urban': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defending army to gain +1 army each turn (max of 10 armies)'],
-            'swamp': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defending army to lose 1 army per turn (may not lose all armies)'],
-            'plains': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#128065; Visibility - Defending army numbers known'],
-            'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defending army to lose 1 army per turn (may not lose all armies)']
+            'hills': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden'],
+            'city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)'],
+            'swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
+            'plains': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known'],
+            'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
+            'mountain': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'tundra': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'boreal forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack']
         }
         return [
             [function() {

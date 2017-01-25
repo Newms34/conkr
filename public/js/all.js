@@ -2443,6 +2443,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
 
         });
     });
+    $scope.biomeTypes = {
+        warm: ['city', 'swamp', 'forest', 'plains', 'hills'],
+        cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
+    };
+    $scope.isInvis = function(ap) {
+        return ap.terr == 'city'|| ap.terr == 'forest'||ap.terr == 'hills'||ap.terr == 'frozen city'||ap.terr == 'boreal forest'|| ap.terr == 'mountain';
+    };
     $scope.btns = true;
     $scope.allGames = [];
     $scope.usrGames = function() {
@@ -2467,8 +2474,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         mapFact.loadOneMap(g.mapId).then(function(m) {
             console.log('result of attempt to get 1 map', m);
             $scope.pickMap(m.data.mapData, g.mapId, true);
-            $scope.loading=false;
-                $scope.$digest();
+            $scope.loading = false;
+            $scope.$digest();
             $scope.gameReady = true;
             hintMaker(7, function() {
                 hintMaker(8);
@@ -2496,8 +2503,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             'swamp': '&#128065; &#128737; &#9760;',
             'plains': '&#128065; &#128481;',
             'forest': '&#10006; &#128059;',
-            'mountain': '&#10006; &#128737;',
-            'urban': '&#10006; &#128481; &#128587;'
+            'hills': '&#10006; &#128737;',
+            'city': '&#10006; &#128481; &#128587;',
+            'frozen swamp': '&#10052; &#128065; &#128737; &#9760;',
+            'tundra': '&#10052; &#128065; &#128481;',
+            'boreal forest': '&#10052; &#10006; &#128059;',
+            'mountain': '&#10052; &#10006; &#128737;',
+            'frozen city': '&#10052; &#10006; &#128481; &#128587;'
         };
         return terrLbls[terr];
     };
@@ -2603,11 +2615,16 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     });
     $scope.armyRightClick = function(ap) {
         var terrEffs = {
-            'mountain': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#10006; No Visibility - Defending army number hidden'],
-            'urban': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defending army to gain +1 army each turn (max of 10 armies)'],
-            'swamp': ['&#128737; Defensive bonus - Increased chance for defending army to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defending army to lose 1 army per turn (may not lose all armies)'],
-            'plains': ['&#128481; Offensive bonus - Increased chance for attacking army to win a conflict', '&#128065; Visibility - Defending army numbers known'],
-            'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defending army to lose 1 army per turn (may not lose all armies)']
+            'hills': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden'],
+            'city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)'],
+            'swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
+            'plains': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known'],
+            'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
+            'mountain': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Poison - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'tundra': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'boreal forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack']
         }
         return [
             [function() {
@@ -3135,7 +3152,11 @@ app.factory('mapFact', function($rootScope, $http, $q) {
             ["stan", "dor", "vania", "nia", "lor", "cor", "dal", "bar", "sal", "ra", "la", "lia", "jan", "rus", "ze", "tan", "wana", "sil", "so", "na", "le", "bia", "ca", "ji", "ce", "ton", "ssau", "sau", "sia", "ca", "ya", "ye", "yae", "tho", "stein", "ria", "nia", "burg", "nia", "gro", "que", "gua", "qua", "rhiel", "cia", "les", "dan", "nga", "land"],
             ["ia", "a", "en", "ar", "istan", "aria", "ington", "ua", "ijan", "ain", "ium", "us", "esh", "os", "ana", "il", "ad", "or", "ea", "eau", "ax", "on", "ana", "ary", "ya", "ye", "yae", "ait", "ein", "urg", "al", "ines", "ela"]
         ],
-        countryPrefs = ['Republic of', 'Kingdom of', 'Empire of', 'United Lands of', 'Dominion of', 'Holy empire of'];
+        countryPrefs = ['Republic of', 'Kingdom of', 'Empire of', 'United Lands of', 'Dominion of', 'Holy empire of'],
+        biomeTypes = {
+            warm: ['city', 'swamp', 'forest', 'plains', 'hills'],
+            cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
+        };
 
     return {
         loadMaps: function() {
@@ -3338,7 +3359,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                             site.x = (site.x + cell.site.x) / 2;
                             site.y = (site.y + cell.site.y) / 2;
                         }
-                        // probability of mytosis
+                        // probability of mitosis
                         if (rn > (1 - p)) {
                             dist /= 2;
                             sites.push({
@@ -3366,7 +3387,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                                 x: c.site.x,
                                 y: c.site.y,
                                 name: c.name || c.country,
-                                terr:c.terrType||'plains'
+                                terr: c.terrType || 'plains'
                             });
                         }
                     });
@@ -3419,7 +3440,6 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
                         var newName = null;
-                        console.log('GIVING CELL NAME FOR', n)
                         if (cell.isLand) {
                             var isUnique = false;
                             while (!isUnique) {
@@ -3434,6 +3454,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                                 cell.name = newName;
                             }
                             this.countryNames.push(newName);
+                            console.log('Cell',newName,'has terrain',cell.terrType)
                         }
                     }
                 },
@@ -3487,22 +3508,25 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         if (Math.random() > 0.7) {
                             //we're using earth-like ratios here, where 70% of earth is water
                             this.diagram.cells[i].isLand = true;
-                            switch (Math.floor(Math.random() * 5)) {
-                                case 0:
-                                    this.diagram.cells[i].terrType = 'forest';
-                                    break;
-                                case 1:
-                                    this.diagram.cells[i].terrType = 'mountain';
-                                    break;
-                                case 2:
-                                    this.diagram.cells[i].terrType = 'urban';
-                                    break;
-                                case 3:
-                                    this.diagram.cells[i].terrType = 'swamp';
-                                    break;
-                                default:
-                                    this.diagram.cells[i].terrType = 'plains';
+                            //determine biome:
+
+                            /*chance for terrain to be snow-covered is based on 
+                            the y-position as follows:
+                             - Take percent position (y/canvas height), subtract 5. 
+                             - This gives us, essentially, a max of 50% in either direction.
+                             - Do Math.abs() on it, since it doesnt if we're N vs S.
+                             - If this val is >.25 (about 45deg irl), chance to be frozen
+                             - As we move to poles, Math.random()/.4 (max of 0.25) has a SMALLER chance of
+                             being greater than our Lat. If greater, warm. Otherwise, cold.
+                            */
+                            var isFroze = Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) > .25 ? Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) - .25 > (Math.random() / 4) : false;
+                            console.log('CELL',i,'FROZEN?',isFroze)
+                            if(isFroze){
+                                this.diagram.cells[i].terrType = biomeTypes['cold'][Math.floor(Math.random()*biomeTypes['cold'].length)];
+                            }else{
+                                this.diagram.cells[i].terrType = biomeTypes['warm'][Math.floor(Math.random()*biomeTypes['warm'].length)];
                             }
+
                         } else {
                             this.diagram.cells[i].terrType = 'water';
                             this.diagram.cells[i].isLand = false;
@@ -3547,12 +3571,6 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         while (iEdge--) {
                             ctx.beginPath();
                             edge = edges[iEdge];
-                            // var edgeGradLine = me.getEdgeGrad(edge);
-                            // console.log(edgeGradLine);
-                            // // gradArr.push(ctx.createLinearGradient(edgeGradLine.xi, edgeGradLine.yi, edgeGradLine.xf, edgeGradLine.yf));
-                            // // gradArr[gradArr.length - 1].addColorStop(0, edgeGradLine.start);
-                            // // gradArr[gradArr.length - 1].addColorStop(1, edgeGradLine.end);
-                            // ctx.strokeStyle = gradArr[gradArr.length - 1];
                             ctx.strokeStyle = '#003259';
                             v = edge.va;
                             ctx.moveTo(v.x, v.y);
@@ -3592,21 +3610,6 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return false;
                 },
-                // counLblObjs: function() {
-                //     var ctx = this.canvas.getContext('2d'); //for measuring
-                //     var arr = [];
-                //     for (var i = 0; i < this.diagram.cells.length; i++) {
-                //         var cell = this.diagram.cells[i];
-                //         if (cell.name && cell.isLand) {
-                //             arr.push({
-                //                 boxWid: ctx.measureText(cell.name) + 4,
-                //                 boxHeight: 13,
-                //                 boxLeft: Math.floor(cell.site.x - (textBoxWid / 2) - 2),
-                //                 boxTop: cell.site.y - 2
-                //             })
-                //         }
-                //     }
-                // },
                 buildTreemap: function() {
                     var treemap = new QuadTree({
                         x: this.bbox.xl,
@@ -3726,43 +3729,18 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     ctx.fill();
                 },
                 doAllCells: function() {
-                    var landTypes = ['plains', 'swamp', 'forest', 'mountain', 'urban'],
+                    var landTypes = biomeTypes['warm'].concat(biomeTypes['cold']),
                         landImgProms = [],
                         imgArr = [],
                         me = this,
                         ctx = this.canvas.getContext("2d");
-                    // for (var i = 0; i < landTypes.length; i++) {
-                    //     imgArr[i] = new Image();
-                    //     imgArr[i].src = '../img/terrains/' + landTypes[i] + '.jpg';
-                    // }
-
-                    // function resolvePromises(n) {
-                    //     return $q.when(n);
-                    // }
-                    // landImgProms = imgArr.map(resolvePromises);
-                    // $q.all(landImgProms).then(function(terrImgs) {
-                    //     terrImgs.forEach(function(t) {
-                    //         var thisTerr = t.src.slice(t.src.lastIndexOf('/') + 1, t.src.lastIndexOf('.')) || 'plains';
-                    //         var thePtrn = ctx.createPattern(t, "repeat");
-                    //         console.log('IMAGE PATTERN',thePtrn,t)
-                    //         for (var n = 0; n < me.diagram.cells.length; n++) {
-                    //             // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
-                    //             if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
-                    //                 me.renderCell(n, thePtrn);
-                    //             }
-                    //         }
-                    //     })
-                    //     me.makeCellNames();
-                    //     me.getCellNames();
-                    //     me.doCellSites();
-                    // });
                     var imsDone = 0;
                     for (var i = 0; i < landTypes.length; i++) {
                         imgArr[i] = new Image();
-                        imgArr[i].src = '../img/terrains/' + landTypes[i] + '.jpg';
+                        imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/,'_') + '.jpg';
                         imgArr[i].onload = function() {
                             var thePtrn = ctx.createPattern(this, "repeat"),
-                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')) || 'plains';
+                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_',' ')|| 'plains';
                             for (var n = 0; n < me.diagram.cells.length; n++) {
                                 // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
                                 if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
@@ -3770,7 +3748,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                                 }
                             }
                             imsDone++;
-                            console.log('IMAGES DONE:',imsDone,'of',landTypes.length)
+                            console.log('IMAGES DONE:', imsDone, 'of', landTypes.length)
                             if (imsDone == landTypes.length) {
                                 me.makeCellNames();
                                 me.getCellNames();
@@ -3778,17 +3756,6 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                             }
                         }
                     }
-
-                    // var
-                    //     ctx = this.canvas.getContext("2d");
-                    // plainsImg.src = '../img/grass.jpg';
-                    // plainsImg.onload = function() {
-                    //     me.landPattern = ctx.createPattern(this, "repeat");
-                    //     for (var n = 0; n < me.diagram.cells.length; n++) {
-                    //         if (me.diagram.cells[n].isLand) me.renderCell(n);
-                    //     }
-
-                    // };
                 },
                 getCellByName: function(n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
