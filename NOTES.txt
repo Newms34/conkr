@@ -50,4 +50,7 @@ Plains		Tundra
 Swamp		Frozen Swamp
 Hills 		Mountain
 
+Add resign option?
+BUG FIX: if attacker loses an army, but conquers zone, num moved in should reflect this (i.e., minus the dead army)
+
 */

@@ -50,7 +50,8 @@ Finally, once the game's started, it cycles thru each player in sequence. During
   - **Boreal Forest:** Frozen version of the Forest. You'll have to contend both with animal attacks and the frigid weather here. &#10006; No visible armies, &#128059; animal attacks, &#10052; cold weather.
   - **Frozen City:** Frozen version of the City. Who would build a city here? It's freezing! Bonus to &#128481; offense, &#10006; no visible armies, &#128587; recruiting, &#10052; cold weather.
   - **Mountain:** Frozen version of Hills. Still nice and cozy and defend-y, but this time you'll need a warm coat. Bonus to &#128737; defense, &#10006; no visible armies, &#10052; cold weather.
- 4. If you attack a country and kill off the last enemy army, you conquer that country! One of your armies moves in to take up residence and piss off the locals.
+ 4. If you attack a country and kill off the last enemy army, you conquer that country! Your armies move in to take up residence and piss off the locals.
+    - You *must* move the number of armies you attacked with into the new country. So if you attacked with 3 armies, you'll need to move 3 armies from the attacking country into the new one.
  5. The end of the game occurs under two circumstances, relative to each player:
   - If you conquer all countries, congrats, you win! And... nothing happens. So far. Eventually, each win will give a player a score point, and you can brag to your friends about how much you pwned them.
   - If the last of your countries is conquered, you lose! You'll still be able to watch (and say rude things about) your enemies, but you can no longer influence the battle. Except, you know, by like psychological warfare.
