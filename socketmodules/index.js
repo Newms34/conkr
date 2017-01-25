@@ -134,8 +134,11 @@ newArmies = function(usrs, map) {
     status = cd.num==0;
     if (status){
         //if zone is conquered, move number of attacking armies in to 'occupy'.
-        ca.num-=ra;
-        cd.num=ra;
+        numTransf = ra - results.filter(function(r){
+            return r;
+        }).length;
+        ca.num-=numTransf;
+        cd.num=numTransf;
     }
     console.log(`End result: ${ca.country} ${ca.num} vs ${cd.country} ${cd.num}`)
     return {
