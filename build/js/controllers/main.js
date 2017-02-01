@@ -500,7 +500,6 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.currPlayer = d.players[d.turn];
         $scope.getPStats(d.armies, d.players, d.avas);
         $scope.$digest();
-        throw new Error('STOP HERE')
     });
     socket.on('gameReady', function(d) {
         $scope.gameIsReady = true;
