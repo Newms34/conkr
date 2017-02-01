@@ -49,15 +49,20 @@ Forest		Arboreal Forest
 Plains		Tundra
 Swamp		Frozen Swamp
 Hills 		Mountain
+..others?
 
 Add resign option?
 BUG FIX: if attacker loses an army, but conquers zone, num moved in should reflect this (i.e., minus the dead army)
 
-disasters?
+
+DISASTERS:
+=====
 disasters should be dependent on terrain. 
 most will just remove an army/armies. can they have other effects?
 hide all enemy army numbers temporarily? Hide OWN army temporarily?
-prevent attack? possibilities:
+prevent attack? 
+
+possibilities:
 tornado - kill 1 army? kill more than 1?
 flood - ?  
 disease - ?

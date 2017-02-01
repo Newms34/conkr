@@ -2420,6 +2420,22 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.isDead = false;
     //before anything, check to see if we're logged in!
     $scope.loading = true;
+    $scope.playerStats = [{
+        h: 0,
+        name: 'ed',
+        num: 20,
+        numPerc: 33
+    }, {
+        h: 20,
+        name: 'edd',
+        num: 10,
+        numPerc: 16
+    }, {
+        h: 40,
+        name: 'eddy',
+        num: 30,
+        numPerc: 50
+    }];
     miscFact.chkLoggedStatus().then(function(r) {
         console.log('DATA', r.data);
         if (!r.data.result) window.location.assign('./login');
@@ -2448,7 +2464,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
     };
     $scope.isInvis = function(ap) {
-        return ap.terr == 'city'|| ap.terr == 'forest'||ap.terr == 'hills'||ap.terr == 'frozen city'||ap.terr == 'boreal forest'|| ap.terr == 'mountain';
+        return ap.terr == 'city' || ap.terr == 'forest' || ap.terr == 'hills' || ap.terr == 'frozen city' || ap.terr == 'boreal forest' || ap.terr == 'mountain';
     };
     $scope.btns = true;
     $scope.allGames = [];
@@ -2620,11 +2636,11 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             'swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Swamp Gas - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
             'plains': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known'],
             'forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)'],
-            'mountain': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
-            'frozen city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
-            'frozen swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Swamp Gas - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
-            'tundra': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
-            'boreal forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)','&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack']
+            'mountain': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#10006; No Visibility - Defending army number hidden', '&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen city': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#10006; No Visibility - Defending army numbers hidden', '&#128587; Recruiting - Small chance for defender to gain +1 army each turn (max of 10 armies)', '&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'frozen swamp': ['&#128737; Defensive bonus - Increased chance for defender to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#9760; Swamp Gas - Small chance for defender to lose 1 army per turn (may not lose all armies)', '&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'tundra': ['&#128481; Offensive bonus - Increased chance for attacker to win a conflict', '&#128065; Visibility - Defending army numbers known', '&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack'],
+            'boreal forest': ['&#10006; No Visibility - Defending army number hidden', '&#128059; Animal attacks - Small chance for defender to lose 1 army per turn (may not lose all armies)', '&#10052; Cold Weather - Chance for both attacker and defender to lose one army after attack']
         }
         return [
             [function() {
@@ -2866,6 +2882,31 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.armyPieces = [];
         }
     };
+    $scope.getPStats = function(a, p, im) {
+        $scope.playerStats = [];
+        var total = 0;
+        for (var i = 0; i < p.length; i++) {
+            var pStatCol = 360 * i / p.length,
+                playerObj = {
+                    num: 0,
+                    h: pStatCol,
+                    name: '&#' + im[i] + '; ' + p[i],
+                    numPerc: 0
+                }
+            for (var j = 0; j < a.length; j++) {
+                if (a[j].user == p[i]) {
+                    total++;
+                    playerObj.num++
+                }
+            }
+            $scope.playerStats.push(playerObj);
+        }
+        //now loop thru again for percents
+        for (var k = 0; k < $scope.playerStats.length; k++) {
+            $scope.playerStats[k].numPerc = 100*$scope.playerStats[k].num/total;
+        }
+        console.log('PLAYER STATS:', $scope.playerStats, 'TOTAL', total)
+    };
     socket.on('updateArmies', function(d) {
         console.log('UPDATE ARMIES', d);
         d.players.forEach((p, i) => {
@@ -2873,7 +2914,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         });
         $scope.armyPieces = fightFact.placeArmies($scope.map, d.armies, $scope.currGamePlayers);
         $scope.currPlayer = d.players[d.turn];
+        $scope.getPStats(d.armies, d.players, d.avas);
         $scope.$digest();
+        throw new Error('STOP HERE')
     });
     socket.on('gameReady', function(d) {
         $scope.gameIsReady = true;

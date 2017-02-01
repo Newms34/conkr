@@ -180,6 +180,13 @@
             <!-- ADD ||ap.usr == user -->
             <br/><span ng-bind-html="'&#'+ap.lbl+';'"></span>: <span ng-show='!isInvis(ap) || ap.usr == user'>{{ap.num}}</span><span ng-show='isInvis(ap) && ap.usr != user'>?</span></div>
     </div>
+    <div id='game-stats' ng-show='!gameMenu && gameId' ng-class='{"smol":!showGameStats}' ng-click='showGameStats=!showGameStats'>
+        <h4>Game Stats &#128202;</h4>
+        <div ng-repeat='p in playerStats' class='player-stat-key'>
+            <span class='player-stat-box' style='background:hsl({{p.h}},100%,50%)'></span><span ng-bind-html="p.name"></span>
+        </div>
+        <div class='player-stat-bar' ng-repeat='pn in playerStats' style='background:hsl({{pn.h}},100%,50%);width:{{pn.numPerc}}%;'>{{pn.num}}</div>
+    </div>
     <div ng-if='!currPlayer||currPlayer==user'>
         <button class='btn btn-warning col-md-1 col-md-offset-5 atk-btn' ng-click='startAttack();' ng-hide='(!srcCell && srcCell!==0) || (!targCell && targCell!==0)||moveArmies||!btns'>&#9876;Attack!</button>
         <button class='btn btn-success col-md-1 col-md-offset-5 play-mode-btn' ng-click='switchPlayMode();' ng-if='moveArmies && btns' title="You're currently in move mode, which allows you to move armies. Click here to start attacking!" id='move-mode-btn'><span>&#127939; Move Mode</span><span style='display:none;'>&#10227;Attack Mode</span></button>
