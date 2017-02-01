@@ -53,4 +53,18 @@ Hills 		Mountain
 Add resign option?
 BUG FIX: if attacker loses an army, but conquers zone, num moved in should reflect this (i.e., minus the dead army)
 
+disasters?
+disasters should be dependent on terrain. 
+most will just remove an army/armies. can they have other effects?
+hide all enemy army numbers temporarily? Hide OWN army temporarily?
+prevent attack? possibilities:
+tornado - kill 1 army? kill more than 1?
+flood - ?  
+disease - ?
+famine  - reduce army count by 1 for a turn. May need a separate var implemented for this. OR, during attack, famine reduces army number by 1 for defender.
+confusion or something other (attack random neighbor?)
+
+
+https://jsfiddle.net/L0zaxsnh/10/
+
 */
