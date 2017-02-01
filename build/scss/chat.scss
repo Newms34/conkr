@@ -2,7 +2,12 @@
     position:fixed;
     left:2px;
     bottom:5px;
+    transition-duration:.2s;
     z-index:500;
+}
+.chat-blink{
+    background:#faa;
+    transform:rotateZ(-10deg)
 }
 .chat-win{
     position:fixed;

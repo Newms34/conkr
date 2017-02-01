@@ -69,6 +69,12 @@ disease - ?
 famine  - reduce army count by 1 for a turn. May need a separate var implemented for this. OR, during attack, famine reduces army number by 1 for defender.
 confusion or something other (attack random neighbor?)
 
+disaster unicode
+flood: &#127754;
+tornado: &#127786;
+disease: &#128567;
+confused: &#128565;
+
 
 https://jsfiddle.net/L0zaxsnh/10/
 

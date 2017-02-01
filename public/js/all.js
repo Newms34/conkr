@@ -2230,13 +2230,18 @@ const app = angular.module('conkr', ['ngSanitize','ui.bootstrap.contextMenu']).c
     });
     socket.on('newMsg', function(msg) {
         msg.now = new Date().toLocaleTimeString();
-        // if ($scope.msgs.length>1 && !$scope.maxMsg)
         if ($scope.msgs.length > 8) {
             $scope.msgs.shift();
         }
         $scope.msgs.push(msg);
-        console.log($scope.msgs);
         $scope.$digest();
+        console.log('new message',msg)
+        if(!$scope.$parent.$parent.showChat){
+            $('#chat-btn').addClass('chat-blink btn-lg');
+            setTimeout(function(){
+                $('#chat-btn').removeClass('chat-blink btn-lg');
+            },250)
+        }
         $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()));
     });
     $scope.sendMsg = function() {
@@ -2253,7 +2258,7 @@ const app = angular.module('conkr', ['ngSanitize','ui.bootstrap.contextMenu']).c
         }else if($scope.msgInp===''){
             return false;
         }else {
-            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user, local:!!$scope.$parent.gameId});
+            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user, local:!!$scope.$parent.gameId && $scope.chatLocal});
         }
         $scope.prevSent.push($scope.msgInp);
         $scope.currPrevMsg = $scope.prevSent.length;
@@ -2645,23 +2650,15 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         return [
             [function() {
                 return '<strong>Country:</strong> ' + ap.country;
-            }, function() {
-
             }],
             [function() {
-                return '<strong>User:</strong> &#' + ap.lbl + '; ' + ap.usr;
-            }, function() {
-
+                return '<strong>Player:</strong> &#' + ap.lbl + '; ' + ap.usr;
             }],
             [function() {
                 return '<strong>Number of Armies:</strong> ' + ap.num;
-            }, function() {
-
             }],
             [function() {
                 return '<strong>Terrain:</strong> ' + ap.terr;
-            }, function() {
-
             }],
             [function() {
                 var terrEff = '<ul>';
@@ -2670,8 +2667,6 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 })
                 console.log(terrEff)
                 return terrEff + '</ul>'
-            }, function() {
-
             }]
         ]
     }
@@ -2916,7 +2911,6 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.currPlayer = d.players[d.turn];
         $scope.getPStats(d.armies, d.players, d.avas);
         $scope.$digest();
-        throw new Error('STOP HERE')
     });
     socket.on('gameReady', function(d) {
         $scope.gameIsReady = true;

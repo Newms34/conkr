@@ -229,23 +229,15 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         return [
             [function() {
                 return '<strong>Country:</strong> ' + ap.country;
-            }, function() {
-
             }],
             [function() {
-                return '<strong>User:</strong> &#' + ap.lbl + '; ' + ap.usr;
-            }, function() {
-
+                return '<strong>Player:</strong> &#' + ap.lbl + '; ' + ap.usr;
             }],
             [function() {
                 return '<strong>Number of Armies:</strong> ' + ap.num;
-            }, function() {
-
             }],
             [function() {
                 return '<strong>Terrain:</strong> ' + ap.terr;
-            }, function() {
-
             }],
             [function() {
                 var terrEff = '<ul>';
@@ -254,8 +246,6 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 })
                 console.log(terrEff)
                 return terrEff + '</ul>'
-            }, function() {
-
             }]
         ]
     }

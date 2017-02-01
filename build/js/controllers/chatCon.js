@@ -17,13 +17,18 @@ const app = angular.module('conkr', ['ngSanitize','ui.bootstrap.contextMenu']).c
     });
     socket.on('newMsg', function(msg) {
         msg.now = new Date().toLocaleTimeString();
-        // if ($scope.msgs.length>1 && !$scope.maxMsg)
         if ($scope.msgs.length > 8) {
             $scope.msgs.shift();
         }
         $scope.msgs.push(msg);
-        console.log($scope.msgs);
         $scope.$digest();
+        console.log('new message',msg)
+        if(!$scope.$parent.$parent.showChat){
+            $('#chat-btn').addClass('chat-blink btn-lg');
+            setTimeout(function(){
+                $('#chat-btn').removeClass('chat-blink btn-lg');
+            },250)
+        }
         $('.chat-cont').scrollTop(parseInt($('.chat-cont').height()));
     });
     $scope.sendMsg = function() {
@@ -40,7 +45,7 @@ const app = angular.module('conkr', ['ngSanitize','ui.bootstrap.contextMenu']).c
         }else if($scope.msgInp===''){
             return false;
         }else {
-            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user, local:!!$scope.$parent.gameId});
+            socket.emit('sendMsg', { msg: $scope.msgInp, usr: $scope.user, local:!!$scope.$parent.gameId && $scope.chatLocal});
         }
         $scope.prevSent.push($scope.msgInp);
         $scope.currPrevMsg = $scope.prevSent.length;
