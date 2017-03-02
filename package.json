@@ -1,7 +1,7 @@
 {
   "name": "conkr",
   "version": "0.1.0",
-  "description": "Multiplayer Risk pot",
+  "description": "Multiplayer Risk port",
   "main": "index.js",
   "scripts": {
     "postinstall": "bower install",

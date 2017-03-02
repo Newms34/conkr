@@ -52,8 +52,6 @@ Hills 		Mountain
 ..others?
 
 Add resign option?
-BUG FIX: if attacker loses an army, but conquers zone, num moved in should reflect this (i.e., minus the dead army)
-
 
 DISASTERS:
 =====
@@ -74,6 +72,8 @@ flood: &#127754;
 tornado: &#127786;
 disease: &#128567;
 confused: &#128565;
+
+should add a system to notify when a new chat msg appears and chat window is not open
 
 
 https://jsfiddle.net/L0zaxsnh/10/
