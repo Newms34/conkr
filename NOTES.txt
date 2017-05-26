@@ -79,3 +79,5 @@ should add a system to notify when a new chat msg appears and chat window is not
 https://jsfiddle.net/L0zaxsnh/10/
 
 */
+Line 598 of main.js: need to assign armyPieces to map before save. 
+do we actually need to send the map? or just armyPieces? do we need to save at ALL, since game is forfeited on dc?

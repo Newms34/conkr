@@ -197,13 +197,12 @@ io.on('connection', function(socket) {
                             })
                         }
                     } else {
-                        //e
                         upd.armies.forEach((ar)=>{
                             if(ar.newArmy){
                                 ar.newArmy = false;
                                 return;
                             }else{
-                                //if player's in a swamp terrain, the noxious fumes can kill 1 army per turn (as long as there's more than 1 army in the zone). If they're in an urban terrain, they can recruit locals to help
+                                //if player's in a swamp terrain, the noxious fumes can kill 1 army per turn (as long as there's more than 1 army in the zone). If they're in an urban terrain, they can recruit locals to help. If they're in a forest terrain, they can lose 1 army per turn (again, as long as there's more than 1 army). Finally, if they're in frozen territory, they can also lose an army.
                                 if((ar.terr=='swamp' ||ar.terr =='frozen swamp') && ar.num>1 && Math.random()<.1){
                                     ar.num--;
                                 }else if ((ar.terr=='city' ||ar.terr =='frozen city')&& ar.num<20 && Math.random()<.1){

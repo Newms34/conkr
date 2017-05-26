@@ -1,6 +1,6 @@
 var socket = io(),
     socketRoom = null;
-app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
+app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce, disastFact) {
     $scope.isDead = false;
     //before anything, check to see if we're logged in!
     $scope.loading = true;
@@ -273,7 +273,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         });
     };
-    $scope.pickTarg = false;
+    $scope.pickTarg = false;//when true, this means we're picking the DESTINATION of an action (instead of the source)
     $scope.moveArmies = true;
     var debugMode = false; //allows us to pick our own dudes as targets, allowing testing of attack mode without another player
     $scope.pickCell = function(ap) {
@@ -329,6 +329,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true;
         } else if (!$scope.moveArmies) {
             if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
+                //in target pick mode (have already picked source), target user is NOT us.
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
                     sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 });
                     return false;
@@ -349,6 +350,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 if (srcNum < 2) {
                     sandalchest.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
                     return false;
+                }
+                if (ap.debuff=='noRecruit'){
+                    sandalchest.alert('No Recruiting',`Low morale in ${ap.country} means you cannot move armies into that country this turn.`)
                 }
                 sandalchest.dialog({
                     buttons: [{
@@ -477,7 +481,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         }
         //now loop thru again for percents
         for (var k = 0; k < $scope.playerStats.length; k++) {
-            $scope.playerStats[k].numPerc = 100*$scope.playerStats[k].num/total;
+            $scope.playerStats[k].numPerc = 100 * $scope.playerStats[k].num / total;
         }
         console.log('PLAYER STATS:', $scope.playerStats, 'TOTAL', total)
     };
@@ -537,6 +541,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         if (rd > ra) ra = rd; //defender cannot defend with more armies than attacker attacks with
         if (mapFact.isNeighbor($scope.map.diagram.cells, s, d)) {
             fightFact.doFight($scope.user, $scope.getAPByName($scope.map.diagram.cells[s].name), $scope.getAPByName($scope.map.diagram.cells[d].name), ra, rd, $scope.gameId);
+            $scope.srcCell = null;
+            $scope.targCell = null;
         }
     };
     $scope.getAPByName = function(name) {
@@ -551,6 +557,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         console.log('SOURCE CELL', $scope.map.diagram.cells[$scope.srcCell]);
         if ((!$scope.srcCell && $scope.srcCell !== 0) || (!$scope.targCell && $scope.targCell !== 0)) {
             sandalchest.alert('Attack Issue', 'You need both an attacker and a target!');
+        } else if($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).debuff=='noAttack'){
+            sandalchest.alert("Can't Attack",`Due to a natural disaster, your armies in ${$scope.map.diagram.cells[$scope.srcCell].name} are in disarray! You can't attack from there this turn.`)
         } else if ($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name) && $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 2) {
             sandalchest.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`);
         } else {
@@ -587,6 +595,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.nextTurn = function() {
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
             if (res && res !== null) {
+                //NEED TO ASSIGN ARMY PIECE DATA TO MAP HERE!
                 fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
         });
@@ -599,6 +608,22 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.addMode = true;
             sandalchest.alert('new armies:', t.newA.toString())
         }
+        console.log('turnSwitch data:', t)
+            // disastFact.doDisasts(t.armies).then(function(r){
+
+        // });
+        var armyForDisast = angular.copy(t.armies)
+        var dis = disastFact.doDisasts(armyForDisast);
+        console.log('LEN COMPARE',$scope.armyPieces.length,$scope.map.diagram.cells.length)
+        if (dis.dis.length) {
+            $scope.armyPieces = dis.cells;
+            var disastList = '<li>' + dis.dis.join('</li><li>') + '</li>'
+            sandalchest.alert(`Disaster has struck!`,`<ul>${disastList}</ul>`)
+        }
         $scope.$digest();
-    })
+    });
+    $scope.testDisasts = function() {
+        var armyForDisast = angular.copy($scope.armyPieces);
+        disastFact.doDisasts(armyForDisast);
+    }
 });

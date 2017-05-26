@@ -1,139 +1,140 @@
 <div id='abt-stuff'>
     <!-- This is actually a copy of the readme.md on github! -->
-<h1 id="conkrariskport">Conkr - A Risk™ port;</h1>
-
-<h2 id="contents">Contents:</h2>
-
-<ul>
-<li><a href="#about">&#128712;About</a></li>
-
-<li><a href="#warning">&#9888;Warning</a></li>
-
-<li><a href="#usage">&#128377;Usage</a></li>
-
-<li><a href="#server">&#128421;Server</a></li>
-
-<li><a href="#technical-stuff">&#128202;Technical Stuff</a></li>
-
-<li><a href="#credits">&#128203;Credits</a></li>
-</ul>
-
-<h1 id="about">About</h1>
-
-<p>It's multiplayer Risk™! With random country generation! Or at least it will be eventually!</p>
-
-<h2 id="warning">Warning</h2>
-
-<p>Please note that Conkr is still very much a work in progress. As such, players should keep two warnings in mind:</p>
-
-<ul>
-<li>There will be &#128027; bugs. If something horrible happens, try <em>not</em> to panic, and send me a (nice!) message about it.</li>
-
-<li>I will likely reset the database numerous times before release, due to updates in models, &#128027; bugs, etc., which will include resets of user accounts, active games, and/or maps. I'll try to do this as <em>rarely</em> as possible, but be warned!</li>
-</ul>
-
-<h1 id="usage">Usage</h1>
-
-<p>After you've created an account, you'll be placed in the main game screen. There, you have a number of options:</p>
-
-<ul>
-<li>Create a new map &#127758;</li>
-
-<li>Load an existing map &#127758;</li>
-
-<li>Join a game</li>
-</ul>
-
-<p>Note that, if you're already in a game when you log in, you will not be given these options.</p>
-
-<p>If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". If you want, you can also give your game a password to make it private.</p>
-
-<p>Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if <em>you</em> are the creator of the game. </p>
-
-<p>Finally, once the game's started, it cycles thru each player in sequence. During your turn, you:</p>
-
-<ol>
-<li><p>Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you <em>cannot</em> abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. </p></li>
-
-<li><p>You'll then begin the &#9876;Attack phase by clicking the green button at bottom.</p></li>
-
-<li><p>The &#9876;Attack phase works similarly to the movement phase, except that your target must be an enemy, adjacent country. As in the movement phase, you <em>must</em> have at least 2 armies in the attacking country to perform an attack. When attacking, your attack takes into account the terrain of the target region as follows:</p>
-
-<h3 id="normalregions">Normal Regions</h3></li>
-</ol>
-
-<ul>
-<li><p><strong>Plains:</strong> Due to the plains' largely open nature, the offensive army has an advantage here, while the defending army has nowhere to hide. Bonus to &#128481; offense, &#128065; visible armies.</p></li>
-
-<li><p><strong>Swamp:</strong> The boggy nature of the swamp causes difficulty for the attacking army. However, the defending army has to contend with the noxious swamp gas, which can overwhelm an army. Bonus to &#128737; defense, &#128065; visible armies, &#9760; swamp gas.</p></li>
-
-<li><p><strong>Forest:</strong> The dappled light of the forest makes life equally difficult for both attacking and defending armies. While it allows the defending army to hide their numbers, there's a small chance that the forest beasts may not appreciate your presence. &#10006; No visible armies, &#128059; animal attacks.</p></li>
-
-<li><p><strong>City:</strong> The close-quarters fighting, civilian casualties, and plethora of glass in the city means the attacking army has an advantage. However, the defending army can hide some of their troops in the surrounding buildings. In addition, the local residents may choose to defend their homes, adding to the defender's armies! Bonus to &#128481; offense, &#10006; no visible armies, &#128587; recruiting.</p></li>
-
-<li><p><strong>Hills:</strong> These natural fortresses give the defending army an advantage. In addition, the twisting steep canyons allow said defending army to hide their numbers. Bonus to &#128737; defense, &#10006; no visible armies.</p>
-
-<h3 id="frozenregions10052">Frozen Regions &#10052;</h3></li>
-
-<li><p><strong>Tundra:</strong> The frozen version of Plains. As with Plains, there's not really anywhere to hide. Bonus to &#128481; offense, &#128065; visible armies, &#10052; cold weather.</p></li>
-
-<li><p><strong>Frozen Swamp:</strong> Frozen version of the Swamp. Beware of swamp gas! Bonus to &#128737; defense, &#128065; visible armies, &#9760; swamp gas, &#10052; cold weather.</p></li>
-
-<li><p><strong>Boreal Forest:</strong> Frozen version of the Forest. You'll have to contend both with animal attacks and the frigid weather here. &#10006; No visible armies, &#128059; animal attacks, &#10052; cold weather.</p></li>
-
-<li><p><strong>Frozen City:</strong> Frozen version of the City. Who would build a city here? It's freezing! Bonus to &#128481; offense, &#10006; no visible armies, &#128587; recruiting, &#10052; cold weather.</p></li>
-
-<li><p><strong>Mountain:</strong> Frozen version of Hills. Still nice and cozy and defend-y, but this time you'll need a warm coat. Bonus to &#128737; defense, &#10006; no visible armies, &#10052; cold weather.</p></li>
-</ul>
-
-<ol>
-<li>If you attack a country and kill off the last enemy army, you conquer that country! Your armies move in to take up residence and piss off the locals.
-
-
-<ul>
-<li>You <em>must</em> move the number of armies you attacked with into the new country. So if you attacked with 3 armies, you'll need to move 3 armies from the attacking country into the new one.</li></ul>
-</li>
-
-<li>The end of the game occurs under two circumstances, relative to each player:</li>
-</ol>
-
-<ul>
-<li>If you conquer all countries, congrats, you win! And... nothing happens. So far. Eventually, each win will give a player a score point, and you can brag to your friends about how much you pwned them.</li>
-
-<li>If the last of your countries is conquered, you lose! You'll still be able to watch (and say rude things about) your enemies, but you can no longer influence the battle. Except, you know, by like psychological warfare.</li>
-</ul>
-
-<h2 id="server">Server</h2>
-
-<p>The server runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.</p>
-
-<h2 id="technicalstuff">Technical Stuff</h2>
-
-<p>Conkr uses the following technologies:</p>
-
-<ul>
-<li>AngularJS for front-end responsiveness.</li>
-
-<li>NodeJS and ExpressJS on the back-end for the server.</li>
-
-<li>Websockets, via socket.io, to allow quick communication between the server, phones, and game. They also allow me to send information <em>from</em> the server <em>to</em> the client without prompting, which is something boring old AJAX doesn't really do. </li>
-
-<li>HTML5's Canvas. I'm (probably stupidly) storing the maps' actual appearance as dataurls in MongoDB, which allows me to then pull up the map without having to explicitly recalculate it each time.</li>
-
-<li>The map &#127758; itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. I'm not completely sure how this works, but suffice it to say it produces nice, random shapes. There's some arcane math things happening in there somewhere.</li>
-
-<li>MongoDB for storing currently all the things! That's maps &#127758;, games, and people (or at least their accounts. People are too much data).</li>
-</ul>
-
-<h2 id="credits">Credits</h2>
-
-<ul>
-<li>Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.</li>
-
-<li>Conkr was written by me, <a href="https://github.com/Newms34">Dave</a>. </li>
-
-<li>Other various libraries/technologies are from their respective creators. I'm just using them.</li>
-
-<li>As usual, if you see something that's yours, and you don't want me to use it, let me know!</li>
-</ul>
+    <h1 id="conkrariskport">Conkr - A Risk™ port;</h1>
+    <hr>
+    <h2 id="contents">Contents:</h2>
+    <ul>
+        <li><a href="#about">&#128712;About</a></li>
+        <li><a href="#warning">&#9888;Warning</a></li>
+        <li><a href="#usage">&#128377;Usage</a></li>
+        <li><a href="#regions">&#127758;Regions</a></li>
+        <li><a href="#tech">&#128421;Technology</a></li>
+        <li><a href="#credits">&#128203;Credits</a></li>
+    </ul>
+    <hr>
+    <h1 id="about">About</h1>
+    <p>It's multiplayer Risk™! With random country generation! Or at least it will be eventually!</p>
+    <h2 id="warning">Warning</h2>
+    <p>Please note that Conkr is still very much a work in progress. As such, players should keep two warnings in mind:</p>
+    <ul>
+        <li>There will be &#128027; bugs. If something horrible happens, try <em>not</em> to panic, and send me a (nice!) message about it.</li>
+        <li>I will likely reset the database numerous times before release, due to updates in models, &#128027; bugs, etc., which will include resets of user accounts, active games, and/or maps. I'll try to do this as <em>rarely</em> as possible, but be warned!</li>
+    </ul>
+    <hr>
+    <h1 id="usage">Usage</h1>
+    <p>After you've created an account, you'll be placed in the main game screen. There, you have a number of options:</p>
+    <ul>
+        <li>Create a new map &#127758;</li>
+        <li>Load an existing map &#127758;</li>
+        <li>Join a game</li>
+    </ul>
+    <p>Note that, if you're already in a game when you log in, you will <i>not</i> be given these options.</p>
+    <p>If you've created a game, it will remain 'open', allowing other players to join it, until you close it by clicking "start game". If you want, you can also give your game a password to make it private.</p>
+    <p>Once you're ready to start a game, click the My Games tab in the menu, and then click "Start Game". Note that this is only available if <em>you</em> are the creator of the game. </p>
+    <p>Finally, once the game's started, it cycles thru each player in sequence. During your turn, you:</p>
+    <ol>
+        <li>
+            <p>Move armies from one country to an adjacent country that you own during the &#127939; Move phase. Click the starting country, and then the destination country. Note that you <em>cannot</em> abandon a country: if the starting country has only 1 army, you'll get told off. Shame on you. </p>
+        </li>
+        <li>
+            <p>You'll then begin the &#9876;Attack phase by clicking the green button at bottom.</p>
+        </li>
+        <li>
+            <p>The &#9876;Attack phase works similarly to the movement phase, except that your target must be an enemy, adjacent country. As in the movement phase, you <em>must</em> have at least 2 armies in the attacking country to perform an attack. When attacking, your attack takes into account the terrain of the target region as follows:</p>
+        </li>
+        <li>If you attack a country and kill off the last enemy army, you conquer that country! Your armies move in to take up residence and piss off the locals.
+            <ul>
+                <li>You <em>must</em> move the number of armies you attacked with into the new country. So if you attacked with 3 armies, you'll need to move 3 armies from the attacking country into the new one.</li>
+            </ul>
+        </li>
+        <li>The end of the game occurs under two circumstances, relative to each player:</li>
+        <ul>
+            <li>If you conquer all countries, congrats, you win! And... nothing happens. So far. Eventually, each win will give a player a score point, and you can brag to your friends about how much you pwned them.</li>
+            <li>If the last of your countries is conquered, you lose! You'll still be able to watch (and say rude things about) your enemies, but you can no longer influence the battle. Except, you know, by like psychological warfare.</li>
+        </ul>
+    </ol>
+    <hr>
+    <h2 id='regions'>Regions</h2>
+    <p>Besides ocean tiles (which cannot be occupied), regions are divided into 5 separate types, with each type further split into a warm (normal) version and a cold (frozen) version. The wary conquerer will keep each region's bonuses and penalties in mind!</p>
+    <h3>Normal Regions</h3>
+    <ul>
+        <li>
+            <p><strong>Plains:</strong> Due to the plains' largely open nature, the offensive army has an advantage here, while the defending army has nowhere to hide. &#128481; Offensive bonus, &#128065; Visibility.</p>
+        </li>
+        <li>
+            <p><strong>Swamp:</strong> The boggy nature of the swamp causes difficulty for the attacking army. However, the defending army has to contend with the noxious swamp gas, which can overwhelm an army. &#128737; Defensive Bonus, &#128065; Visibility, &#9760; swamp gas.</p>
+        </li>
+        <li>
+            <p><strong>Forest:</strong> The dappled light of the forest makes life equally difficult for both attacking and defending armies. While it allows the defending army to hide their numbers, there's a small chance that the forest beasts may not appreciate your presence. &#10006; No visibility, &#128059; Animal attacks.</p>
+        </li>
+        <li>
+            <p><strong>City:</strong> The close-quarters fighting, civilian casualties, and plethora of glass in the city means the attacking army has an advantage. However, the defending army can hide some of their troops in the surrounding buildings. In addition, the local residents may choose to defend their homes, adding to the defender's armies! &#128481; Offensive bonus, &#10006; No visibility, &#128587; Recruiting.</p>
+        </li>
+        <li>
+            <p><strong>Hills:</strong> These natural fortresses give the defending army an advantage. In addition, the twisting steep canyons allow said defending army to hide their numbers. &#128737; Defensive Bonus, &#10006; No visibility.</p>
+        </li>
+    </ul>
+    <h3>Frozen Regions</h3>
+    <ul>
+        <li>
+            <p><strong>Tundra:</strong> The frozen version of Plains. As with Plains, there's not really anywhere to hide. &#128481; Offensive bonus, &#128065; Visibility, &#10052; Cold weather.</p>
+        </li>
+        <li>
+            <p><strong>Frozen Swamp:</strong> Frozen version of the Swamp. Beware of swamp gas! &#128737; Defensive Bonus, &#128065; Visibility, &#9760; swamp gas, &#10052; Cold weather.</p>
+        </li>
+        <li>
+            <p><strong>Boreal Forest:</strong> Frozen version of the Forest. You'll have to contend both with animal attacks and the frigid weather here. &#10006; No visibility, &#128059; Animal attacks, &#10052; Cold weather.</p>
+        </li>
+        <li>
+            <p><strong>Frozen City:</strong> Frozen version of the City. Who would build a city here? It's freezing! &#128481; Offensive bonus, &#10006; No visibility, &#128587; Recruiting, &#10052; Cold weather.</p>
+        </li>
+        <li>
+            <p><strong>Mountain:</strong> Frozen version of Hills. Still nice and cozy and defend-y, but this time you'll need a warm coat. &#128737; Defensive Bonus, &#10006; No visibility, &#10052; Cold weather.</p>
+        </li>
+    </ul><br>
+    <h3>Region Effects</h3>
+    <p>Each region has a number of possible effects. These are:</p>
+    <ul>
+    	<li><strong>&#128481; Offensive bonus: </strong> Slightly increased chance for attacker to win a conflict.</li>
+    	<li><strong>&#128737; Defensive bonus: </strong> Slightly increased chance for defender to win a conflict.</li>
+    	<li><strong>&#128065; Visibility: </strong> Enemies will be able to see the number of armies you have in a region</li>
+    	<li><strong>&#10006; No visibility: </strong> The terrain hides your numbers from the enemy. </li>
+    	<li><strong>&#128059; Animal attacks: </strong> The local fauna don't like you being here. Small chance for defender to lose one army per turn. Defender cannot lose all armies. </li>
+    	<li><strong>&#9760; Swamp gas: </strong> Noxious swamp fumes poison your troops. Small chance for defender to lose one army per turn. Defender cannot lose all armies. </li>
+    	<li><strong>&#128587; Recruiting: </strong> Your defense of their land may inspire locals to join your cause. Small chance of defender army gaining +1 army per turn, up to a maximum of 10 armies. </li>
+    	<li><strong>&#10052; Cold weather: </strong> Chance for attacker or defender (or both) to lose one army after attack due to frostbite.</li>
+    </ul>
+    <hr>
+    <h2 id='Disasters'>Disasters </h2>
+    <h4 class='text-muted'>(Coming soon!)</h4>
+    <p>Disasters (coming in the next update!) will be region-specific events that have a chance of killing off a defending army entirely. Some disasters may also change the type of a region! The disasters so far:</p> 
+    <ul>
+    	<li><strong>&#127786; Tornado:</strong> Fierce winds batter your defending armies. Kills off 1-2 armies. Prevents attacking for one turn as your troops pick up their stuff. Only occurs in plains and tundra region types.</li>
+    	<li><strong> &#128567; Epidemic:</strong> A horrible disease ravages your city, killing off troops and civilians alike. Kills off 2-3 armies, and prevents &#128587; Recruiting for one turn. Only occurs in city and frozen city region types.</li>
+    	<li><strong>&#127754; Flood:</strong> The waters giveth life, and so they taketh it away. Kills off 2-3 armies. May convert given region type to Swamp. Occurs in plains, forest, and hills region types.</li>
+    	<li><strong>&#128293; Forest fire:</strong> Wood burns. Who knew? Kills off 1-2 armies. May convert the region to plains or tundra (as appropriate) Only occurs in forest and frozen forest region types.</li>
+    	<li><strong>&#127956; Avalanche:</strong> The fluffy white stuff can be rather deadly. Kills off 3/4 of your armies. Only occurs in mountain region type.</li>
+        <li><strong>&#128168; Limnic Erruption:</strong> Silent but deadly. Lethal swamp gas kills off 1-2 armies. Only occurs in swamp and frozen swamp region types</li>
+    </ul>
+    <hr>
+    <h2 id="tech">Technology</h2>
+    <p>The game runs on a full JavaScript stack. This includes MongoDB as the database, Express.js as the server software, Angular (1.x) for the front end, and Node.js for the back end. By their powers combined, they form Captain MEAN-stack.</p>
+    <p>Conkr uses the following technologies:</p>
+    <ul>
+        <li>AngularJS for front-end responsiveness.</li>
+        <li>NodeJS and ExpressJS on the back-end for the server.</li>
+        <li>Websockets, via socket.io, to allow quick communication between the server, phones, and game. They also allow me to send information <em>from</em> the server <em>to</em> the client without prompting, which is something boring old AJAX doesn't really do. </li>
+        <li>HTML5's Canvas. I'm storing the maps' actual appearance as dataurls in MongoDB, which allows me to then pull up the map without having to explicitly recalculate it each time. Since the map generation includes a very noticable element of randomness, this also allows you to save/reload your favorite map designs.</li>
+        <li>The map &#127758; itself is generated with something called a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Diagram</a>. I'm not completely sure how this works, but suffice it to say it produces nice, random shapes. There's some arcane math things happening in there somewhere.</li>
+        <li>MongoDB for storing currently all the things! That's maps &#127758;, games, and people (or at least their accounts. People are too much data).</li>
+    </ul>
+    <hr>
+    <h2 id="credits">Credits</h2>
+    <ul>
+        <li>Risk™ is owned by Hasbro. They own the game, and I'm just doin this as an experiment.</li>
+        <li>Conkr was written by me, <a href="https://github.com/Newms34">Dave</a>. </li>
+        <li>Other various libraries/technologies are from their respective creators. I'm just using them.</li>
+        <li>There are a <i>lot</i> of pictures being used here from me basically Googling things. This is largely because while I'm decent at development, I have next to no artistic talent. So I'm just relying on what others can do!</li>
+        <li>As usual, if you see something that's yours, and you don't want me to use it, let me know!</li>
+    </ul>
 </div>

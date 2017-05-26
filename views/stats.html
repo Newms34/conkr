@@ -8,7 +8,7 @@
         </thead>
         <tbody>
             <tr ng-repeat='p in pStats'>
-            <td>{{p.place}}</td><td>{{p.names}}</td><td>{{p.score}}</td>
+            <td>{{p.place}}<div ng-if='$index<4'></div></td><td>{{p.names}}</td><td>{{p.score}}</td>
             </tr>
         </tbody>
     </table>

@@ -2421,7 +2421,7 @@ app.controller('loginCont', function($scope, miscFact, $timeout) {
 
 var socket = io(),
     socketRoom = null;
-app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
+app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce, disastFact) {
     $scope.isDead = false;
     //before anything, check to see if we're logged in!
     $scope.loading = true;
@@ -2694,7 +2694,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             }
         });
     };
-    $scope.pickTarg = false;
+    $scope.pickTarg = false;//when true, this means we're picking the DESTINATION of an action (instead of the source)
     $scope.moveArmies = true;
     var debugMode = false; //allows us to pick our own dudes as targets, allowing testing of attack mode without another player
     $scope.pickCell = function(ap) {
@@ -2750,6 +2750,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true;
         } else if (!$scope.moveArmies) {
             if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
+                //in target pick mode (have already picked source), target user is NOT us.
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
                     sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 });
                     return false;
@@ -2770,6 +2771,9 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 if (srcNum < 2) {
                     sandalchest.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
                     return false;
+                }
+                if (ap.debuff=='noRecruit'){
+                    sandalchest.alert('No Recruiting',`Low morale in ${ap.country} means you cannot move armies into that country this turn.`)
                 }
                 sandalchest.dialog({
                     buttons: [{
@@ -2898,7 +2902,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         }
         //now loop thru again for percents
         for (var k = 0; k < $scope.playerStats.length; k++) {
-            $scope.playerStats[k].numPerc = 100*$scope.playerStats[k].num/total;
+            $scope.playerStats[k].numPerc = 100 * $scope.playerStats[k].num / total;
         }
         console.log('PLAYER STATS:', $scope.playerStats, 'TOTAL', total)
     };
@@ -2958,6 +2962,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         if (rd > ra) ra = rd; //defender cannot defend with more armies than attacker attacks with
         if (mapFact.isNeighbor($scope.map.diagram.cells, s, d)) {
             fightFact.doFight($scope.user, $scope.getAPByName($scope.map.diagram.cells[s].name), $scope.getAPByName($scope.map.diagram.cells[d].name), ra, rd, $scope.gameId);
+            $scope.srcCell = null;
+            $scope.targCell = null;
         }
     };
     $scope.getAPByName = function(name) {
@@ -2972,6 +2978,8 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         console.log('SOURCE CELL', $scope.map.diagram.cells[$scope.srcCell]);
         if ((!$scope.srcCell && $scope.srcCell !== 0) || (!$scope.targCell && $scope.targCell !== 0)) {
             sandalchest.alert('Attack Issue', 'You need both an attacker and a target!');
+        } else if($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).debuff=='noAttack'){
+            sandalchest.alert("Can't Attack",`Due to a natural disaster, your armies in ${$scope.map.diagram.cells[$scope.srcCell].name} are in disarray! You can't attack from there this turn.`)
         } else if ($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name) && $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 2) {
             sandalchest.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`);
         } else {
@@ -3008,6 +3016,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.nextTurn = function() {
         sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
             if (res && res !== null) {
+                //NEED TO ASSIGN ARMY PIECE DATA TO MAP HERE!
                 fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
             }
         });
@@ -3020,8 +3029,24 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             $scope.addMode = true;
             sandalchest.alert('new armies:', t.newA.toString())
         }
+        console.log('turnSwitch data:', t)
+            // disastFact.doDisasts(t.armies).then(function(r){
+
+        // });
+        var armyForDisast = angular.copy(t.armies)
+        var dis = disastFact.doDisasts(armyForDisast);
+        console.log('LEN COMPARE',$scope.armyPieces.length,$scope.map.diagram.cells.length)
+        if (dis.dis.length) {
+            $scope.armyPieces = dis.cells;
+            var disastList = '<li>' + dis.dis.join('</li><li>') + '</li>'
+            sandalchest.alert(`Disaster has struck!`,`<ul>${disastList}</ul>`)
+        }
         $scope.$digest();
-    })
+    });
+    $scope.testDisasts = function() {
+        var armyForDisast = angular.copy($scope.armyPieces);
+        disastFact.doDisasts(armyForDisast);
+    }
 });
 
 app.controller('statCon', function($scope, miscFact) {
@@ -3066,6 +3091,131 @@ app.controller('statCon', function($scope, miscFact) {
         $scope.getScore();
     });
     $scope.getScores();
+});
+
+app.factory('disastFact', function($rootScope, $http) {
+    return {
+        doDisasts: function(c) {
+            //c: army cells
+            var numDisasts = Math.floor(Math.random() * c.length * .25),
+                disasts = [],
+                disastNumsDone = [],
+                getDisast = function(cell) {
+                    numDead = 0;
+                    console.log('INCOMING CELL:', cell, 'TYPE', cell.terr)
+                    if (cell.terr == 'plains') {
+                        if (Math.random() > 0.5) {
+                            console.log('plains, tornado')
+                            numDead = cell.num > 1 ? Math.floor(Math.random() * 2) + 1 : 1;
+                            cell.num -= numDead;
+                            disasts.push(`A tornado touched down in ${cell.country}, killing ${numDead} armies! ${cell.country}'s armies are scattered, preventing attacks this turn`);
+                            cell.debuff = 'noAttack';
+                            return cell;
+                        } else {
+                            console.log('plains, flood')
+                            numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                            cell.num -= numDead;
+                            var converted = Math.random() > .8;
+                            disasts.push(`Rising waters cause a horrible flood in ${cell.country}, killing ${numDead} armies! ${cell.country}'s armies are scattered, preventing attacks this turn.${converted?' Additionally, the land has been converted to a swamp.':''}`);
+                            if (converted) {
+                                cell.terr = 'swamp'
+                            }
+                            return cell;
+                        }
+                    } else if (cell.terr == 'tundra') {
+                        console.log('tundra, tornado')
+                        numDead = cell.num > 1 ? Math.floor(Math.random() * 2) + 1 : 1;
+                        cell.num -= numDead;
+                        disasts.push(`A tornado touched down in ${cell.country}, killing ${numDead} armies! ${cell.country}'s armies are scattered, preventing attacks this turn`);
+                        cell.debuff = 'noAttack';
+                        return cell;
+                    } else if (cell.terr == 'hills') {
+                        console.log('hills, flood')
+                        numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                        cell.num -= numDead;
+                        var converted = Math.random() > .8;
+                        disasts.push(`Rising waters cause a horrible flood in ${cell.country}, killing ${numDead} armies! ${cell.country}'s armies are scattered, preventing attacks this turn.${converted?' Additionally, the land has been converted to a swamp.':''}`);
+                        if (converted) {
+                            cell.terr = 'swamp'
+                        }
+                        return cell;
+                    } else if (cell.terr == 'city' || cell.terr == 'frozen city') {
+                        console.log('city or frozen city, epidemic')
+                        numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                        cell.num -= numDead;
+                        disasts.push(`A horrible epidemic has struck the people of ${cell.country}! It kills off ${numDead} armies and demoralizes the citizens of ${cell.country}, preventing recruiting.`);
+                        cell.debuff = 'noRecruit';
+                        return cell;
+                    } else if (cell.terr == 'frozen forest' || cell.terr == 'boreal forest') {
+                        console.log('frozen forest, forest fire')
+                        numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                        cell.num -= numDead;
+                        var converted = Math.random() > .8;
+                        if (converted) {
+                            cell.terr = cell.terr == 'tundra';
+                        }
+                        disasts.push(`A fierce, raging forest fire breaks out in ${cell.country}! It kills off ${numDead} armies.${converted?' The fire was so fierce that the land has been converted to a '+cell.terr+'!':''}`);
+                        return cell;
+                    } else if (cell.terr == 'forest') {
+                        if (Math.random() > 0.5) {
+                            console.log('forest, forest fire')
+
+                            numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                            cell.num -= numDead;
+                            var converted = Math.random() > .8;
+                            if (converted) {
+                                cell.terr = 'plains';
+                            }
+                            disasts.push(`A fierce, raging forest fire breaks out in ${cell.country}! It kills off ${numDead} armies.${converted?' The fire was so fierce that the land has been converted to a '+cell.terr+'!':''}`);
+                            return cell;
+                        } else {
+                            console.log('forest, flood')
+                            numDead = cell.num > 2 ? Math.floor(Math.random() * 2) + 2 : 1;
+                            cell.num -= numDead;
+                            var converted = Math.random() > .8;
+                            if (converted) {
+                                cell.terr = 'swamp';
+                            }
+                            disasts.push(`Rising waters cause a horrible flood in ${cell.country}, killing ${numDead} armies! ${cell.country}'s armies are scattered, preventing attacks this turn.${converted?' Additionally, the land has been converted to a swamp.':''}`);
+                            return cell;
+                        }
+                    } else if (cell.terr == 'mountain') {
+                        console.log('mountain, avalanche')
+                        numDead = Math.floor(cell.num * .75);
+                        cell.num -= numDead;
+                        disasts.push(`An avalange has devastated the armies of ${cell.country}! It kills off ${numDead} armies.`);
+                        return cell;
+                    } else if (cell.terr == 'swamp' || cell.terr == 'frozen swamp') {
+                        console.log('swamp, swampgas')
+                        numDead = Math.floor(cell.num * .75);
+                        cell.num -= numDead;
+                        disasts.push(`Deadly swamp gas has errupted in ${cell.country}! It kills off ${numDead} armies.`);
+                        return cell;
+                    }
+                };
+            for (var i = 0; i < numDisasts; i++) {
+                //find a cell number that has not yet been given a disaster
+                var nd = Math.floor(Math.random() * c.length);
+                while (disastNumsDone.indexOf(nd) > -1) {
+                    nd = Math.floor(Math.random() * c.length);
+                }
+                if (Math.random() < 0.5 && c[nd].num>1) {
+                    //if random chance to spawn disaster, and cell number greater than 1. 
+                    disastNumsDone.push(nd);
+                    console.log('getting disaster for cell', i, 'with terrain type', c[nd].terr)
+                    c[nd] = getDisast(c[nd]); //modify cell number according disaster
+                }
+
+            }
+            console.log('RESULTS')
+            console.table(c)
+            console.log(disasts);
+            return {
+                cells:c,
+                dis:disasts
+            }
+        }
+    };
 });
 
 app.factory('fightFact', function($rootScope, $http) {
@@ -3193,7 +3343,11 @@ app.factory('mapFact', function($rootScope, $http, $q) {
         biomeTypes = {
             warm: ['city', 'swamp', 'forest', 'plains', 'hills'],
             cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
-        };
+        },
+        doneCouns = [],
+        currCont = []
+    allConts = [],
+        justCouns = [];
 
     return {
         loadMaps: function() {
@@ -3328,8 +3482,8 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         sites: this.sites,
                         numsRelaxed: this.numsRelaxed,
                         diagram: this.diagram,
-                        doneCouns: this.doneCouns,
-                        currCont: this.currCont,
+                        doneCouns: doneCouns,
+                        currCont: currCont,
                         cellCenters: this.cellCenters,
                         img: this.canvas.toDataURL()
                     };
@@ -3491,7 +3645,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                                 cell.name = newName;
                             }
                             this.countryNames.push(newName);
-                            console.log('Cell',newName,'has terrain',cell.terrType)
+                            console.log('Cell', newName, 'has terrain', cell.terrType)
                         }
                     }
                 },
@@ -3557,11 +3711,11 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                              being greater than our Lat. If greater, warm. Otherwise, cold.
                             */
                             var isFroze = Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) > .25 ? Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) - .25 > (Math.random() / 4) : false;
-                            console.log('CELL',i,'FROZEN?',isFroze)
-                            if(isFroze){
-                                this.diagram.cells[i].terrType = biomeTypes['cold'][Math.floor(Math.random()*biomeTypes['cold'].length)];
-                            }else{
-                                this.diagram.cells[i].terrType = biomeTypes['warm'][Math.floor(Math.random()*biomeTypes['warm'].length)];
+                            console.log('CELL', i, 'FROZEN?', isFroze)
+                            if (isFroze) {
+                                this.diagram.cells[i].terrType = biomeTypes['cold'][Math.floor(Math.random() * biomeTypes['cold'].length)];
+                            } else {
+                                this.diagram.cells[i].terrType = biomeTypes['warm'][Math.floor(Math.random() * biomeTypes['warm'].length)];
                             }
 
                         } else {
@@ -3774,10 +3928,10 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     var imsDone = 0;
                     for (var i = 0; i < landTypes.length; i++) {
                         imgArr[i] = new Image();
-                        imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/,'_') + '.jpg';
+                        imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/, '_') + '.jpg';
                         imgArr[i].onload = function() {
                             var thePtrn = ctx.createPattern(this, "repeat"),
-                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_',' ')|| 'plains';
+                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_', ' ') || 'plains';
                             for (var n = 0; n < me.diagram.cells.length; n++) {
                                 // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
                                 if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
@@ -3807,33 +3961,94 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     return false;
                 },
                 getContinents: function() {
-                    this.doneCouns = [];
-                    this.allConts = [];
-                    for (var i = 0; i < this.diagram.cells.length; i++) {
-                        this.findNeighbors(i, true);
+                    doneCouns = [];
+                    allConts = [];
+                    justCouns = this.diagram.cells.filter((cf) => {
+                        return !!cf.name;
+                    });
+                    console.log('num countries', justCouns.length)
+                    for (var i = 0; i < justCouns.length; i++) {
+                        if (justCouns[i].name && doneCouns.indexOf(justCouns[i].name) < 0) {
+                            //this cell is a country, and has not already been recorded so run the findNeighbors fn on it, then push the results into our list of continents
+                            this.findNeighbors(i, true);
+                            allConts.push(currCont);
+                        }
                     }
-                    console.log(this.allConts);
-                    return this.allConts;
+                    console.log('Countries:', doneCouns)
+                    var allContsNoDups = [];
+                    allConts.forEach((cont) => {
+                        var reptCounts = [];
+                        cont.forEach((x) => {
+                            if (reptCounts.indexOf(x) < 0) {
+                                reptCounts.push(x);
+                            }
+                        });
+                        allContsNoDups.push(reptCounts);
+                    })
+                    return allContsNoDups;//should be ok? eep.
                 },
-                doneCouns: [], //if a country's in here, don't re-add it.
-                currCont: [],
-                allConts: [],
-                findNeighbors: function(c, mode) {
+                findNeighbors: function(n, m) {
+                    if (m) {
+                        //root node
+                        currCont = [];
+                    }
+                    m = false; //in case we're running recursively for found neighbors.
+                    currCont.push(justCouns[n].name)
+                    console.log('pushing', justCouns[n].name, 'into array!')
+                    doneCouns.push(justCouns[n].name);
+                    var kids = [];
+                    for (var i = 0; i < justCouns.length; i++) {
+                        if (justCouns[i].name && i != n && doneCouns.indexOf(justCouns[i].name) < 0) {
+                            //valid cell to check
+                            var sx = justCouns[n].site.x,
+                                sy = justCouns[n].site.y;
+                            for (var e = 0; e < justCouns[n].halfedges.length; e++) {
+                                //cycle thru all edges and check if neighbor
+                                //find start and end
+                                if (!justCouns[n].halfedges[e].edge.rSite || !justCouns[n].halfedges[e].edge.lSite) {
+                                    //incomplete edge: missing either left or right 'sides' so we cannot test this.
+                                    continue;
+                                }
+                                if (justCouns[n].halfedges[e].edge.rSite.x == sx && justCouns[n].halfedges[e].edge.rSite.y == sy) {
+                                    //rSite is origin (source cell)
+                                    // console.log('rSite origin')
+                                    if (justCouns[n].halfedges[e].edge.lSite.x == justCouns[i].site.x && justCouns[n].halfedges[e].edge.lSite.y == justCouns[i].site.y) {
+                                        console.log(justCouns[i].name, 'is a neighbor of', justCouns[n].name)
+                                        kids.push(i);
+                                    }
+                                } else {
+                                    // console.log('lSite origin')
+                                    //lSite is origin (source cell)
+                                    if (justCouns[n].halfedges[e].edge.rSite.x == justCouns[i].site.x && justCouns[n].halfedges[e].edge.rSite.y == justCouns[i].site.y) {
+                                        console.log(justCouns[i].name, 'is a neighbor of', justCouns[n].name)
+                                        kids.push(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    kids.forEach((c) => {
+                        this.findNeighbors(c);
+                    })
+
+                },
+                findNeighborsOld: function(c, mode) {
+                    //OLD VERSION
                     if (mode) {
-                        if (this.currCont && this.currCont.length) this.allConts.push(this.currCont);
-                        this.currCont = [];
+                        if (currCont && currCont.length) allConts.push(currCont);
+                        currCont = [];
                     }
                     var names = [this.diagram.cells[c].name];
                     console.log('for cell', c, 'names starts as', names);
                     if (!this.diagram.cells[c].name) {
                         return;
                     }
-                    if (this.doneCouns.indexOf(this.diagram.cells[c].name) > -1) {
-                        console.log('cell', this.diagram.cells[c].name, 'already recorded.', this.doneCouns);
+                    if (this.indexOf(this.diagram.cells[c].name) > -1) {
+                        console.log('cell', this.diagram.cells[c].name, 'already doneCouns');
                         return names;
                     }
-                    this.doneCouns.push(this.diagram.cells[c].name);
-                    this.currCont.push(this.diagram.cells[c].name);
+                    this.push(this.diagram.cells[c].name);
+                    currCont.push(this.diagram.cells[c].name);
                     // for any cell with id c, find the neighbors. For each neighbor, find THAT cell's neighbors. If said neighbor is already in this.doneCouns, ignore
                     //first, short-circuit if cell is already recorded;
                     var kids = [];

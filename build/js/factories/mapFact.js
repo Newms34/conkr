@@ -16,7 +16,11 @@ app.factory('mapFact', function($rootScope, $http, $q) {
         biomeTypes = {
             warm: ['city', 'swamp', 'forest', 'plains', 'hills'],
             cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
-        };
+        },
+        doneCouns = [],
+        currCont = []
+    allConts = [],
+        justCouns = [];
 
     return {
         loadMaps: function() {
@@ -151,8 +155,8 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         sites: this.sites,
                         numsRelaxed: this.numsRelaxed,
                         diagram: this.diagram,
-                        doneCouns: this.doneCouns,
-                        currCont: this.currCont,
+                        doneCouns: doneCouns,
+                        currCont: currCont,
                         cellCenters: this.cellCenters,
                         img: this.canvas.toDataURL()
                     };
@@ -314,7 +318,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                                 cell.name = newName;
                             }
                             this.countryNames.push(newName);
-                            console.log('Cell',newName,'has terrain',cell.terrType)
+                            console.log('Cell', newName, 'has terrain', cell.terrType)
                         }
                     }
                 },
@@ -380,11 +384,11 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                              being greater than our Lat. If greater, warm. Otherwise, cold.
                             */
                             var isFroze = Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) > .25 ? Math.abs((this.diagram.cells[i].site.y / this.canvas.height) - .5) - .25 > (Math.random() / 4) : false;
-                            console.log('CELL',i,'FROZEN?',isFroze)
-                            if(isFroze){
-                                this.diagram.cells[i].terrType = biomeTypes['cold'][Math.floor(Math.random()*biomeTypes['cold'].length)];
-                            }else{
-                                this.diagram.cells[i].terrType = biomeTypes['warm'][Math.floor(Math.random()*biomeTypes['warm'].length)];
+                            console.log('CELL', i, 'FROZEN?', isFroze)
+                            if (isFroze) {
+                                this.diagram.cells[i].terrType = biomeTypes['cold'][Math.floor(Math.random() * biomeTypes['cold'].length)];
+                            } else {
+                                this.diagram.cells[i].terrType = biomeTypes['warm'][Math.floor(Math.random() * biomeTypes['warm'].length)];
                             }
 
                         } else {
@@ -597,10 +601,10 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     var imsDone = 0;
                     for (var i = 0; i < landTypes.length; i++) {
                         imgArr[i] = new Image();
-                        imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/,'_') + '.jpg';
+                        imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/, '_') + '.jpg';
                         imgArr[i].onload = function() {
                             var thePtrn = ctx.createPattern(this, "repeat"),
-                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_',' ')|| 'plains';
+                                thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_', ' ') || 'plains';
                             for (var n = 0; n < me.diagram.cells.length; n++) {
                                 // console.log(thePtrn, me.diagram.cells[n].terrType, thisTerr)
                                 if (me.diagram.cells[n].isLand && me.diagram.cells[n].terrType == thisTerr) {
@@ -630,33 +634,94 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     return false;
                 },
                 getContinents: function() {
-                    this.doneCouns = [];
-                    this.allConts = [];
-                    for (var i = 0; i < this.diagram.cells.length; i++) {
-                        this.findNeighbors(i, true);
+                    doneCouns = [];
+                    allConts = [];
+                    justCouns = this.diagram.cells.filter((cf) => {
+                        return !!cf.name;
+                    });
+                    console.log('num countries', justCouns.length)
+                    for (var i = 0; i < justCouns.length; i++) {
+                        if (justCouns[i].name && doneCouns.indexOf(justCouns[i].name) < 0) {
+                            //this cell is a country, and has not already been recorded so run the findNeighbors fn on it, then push the results into our list of continents
+                            this.findNeighbors(i, true);
+                            allConts.push(currCont);
+                        }
                     }
-                    console.log(this.allConts);
-                    return this.allConts;
+                    console.log('Countries:', doneCouns)
+                    var allContsNoDups = [];
+                    allConts.forEach((cont) => {
+                        var reptCounts = [];
+                        cont.forEach((x) => {
+                            if (reptCounts.indexOf(x) < 0) {
+                                reptCounts.push(x);
+                            }
+                        });
+                        allContsNoDups.push(reptCounts);
+                    })
+                    return allContsNoDups;//should be ok? eep.
                 },
-                doneCouns: [], //if a country's in here, don't re-add it.
-                currCont: [],
-                allConts: [],
-                findNeighbors: function(c, mode) {
+                findNeighbors: function(n, m) {
+                    if (m) {
+                        //root node
+                        currCont = [];
+                    }
+                    m = false; //in case we're running recursively for found neighbors.
+                    currCont.push(justCouns[n].name)
+                    console.log('pushing', justCouns[n].name, 'into array!')
+                    doneCouns.push(justCouns[n].name);
+                    var kids = [];
+                    for (var i = 0; i < justCouns.length; i++) {
+                        if (justCouns[i].name && i != n && doneCouns.indexOf(justCouns[i].name) < 0) {
+                            //valid cell to check
+                            var sx = justCouns[n].site.x,
+                                sy = justCouns[n].site.y;
+                            for (var e = 0; e < justCouns[n].halfedges.length; e++) {
+                                //cycle thru all edges and check if neighbor
+                                //find start and end
+                                if (!justCouns[n].halfedges[e].edge.rSite || !justCouns[n].halfedges[e].edge.lSite) {
+                                    //incomplete edge: missing either left or right 'sides' so we cannot test this.
+                                    continue;
+                                }
+                                if (justCouns[n].halfedges[e].edge.rSite.x == sx && justCouns[n].halfedges[e].edge.rSite.y == sy) {
+                                    //rSite is origin (source cell)
+                                    // console.log('rSite origin')
+                                    if (justCouns[n].halfedges[e].edge.lSite.x == justCouns[i].site.x && justCouns[n].halfedges[e].edge.lSite.y == justCouns[i].site.y) {
+                                        console.log(justCouns[i].name, 'is a neighbor of', justCouns[n].name)
+                                        kids.push(i);
+                                    }
+                                } else {
+                                    // console.log('lSite origin')
+                                    //lSite is origin (source cell)
+                                    if (justCouns[n].halfedges[e].edge.rSite.x == justCouns[i].site.x && justCouns[n].halfedges[e].edge.rSite.y == justCouns[i].site.y) {
+                                        console.log(justCouns[i].name, 'is a neighbor of', justCouns[n].name)
+                                        kids.push(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    kids.forEach((c) => {
+                        this.findNeighbors(c);
+                    })
+
+                },
+                findNeighborsOld: function(c, mode) {
+                    //OLD VERSION
                     if (mode) {
-                        if (this.currCont && this.currCont.length) this.allConts.push(this.currCont);
-                        this.currCont = [];
+                        if (currCont && currCont.length) allConts.push(currCont);
+                        currCont = [];
                     }
                     var names = [this.diagram.cells[c].name];
                     console.log('for cell', c, 'names starts as', names);
                     if (!this.diagram.cells[c].name) {
                         return;
                     }
-                    if (this.doneCouns.indexOf(this.diagram.cells[c].name) > -1) {
-                        console.log('cell', this.diagram.cells[c].name, 'already recorded.', this.doneCouns);
+                    if (this.indexOf(this.diagram.cells[c].name) > -1) {
+                        console.log('cell', this.diagram.cells[c].name, 'already doneCouns');
                         return names;
                     }
-                    this.doneCouns.push(this.diagram.cells[c].name);
-                    this.currCont.push(this.diagram.cells[c].name);
+                    this.push(this.diagram.cells[c].name);
+                    currCont.push(this.diagram.cells[c].name);
                     // for any cell with id c, find the neighbors. For each neighbor, find THAT cell's neighbors. If said neighbor is already in this.doneCouns, ignore
                     //first, short-circuit if cell is already recorded;
                     var kids = [];

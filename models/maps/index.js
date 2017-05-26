@@ -23,5 +23,3 @@ var skillSchema = new mongoose.Schema({
 }, { collection: 'Map' });
 
 mongoose.model('Map', skillSchema);
-
-// db.Map.find({},{'mapData.countryNames':1,'mapData.diagram':1,'mapData.sites':1,'mapData.doneCouns':1,'mapData.cellCenters':1})
