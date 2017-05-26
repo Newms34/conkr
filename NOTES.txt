@@ -81,3 +81,5 @@ https://jsfiddle.net/L0zaxsnh/10/
 */
 Line 598 of main.js: need to assign armyPieces to map before save. 
 do we actually need to send the map? or just armyPieces? do we need to save at ALL, since game is forfeited on dc?
+
+seems to be an issue with continents being duplicated in the armypieces arr. 

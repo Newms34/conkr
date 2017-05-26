@@ -2812,9 +2812,11 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if (r.data == 'gameLogErr') {
                 sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!');
                 return false;
+            }else{
+                window.location.reload();   
             }
-            console.log('JOINED GAME:', r);
-            socket.emit('getGames', { x: true });
+            // console.log('JOINED GAME:', r);
+            // socket.emit('getGames', { x: true });
         });
     };
     $scope.neighborTest = function(s, d) {
