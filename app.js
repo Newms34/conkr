@@ -6,7 +6,8 @@ var express = require('express'),
     config = require('./.config'),
     session = require('client-sessions'),
     mongoose = require('mongoose'),
-    sockmod = require('./socketmodules');
+    sockmod = require('./socketmodules'),
+    dis = require('./disast');
 var app = express();
 
 app.set('views', path.join(__dirname, 'views'));
@@ -217,14 +218,19 @@ io.on('connection', function(socket) {
                             }
                         })
                         //notify front ends of turn switch
-                        console.log('Turn for game', d.game, 'successfully switched to', upd.players[upd.turn], '. Remaining players', upd.players)
-                        upd.save();
+                        console.log('Turn for game', d.game, 'successfully switched to', upd.players[upd.turn], '. Remaining players', upd.players);
+                        console.log('----ARMIES----',upd.armies)
+                        console.log(dis);
+                        disasts = dis(upd.armies);
+                        // console.log('AFTER DIS BACKEND FACT:',disasts);
                         io.sockets.in(d.game).emit('turnSwitch', {
                             id: d.game,
                             usr: upd.players[upd.turn],
-                            armies: upd.armies,
-                            newA: newArmies
+                            armies: disasts.cells,
+                            newA: newArmies,
+                            dis:disasts.dis
                         })
+                        upd.save();
                     }
                 });
             }

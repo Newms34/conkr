@@ -1,6 +1,6 @@
 var socket = io(),
     socketRoom = null;
-app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce, disastFact) {
+app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact, $sce) {
     $scope.isDead = false;
     //before anything, check to see if we're logged in!
     $scope.loading = true;
@@ -611,21 +611,22 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             sandalchest.alert('new armies:', t.newA.toString())
         }
         console.log('turnSwitch data:', t)
-            // disastFact.doDisasts(t.armies).then(function(r){
-
-        // });
-        var armyForDisast = angular.copy(t.armies)
-        var dis = disastFact.doDisasts(armyForDisast);
-        console.log('LEN COMPARE',$scope.armyPieces.length,$scope.map.diagram.cells.length)
-        if (dis.dis.length) {
-            $scope.armyPieces = dis.cells;
-            var disastList = '<li>' + dis.dis.join('</li><li>') + '</li>'
+        if (t.dis.length) {
+            // console.log('DIS from disaster fact',dis,$scope.armyPieces)
+            var disastList = '<li>' + t.dis.join('</li><li>') + '</li>'
             sandalchest.alert(`Disaster has struck!`,`<ul>${disastList}</ul>`)
+            var i=0;
+            $scope.armyPieces = $scope.armyPieces.map((ap)=>{
+                for(i=0;i<t.armies.length;i++){
+                    if(t.armies[i].country==ap.country){
+                        ap.num=t.armies[i].num;
+                        ap.terr=t.armies[i].terr;
+                        return ap;
+                    }
+                }
+                return ap;
+            })
         }
         $scope.$digest();
     });
-    $scope.testDisasts = function() {
-        var armyForDisast = angular.copy($scope.armyPieces);
-        disastFact.doDisasts(armyForDisast);
-    }
 });
