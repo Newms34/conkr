@@ -1,8 +1,5 @@
-var express = require('express'),
-    router = express.Router(),
-    path = require('path'),
-    models = require('../models/'),
-    session = require('client-sessions');
+const express = require('express'),
+    router = express.Router();
 router.use('/game', require('./game'));
 router.use('/user', require('./user'));
 router.use('/map', require('./map'));

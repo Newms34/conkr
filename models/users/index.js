@@ -1,7 +1,7 @@
-var mongoose = require('mongoose'),
+const mongoose = require('mongoose'),
     crypto = require('crypto');
 //we're just testing password encryption here!
-var usrSchema = new mongoose.Schema({
+const usrSchema = new mongoose.Schema({
     name: String, //name of the user
     totalScore: Number,
     pass: String,
@@ -10,11 +10,11 @@ var usrSchema = new mongoose.Schema({
 
 // generateSalt, encryptPassword and the pre 'save' and 'correctPassword' operations
 // are all used for local authentication security.
-var generateSalt = function() {
+const generateSalt = function() {
     return crypto.randomBytes(16).toString('base64');
 };
-var encryptPassword = function(plainText, salt) {
-    var hash = crypto.createHash('sha1');
+const encryptPassword = function(plainText, salt) {
+    const hash = crypto.createHash('sha1');
     hash.update(plainText);
     hash.update(salt);
     return hash.digest('hex');

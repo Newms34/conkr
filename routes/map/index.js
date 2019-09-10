@@ -1,10 +1,6 @@
-var express = require('express');
-var router = express.Router(),
-    path = require('path'),
-    models = require('../../models/'),
-    async = require('async'),
+const express = require('express'),
+    router = express.Router(),
     mongoose = require('mongoose'),
-    session = require('client-sessions');
 module.exports = router;
 router.post('/newMap', function(req, res, next) {
     //create a new game!
@@ -12,7 +8,7 @@ router.post('/newMap', function(req, res, next) {
         res.send('Error! Not logged in!');
         return;
     }
-    var mapId = Math.floor(Math.random() * 99999999999).toString(32),
+    const mapId = Math.floor(Math.random() * 99999999999).toString(32),
         map = req.body;
     console.log('SESSION USER', req.session.user.name)
     mongoose.model('Map').create({ id: mapId, mapData: map, creator: req.session.user.name }, function(err, data) {

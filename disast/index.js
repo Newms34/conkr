@@ -1,9 +1,9 @@
-var doDisast = function(c) {
+const doDisast = function(c) {
     //c: army cells
     //temporary short circuit: enable to disable disaster 'factory'
     // return {cells:c,dis:[]}
     console.log('INCOMING TO DISASTER FNS:',c)
-    var numDisasts = Math.floor(Math.random() * c.length * .25), //per turn, disasters can happen to up to a quarter (25%) of the occupiable continents
+    const numDisasts = Math.floor(Math.random() * c.length * .25), //per turn, disasters can happen to up to a quarter (25%) of the occupiable continents
         disasts = [],
         disastNumsDone = [],
         getDisast = function(cell) {
@@ -99,9 +99,9 @@ var doDisast = function(c) {
                 return cell;
             }
         };
-    for (var i = 0; i < numDisasts; i++) {
+    for (let i = 0; i < numDisasts; i++) {
         //find a cell number that has not yet been given a disaster
-        var nd = Math.floor(Math.random() * c.length);
+        let nd = Math.floor(Math.random() * c.length);
         while (disastNumsDone.indexOf(nd) > -1) {
             nd = Math.floor(Math.random() * c.length);
         }

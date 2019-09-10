@@ -3,27 +3,32 @@ Gulp is a node package that concatenates your files. It basically can convert a 
 More importantly, it also means our user's browser only needs to fetch ONE file (all.min.js), instead of... however many i create. 
 */
 
-const gulp = require('gulp');
-const jshint = require('gulp-jshint');
-const sass = require('gulp-sass');
-const concat = require('gulp-concat');
-const uglify = require('gulp-uglify');
-const rename = require('gulp-rename');
-const kid = require('child_process');
-const ps = require('ps-node');
-const gutil = require('gulp-util');
-const cleany = require('gulp-clean-css');
-const babel = require('gulp-babel');
-const ngAnnotate = require('gulp-ng-annotate');
+const gulp = require('gulp'),
+    tscConfig = require('./tsconfig.json'),
+    typescript = require('gulp-typescript'),
+    sourcemaps = require('gulp-sourcemaps'),
+    jshint = require('gulp-jshint'),
+    sass = require('gulp-sass'),
+    concat = require('gulp-concat'),
+    uglify = require('gulp-uglify'),
+    rename = require('gulp-rename'),
+    kid = require('child_process'),
+    ps = require('ps-node'),
+    gutil = require('gulp-util'),
+    cleany = require('gulp-clean-css'),
+    babel = require('gulp-babel'),
+    ngAnnotate = require('gulp-ng-annotate');
 // Lint Task
-gulp.task('lint', function() {
-    return gulp.src(['build/js/controllers/*.js','build/js/factories/*.js'])
-        .pipe(jshint({esversion:6}))
+gulp.task('lint', function () {
+    return gulp.src(['build/js/controllers/*.js', 'build/js/factories/*.js'])
+        .pipe(jshint({
+            esversion: 6
+        }))
         .pipe(jshint.reporter('default'));
 });
 
 // Compile Our Sass
-gulp.task('sass', function() {
+gulp.task('sass', function () {
     return gulp.src(['build/scss/*.scss', 'build/scss/**/*.scss'])
         .pipe(sass())
         .pipe(concat('styles.css'))
@@ -31,27 +36,50 @@ gulp.task('sass', function() {
         .pipe(gulp.dest('public/css'));
 });
 // Concatenate & Minify JS
-gulp.task('scripts', function() {
-    return gulp.src(['build/js/misc/*.js','build/js/controllers/*.js','build/js/factories/*.js'])
-        .pipe(concat('all.js'))
-        .pipe(gulp.dest('public/js'))
-        .pipe(rename('all.min.js'))
-        .pipe(babel({presets: ['es2015']}))
-        .pipe(ngAnnotate())
-        .pipe(uglify().on('error', gutil.log))
-        .pipe(gulp.dest('public/js'));
+// gulp.task('scripts', function () {
+//     return gulp.src(['build/js/misc/*.js', 'build/js/controllers/*.js', 'build/js/factories/*.js'])
+//         .pipe(concat('all.js'))
+//         .pipe(gulp.dest('public/js'))
+//         .pipe(rename('all.min.js'))
+//         .pipe(babel({
+//             presets: ['es2015']
+//         }))
+//         .pipe(ngAnnotate())
+//         .pipe(uglify().on('error', gutil.log))
+//         .pipe(gulp.dest('public/js'));
+// });
+
+gulp.task('copy:libs', ['clean'], function() {
+    return gulp.src([
+        // 'node_modules/angular2/bundles/angular2-polyfills.js',
+        'node_modules/systemjs/dist/system.src.js',
+        'node_modules/rxjs/bundles/Rx.js',
+        'node_modules/angular2/bundles/angular2.dev.js',
+        // 'node_modules/angular2/bundles/router.dev.js'
+      ])
+      .pipe(gulp.dest('dist/lib'))
+  });
+
+gulp.task('scripts', function () {
+    return gulp.src('build/js/src/**/*.ts')
+        .pipe(sourcemaps.init()) // <--- sourcemaps
+        .pipe(typescript(tscConfig.compilerOptions))
+        .pipe(sourcemaps.write('.')) // <--- sourcemaps
+        .pipe(gulp.dest('dist/app'));
 });
 
-gulp.task('checkDB', function() {
+gulp.task('checkDB', function () {
     if (process.platform == 'win32' && process.env.USERNAME == 'Newms') {
         console.log('Checking to see if mongod already running!');
-        ps.lookup({ command: 'mongod' }, function(e, f) {
-            if (!f.length){
+        ps.lookup({
+            command: 'mongod'
+        }, function (e, f) {
+            if (!f.length) {
                 //database not already running, so start it up!
-                kid.exec('c: && cd c:\\mongodb\\bin && start mongod -dbpath "d:\\data\\mongo\\db" && pause',function(err,stdout,stderr){
-                    if (err) console.log('Uh oh! An error of "',err,'" prevented the DB from starting!');
+                kid.exec('c: && cd c:\\mongodb\\bin && start mongod -dbpath "d:\\data\\mongo\\db" && pause', function (err, stdout, stderr) {
+                    if (err) console.log('Uh oh! An error of "', err, '" prevented the DB from starting!');
                 })
-            }else{
+            } else {
                 console.log('mongod running!')
             }
         })
@@ -59,13 +87,19 @@ gulp.task('checkDB', function() {
 })
 
 // Watch Files For Changes
-gulp.task('watch', function() {
+gulp.task('watch', function () {
     gulp.watch(['build/js/*.js', 'build/js/**/*.js'], ['lint', 'scripts']);
     gulp.watch(['build/scss/*.scss', 'build/scss/**/*.scss'], ['sass']);
 });
 
 //no watchin!
-gulp.task('render', ['lint', 'sass', 'scripts'])
+// gulp.task('render', ['lint', 'sass', 'scripts'])
 
 // Default Task
-gulp.task('default', ['lint', 'sass', 'scripts', 'checkDB', 'watch']);
+// gulp.task('default', ['lint', 'sass', 'scripts', 'checkDB', 'watch']);
+
+//task to simply create everything without actually watching or starting the DB
+gulp.task('render', gulp.series('lint', 'sass', 'scripts'))
+
+// Default Task
+gulp.task('default', gulp.series('lint', 'sass', 'scripts', 'checkDB', 'watch'));

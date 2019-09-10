@@ -1,14 +1,10 @@
-var express = require('express');
-var router = express.Router(),
-    path = require('path'),
-    models = require('../../models/'),
-    async = require('async'),
+const express = require('express');
+const router = express.Router(),
     mongoose = require('mongoose'),
-    session = require('client-sessions'),
     sockmod = require('../../socketmodules');
 module.exports = router;
 Array.prototype.shuffle = function() {
-    var currentIndex = this.length,
+    let currentIndex = this.length,
         temporaryValue, randomIndex;
     while (0 !== currentIndex) {
         randomIndex = Math.floor(Math.random() * currentIndex);
@@ -65,7 +61,7 @@ router.get('/del/:id', function(req, res, next) {
             res.send('wrongUser')
             return;
         }
-        var whichMap = game.mapId;
+        const whichMap = game.mapId;
         mongoose.model('Game').find({gameId:req.params.id}).remove(function(err) {
             console.log('Successfully removed game!')
             if (err) res.send(err);
@@ -137,11 +133,11 @@ router.get('/startGame/:id', function(req, res, next) {
                 res.send('errMap');
             }
             doc.players = doc.players.shuffle()
-            var couns = mdoc.mapData.cellCenters;
-            var players = doc.players;
+            const couns = mdoc.mapData.cellCenters;
+            const players = doc.players;
             if (!doc.avas) doc.avas = [];
             doc.armies = sockmod.getInitArmies(couns, players);
-            var allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
+            const allAnims = [128045, 128046, 128047, 128048, 128049, 128050, 128052, 128053, 128054, 128055, 128056, 128057, 128058, 128060, 128023, 128040, 128127, 128125, 128123, 127877];
             //pick an avatar (animal) for each player
             players.forEach((p) => {
                 var pik = Math.floor(Math.random() * allAnims.length);

@@ -1,6 +1,4 @@
-var mongoose = require('mongoose');
-
-var http = require('https');
+const mongoose = require('mongoose');
 require('./games/');
 require('./users/');
 require('./maps/');
@@ -11,7 +9,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV != 'prod') {
 } else {
     mongoose.connect(process.env.MONGODB_URI);
 }
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function(e) {
     console.log('Database connected!')

@@ -132,12 +132,12 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.map = mapFact.GetVoronoi($scope.win.h, $scope.win.w, numZones, smootz);
         $scope.map.init();
         $scope.gameMenu = false;
-        sandalchest.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
+        bulmabox.confirm("Confirm Map", "Do you want to accept this map?", function(r) {
             console.log('R FROM MAP CONFIRM', r);
             if (r) {
                 $scope.map.save().then(function(sr) {
                     console.log('ASKING IF NEW GAME');
-                    sandalchest.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()" id='start-new-game-btn'>?</button>`, {
+                    bulmabox.dialog('Start Game', `Do you want to start a new game with this map (${sr.data.id})?<hr/>Password: <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()" id='start-new-game-btn'>?</button>`, {
                         buttons: [{
                             text: 'Create Game',
                             close: true,
@@ -175,7 +175,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         });
     };
     $scope.pwdExpl = function() {
-        sandalchest.alert('Protected Games', 'If you include a password, only players who have that password can join. Leave this blank if you want a public game!', {
+        bulmabox.alert('Protected Games', 'If you include a password, only players who have that password can join. Leave this blank if you want a public game!', {
             rotation: -5
         });
     };
@@ -208,7 +208,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     });
     socket.on('deadPlayer', function(p) {
         if (p.player === $scope.player) {
-            sandalchest.alert('Dead', `Sorry, ${$scope.user}, you've died!`, function(e) {
+            bulmabox.alert('Dead', `Sorry, ${$scope.user}, you've died!`, function(e) {
                 $scope.btns = false;
             });
         }
@@ -250,7 +250,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         ]
     }
     $scope.deleteMap = function(id) {
-        sandalchest.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
+        bulmabox.confirm('Delete Map', 'Are you sure you want to delete map ' + id + '?', function(n) {
             if (n) {
                 mapFact.delMap(id).then(function(r) {
                     if (r.data == 'logErr') return;
@@ -259,12 +259,12 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         });
     };
     $scope.delGame = function(id) {
-        sandalchest.confirm('Delete Game', 'Are you sure you wanna delete this game? This isn\'t reversable!', function(delConf) {
+        bulmabox.confirm('Delete Game', 'Are you sure you wanna delete this game? This isn\'t reversable!', function(delConf) {
             if (delConf) {
                 fightFact.delGame(id).then(function(r) {
                     console.log('back from delGame thing');
                     if (r.data == 'wrongUser') {
-                        sandalchest.alert('Hey! You can\'t delete that game!');
+                        bulmabox.alert('Hey! You can\'t delete that game!');
                     } else {
                         console.log('REMOVED GAME! REFRESHING DATA');
                         socket.emit('getGames', { x: true });
@@ -281,7 +281,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             return true; //not this player's turn
         }
         if ($scope.addMode && ap.usr == $scope.user) {
-            sandalchest.dialog({
+            bulmabox.dialog({
                 buttons: [{
                     text: 'Add em!',
                     close: true,
@@ -331,30 +331,30 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             if ($scope.pickTarg && (ap.usr != $scope.user || debugMode)) {
                 //in target pick mode (have already picked source), target user is NOT us.
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                    sandalchest.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 });
+                    bulmabox.alert("Uh Oh!", "Hey! You can't attack " + ap.country + " from " + $scope.map.diagram.cells[$scope.srcCell].country + "! It's too far away!", { speed: 250 });
                     return false;
                 }
                 $scope.targCell = $scope.map.getCellNumByName(ap.country);
                 ap.status = 2;
                 $scope.pickTarg = false;
             } else if ($scope.pickTarg && ap.usr == $scope.user) {
-                sandalchest.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 });
+                bulmabox.alert("Uh Oh!", "Hey! You can't attack yourself at " + ap.country + "!", { speed: 250 });
             }
         } else {
             if ($scope.pickTarg && ap.usr == $scope.user) {
                 if (!mapFact.isNeighbor($scope.map.diagram.cells, $scope.srcCell, $scope.map.getCellNumByName(ap.country))) {
-                    sandalchest.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 });
+                    bulmabox.alert("Uh Oh!", `Hey! You can't move armies to ${ap.country} from ${$scope.map.diagram.cells[$scope.srcCell].country}! It's too far away!`, { speed: 250 });
                     return false;
                 }
                 var srcNum = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].country).num;
                 if (srcNum < 2) {
-                    sandalchest.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
+                    bulmabox.alert('Uh Oh!', 'You have too few armies in the source country to move armies (less than two). You cannot desert a country!', { speed: 250 });
                     return false;
                 }
                 if (ap.debuff=='noRecruit'){
-                    sandalchest.alert('No Recruiting',`Low morale in ${ap.country} means you cannot move armies into that country this turn.`)
+                    bulmabox.alert('No Recruiting',`Low morale in ${ap.country} means you cannot move armies into that country this turn.`)
                 }
-                sandalchest.dialog({
+                bulmabox.dialog({
                     buttons: [{
                         text: 'Move em!',
                         close: true,
@@ -382,14 +382,14 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
                 }, 'Army Movement', `How many armies do you want to move from ${$scope.map.diagram.cells[$scope.srcCell].country} to ${ap.country}? You can move a maximum of ${srcNum} armies. <br/> <input type="number" id="reqNumMove" value='1' min='1' max='${srcNum}'>`);
 
             } else if ($scope.pickTarg && ap.usr != $scope.user) {
-                sandalchest.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`);
+                bulmabox.alert('Uh Oh!', `${ap.country} is currently occupied by another player. You'll need to conquer it first to move your armies there!`);
             }
         }
     };
     $scope.joinGame = function(g, pwd) {
         fightFact.joinGame(g, $scope.user, pwd).then(function(r) {
             if (r.data == 'gameLogErr') {
-                sandalchest.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!');
+                bulmabox.alert('Join Error', 'This game\'s private, and you\'ve unfortunately entered the wrong password!');
                 return false;
             }else{
                 window.location.reload();   
@@ -402,7 +402,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         console.log('tested cells are neighbors: ', mapFact.isNeighbor($scope.map.diagram.cells, s, d));
     };
     $scope.switchPlayMode = function() {
-        sandalchest.confirm('Switch Modes', 'Are you sure you wanna stop moving armies and begin the attack phase?', function(res) {
+        bulmabox.confirm('Switch Modes', 'Are you sure you wanna stop moving armies and begin the attack phase?', function(res) {
             if (res && res !== null) {
                 $scope.moveArmies = false;
                 $scope.$digest();
@@ -428,7 +428,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.gameMenu = false;
         if (!old) {
             //makin a new game with an old map
-            sandalchest.dialog('New Game', `Making a new game!<hr/> Password (optional): <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
+            bulmabox.dialog('New Game', `Making a new game!<hr/> Password (optional): <input type='password' id='newGamePwd'> <button class='btn btn-danger' onclick="angular.element('body').scope().pwdExpl()">?</button>`, {
                 buttons: [{
                     text: 'Create Game',
                     close: true,
@@ -509,7 +509,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         }
     };
     $scope.startGame = function(id) {
-        sandalchest.confirm(`Start Game ${id}`, `Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`, function(r) {
+        bulmabox.confirm(`Start Game ${id}`, `Are you sure you wanna start game ${id}? Starting a game is not reversable, and prevents any more players from joining.`, function(r) {
             if (r) {
                 fightFact.startGame(id).then(function(r) {
                     socket.emit('gameStarted', r);
@@ -525,10 +525,10 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         }
     });
     $scope.avgCounInfo = function() {
-        sandalchest.alert('Country Number', 'Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
+        bulmabox.alert('Country Number', 'Because of how the map is generated, the actual number of countries may or may not be exactly the number here.');
     };
     $scope.smoothInfo = function() {
-        sandalchest.alert('Map Smoothing', 'Without smoothing, the shapes generated by the map algorithm (a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram" target="_blank">Voronoi Diagram</a>) are very random. Smoothing \'pushes\' the shapes towards being equal size.');
+        bulmabox.alert('Map Smoothing', 'Without smoothing, the shapes generated by the map algorithm (a <a href="https://en.wikipedia.org/wiki/Voronoi_diagram" target="_blank">Voronoi Diagram</a>) are very random. Smoothing \'pushes\' the shapes towards being equal size.');
     };
     $scope.doAttack = function(s, d, ra) {
         var rd = null,
@@ -558,14 +558,14 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
     $scope.startAttack = function() {
         console.log('SOURCE CELL', $scope.map.diagram.cells[$scope.srcCell]);
         if ((!$scope.srcCell && $scope.srcCell !== 0) || (!$scope.targCell && $scope.targCell !== 0)) {
-            sandalchest.alert('Attack Issue', 'You need both an attacker and a target!');
+            bulmabox.alert('Attack Issue', 'You need both an attacker and a target!');
         } else if($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).debuff=='noAttack'){
-            sandalchest.alert("Can't Attack",`Due to a natural disaster, your armies in ${$scope.map.diagram.cells[$scope.srcCell].name} are in disarray! You can't attack from there this turn.`)
+            bulmabox.alert("Can't Attack",`Due to a natural disaster, your armies in ${$scope.map.diagram.cells[$scope.srcCell].name} are in disarray! You can't attack from there this turn.`)
         } else if ($scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name) && $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 2) {
-            sandalchest.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`);
+            bulmabox.alert("Not Enough Armies", `You can't attack from ${$scope.map.diagram.cells[$scope.srcCell].name}! Attacking countries need at least two armies: One to attack, and one to stay home!`);
         } else {
             var maxPain = $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num < 5 ? $scope.getAPByName($scope.map.diagram.cells[$scope.srcCell].name).num - 1 : 3;
-            sandalchest.prompt('Army Strength', `How many armies do you wanna attack with? You can attack with at most ${maxPain} armies.`, function(res) {
+            bulmabox.prompt('Army Strength', `How many armies do you wanna attack with? You can attack with at most ${maxPain} armies.`, function(res) {
                 res = parseInt(res);
                 if (isNaN(res) || res === 0) {
                     return false;
@@ -595,7 +595,7 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
         $scope.$apply();
     });
     $scope.nextTurn = function() {
-        sandalchest.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
+        bulmabox.confirm('End Turn', 'Are you sure you want to end your turn?', function(res) {
             if (res && res !== null) {
                 //NEED TO ASSIGN ARMY PIECE DATA TO MAP HERE!
                 fightFact.nextTurn($scope.map, $scope.gameId, $scope.user);
@@ -608,13 +608,13 @@ app.controller('conkrcon', function($scope, $http, fightFact, mapFact, miscFact,
             //allow player to add armies.
             $scope.newArmies = t.newA;
             $scope.addMode = true;
-            sandalchest.alert('new armies:', t.newA.toString())
+            bulmabox.alert('new armies:', t.newA.toString())
         }
         console.log('turnSwitch data:', t)
         if (t.dis.length) {
             // console.log('DIS from disaster fact',dis,$scope.armyPieces)
             var disastList = '<li>' + t.dis.join('</li><li>') + '</li>'
-            sandalchest.alert(`Disaster has struck!`,`<ul>${disastList}</ul>`)
+            bulmabox.alert(`Disaster has struck!`,`<ul>${disastList}</ul>`)
             var i=0;
             $scope.armyPieces = $scope.armyPieces.map((ap)=>{
                 for(i=0;i<t.armies.length;i++){

@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 //note that maps are usable for multiple games. As such, this purely stores a map (plus country names, NOT army data)
-var skillSchema = new mongoose.Schema({
+const skillSchema = new mongoose.Schema({
     id: String, //id of map
     mapData: {
         countryNames: [String],

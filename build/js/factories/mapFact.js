@@ -1,5 +1,5 @@
-app.factory('mapFact', function($rootScope, $http, $q) {
-    String.prototype.capit = function() {
+app.factory('mapFact', function ($rootScope, $http, $q) {
+    String.prototype.capit = function () {
         return this.slice(0, 1).toUpperCase() + this.slice(1);
     };
     var smoothAmt = 100,
@@ -18,24 +18,24 @@ app.factory('mapFact', function($rootScope, $http, $q) {
             cold: ['frozen city', 'frozen swamp', 'boreal forest', 'tundra', 'mountain']
         },
         doneCouns = [],
-        currCont = []
-    allConts = [],
+        currCont = [],
+        allConts = [],
         justCouns = [];
 
     return {
-        loadMaps: function() {
+        loadMaps: function () {
             // load all maps so we can pick one.
-            return $http.get('/map/loadMaps').then(function(r) {
+            return $http.get('/map/loadMaps').then(function (r) {
                 return r;
             });
         },
-        loadOneMap: function(id) {
+        loadOneMap: function (id) {
             console.log('attempting to get map', id);
-            return $http.get('/map/loadMap/' + id).then(function(r) {
+            return $http.get('/map/loadMap/' + id).then(function (r) {
                 return r;
             });
         },
-        isBorderNeighbor: function(c, s, d) {
+        isBorderNeighbor: function (c, s, d) {
             //OLD VERSION of isNeighbor, only returns true if start and destination are immediate neigbors
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
@@ -52,7 +52,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
             }
             return false;
         },
-        isWater: function(c, x, y) {
+        isWater: function (c, x, y) {
             //test if a cell at point (x,y) is water (i.e., isLand==false)
             for (var i = 0; i < c.length; i++) {
                 if (c[i].site.x == x && c[i].site.y == y && !c[i].isLand) {
@@ -61,7 +61,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
             }
             return false;
         },
-        isNeighbor: function(c, s, d) {
+        isNeighbor: function (c, s, d) {
             //detect if start is either A) an immediate neighbor or B) immediately across the water from dest
             //c: cells (array), s: start cell, d: destination cell
             if (!c[s] || !c[d]) {
@@ -125,29 +125,34 @@ app.factory('mapFact', function($rootScope, $http, $q) {
             }
             return false;
         },
-        delMap: function(id) {
-            return $http.delete('/map/del/' + id, function(r) {
+        delMap: function (id) {
+            return $http.delete('/map/del/' + id, function (r) {
                 return r;
             });
         },
-        GetVoronoi: function(hi, wid, numCells, schmooz) {
+        GetVoronoi: function (hi, wid, numCells, schmooz) {
             var newVor = {
                 voronoi: new Voronoi(),
                 diagram: null,
                 margin: 0.1,
                 canvas: null,
-                bbox: { xl: 0, xr: wid, yt: 0, yb: hi },
+                bbox: {
+                    xl: 0,
+                    xr: wid,
+                    yt: 0,
+                    yb: hi
+                },
                 sites: [],
                 countryNames: [],
                 cellCenters: [],
                 timeoutDelay: 30,
                 numsRelaxed: 100,
-                init: function() {
+                init: function () {
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
                     this.randomSites(numCells, true);
                 },
-                save: function() {
+                save: function () {
                     // note: this function is for saving a map. it is NOT for saving a game!
                     var mapData = {
                         countryNames: this.countryNames,
@@ -161,15 +166,15 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         img: this.canvas.toDataURL()
                     };
                     console.log('TO SAVE:', mapData);
-                    return $http.post('/map/newMap', mapData).then(function(r) {
+                    return $http.post('/map/newMap', mapData).then(function (r) {
                         return r;
                     });
                 },
-                clearSites: function() {
+                clearSites: function () {
                     this.compute([]);
                 },
 
-                randomSites: function(n, clear) {
+                randomSites: function (n, clear) {
                     var sites = [];
                     if (!clear) {
                         sites = this.sites.slice(0);
@@ -182,7 +187,10 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         yo = ymargin,
                         dy = this.canvas.height - ymargin * 2;
                     for (var i = 0; i < n; i++) {
-                        sites.push({ x: self.Math.round((xo + self.Math.random() * dx) * 10) / 10, y: self.Math.round((yo + self.Math.random() * dy) * 10) / 10 });
+                        sites.push({
+                            x: self.Math.round((xo + self.Math.random() * dx) * 10) / 10,
+                            y: self.Math.round((yo + self.Math.random() * dy) * 10) / 10
+                        });
                     }
                     this.compute(sites);
                     // relax sites
@@ -191,12 +199,12 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         this.timeout = null;
                     }
                     var me = this;
-                    this.timeout = setTimeout(function() {
+                    this.timeout = setTimeout(function () {
                         me.relaxSites();
                     }, this.timeoutDelay);
                 },
 
-                relaxSites: function() {
+                relaxSites: function () {
                     if (!this.diagram) {
                         return;
                     }
@@ -236,7 +244,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     this.compute(sites);
                     if (again) {
                         var me = this;
-                        this.timeout = setTimeout(function() {
+                        this.timeout = setTimeout(function () {
                             me.relaxSites();
                         }, this.timeoutDelay);
                     } else {
@@ -244,7 +252,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
 
                     }
                 },
-                doCellSites: function() {
+                doCellSites: function () {
                     this.diagram.cells.forEach((c) => {
                         if (c.name || c.country) {
                             this.cellCenters.push({
@@ -256,7 +264,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         }
                     });
                 },
-                initLoad: function(im) {
+                initLoad: function (im) {
                     //simply redraw an old map on canvas.
                     this.canvas = document.querySelector('canvas');
                     this.clearMap();
@@ -264,14 +272,14 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     var ctx = this.canvas.getContext('2d'),
                         img = new Image(),
                         canv = this.canvas;
-                    img.onload = function() {
+                    img.onload = function () {
                         canv.width = img.width;
                         canv.height = img.height;
                         ctx.drawImage(img, 0, 0);
                     };
                     img.src = im;
                 },
-                makeAName: function() {
+                makeAName: function () {
                     /*name patterns (from http://fantasynamegenerators.com/scripts/landNames.js):
                     0,1,2,3,4
                     0,1,2,5
@@ -299,7 +307,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return nm;
                 },
-                makeCellNames: function() {
+                makeCellNames: function () {
                     console.log('CELL LENGTH', this.diagram.cells.length)
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
@@ -322,13 +330,13 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         }
                     }
                 },
-                distance: function(a, b) {
+                distance: function (a, b) {
                     var dx = a.x - b.x,
                         dy = a.y - b.y;
                     return Math.sqrt(dx * dx + dy * dy);
                 },
 
-                cellArea: function(cell) {
+                cellArea: function (cell) {
                     var area = 0,
                         halfedges = cell.halfedges,
                         iHalfedge = halfedges.length,
@@ -345,7 +353,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     return area;
                 },
 
-                cellCentroid: function(cell) {
+                cellCentroid: function (cell) {
                     var x = 0,
                         y = 0,
                         halfedges = cell.halfedges,
@@ -361,10 +369,13 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         y += (p1.y + p2.y) * v;
                     }
                     v = this.cellArea(cell) * 6;
-                    return { x: x / v, y: y / v };
+                    return {
+                        x: x / v,
+                        y: y / v
+                    };
                 },
 
-                compute: function(sites) {
+                compute: function (sites) {
                     this.sites = sites;
                     this.voronoi.recycle(this.diagram);
                     this.diagram = this.voronoi.compute(sites, this.bbox);
@@ -397,7 +408,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         }
                     }
                 },
-                clearMap: function() {
+                clearMap: function () {
                     //to blank a map if necessary
                     var ctx = this.canvas.getContext('2d');
                     // background
@@ -406,14 +417,14 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     ctx.fillStyle = 'white';
                     ctx.fill();
                 },
-                render: function() {
+                render: function () {
                     //drawBorders
                     var ctx = this.canvas.getContext('2d'),
                         waterImg = new Image(),
                         me = this;
                     waterImg.src = '../img/water.jpg';
 
-                    waterImg.onload = function() {
+                    waterImg.onload = function () {
                         ctx.rect(0, 0, me.canvas.width, me.canvas.height);
                         ctx.fillStyle = ctx.createPattern(this, "repeat");
                         ctx.fill();
@@ -446,7 +457,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
 
                     };
                 },
-                getCellNames: function() {
+                getCellNames: function () {
                     var ctx = this.canvas.getContext('2d');
                     for (var n = 0; n < this.diagram.cells.length; n++) {
                         var cell = this.diagram.cells[n];
@@ -466,7 +477,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         };
                     }
                 },
-                findCell: function(x, y) {
+                findCell: function (x, y) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         if (this.diagram.cells[i].site.x == x && this.diagram.cells[i].site.y == y) {
                             return this.diagram.cells[i];
@@ -474,7 +485,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return false;
                 },
-                buildTreemap: function() {
+                buildTreemap: function () {
                     var treemap = new QuadTree({
                         x: this.bbox.xl,
                         y: this.bbox.yt,
@@ -490,7 +501,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return treemap;
                 },
-                pointIntersection: function(cell, x, y) {
+                pointIntersection: function (cell, x, y) {
                     // Check if point in polygon. Since all polygons of a Voronoi
                     // diagram are convex, then:
                     // http://paulbourke.net/geometry/polygonmesh/
@@ -521,19 +532,22 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return 1;
                 },
-                getStartpoint: function(h) {
+                getStartpoint: function (h) {
                     return h.edge.lSite === h.site ? h.edge.va : h.edge.vb;
                 },
-                getEndpoint: function(h) {
+                getEndpoint: function (h) {
                     return h.edge.lSite === h.site ? h.edge.vb : h.edge.va;
                 },
-                cellIdFromPoint: function(x, y) {
+                cellIdFromPoint: function (x, y) {
                     // We build the treemap on-demand
 
                     this.treemap = this.buildTreemap();
                     console.log('Treez', this.treemap);
                     // Get the Voronoi cells from the tree map given x,y
-                    var items = this.treemap.retrieve({ x: x, y: y }),
+                    var items = this.treemap.retrieve({
+                            x: x,
+                            y: y
+                        }),
                         iItem = items.length,
                         cells = this.diagram.cells,
                         cell, cellid, cellNums = this.diagram.cells.length;
@@ -546,7 +560,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     }
                     return undefined;
                 },
-                cellByPoint: function(x, y) {
+                cellByPoint: function (x, y) {
                     var cells = this.diagram.cells,
                         cell, cellNum = this.diagram.cells.length;
                     while (--cellNum) {
@@ -556,7 +570,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         }
                     }
                 },
-                renderCell: function(id, ptrn) {
+                renderCell: function (id, ptrn) {
                     if (id === undefined) {
                         return;
                     }
@@ -592,7 +606,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     ctx.rect(v.x - 2 / 3, v.y - 2 / 3, 2, 2);
                     ctx.fill();
                 },
-                doAllCells: function() {
+                doAllCells: function () {
                     var landTypes = biomeTypes['warm'].concat(biomeTypes['cold']),
                         landImgProms = [],
                         imgArr = [],
@@ -602,7 +616,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     for (var i = 0; i < landTypes.length; i++) {
                         imgArr[i] = new Image();
                         imgArr[i].src = '../img/terrains/' + landTypes[i].replace(/\s/, '_') + '.jpg';
-                        imgArr[i].onload = function() {
+                        imgArr[i].onload = function () {
                             var thePtrn = ctx.createPattern(this, "repeat"),
                                 thisTerr = this.src.slice(this.src.lastIndexOf('/') + 1, this.src.lastIndexOf('.')).replace('_', ' ') || 'plains';
                             for (var n = 0; n < me.diagram.cells.length; n++) {
@@ -621,19 +635,19 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         }
                     }
                 },
-                getCellByName: function(n) {
+                getCellByName: function (n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         if (this.diagram.cells[i].name == n) return this.diagram.cells[i];
                     }
                     return false;
                 },
-                getCellNumByName: function(n) {
+                getCellNumByName: function (n) {
                     for (var i = 0; i < this.diagram.cells.length; i++) {
                         if (this.diagram.cells[i].name == n) return i;
                     }
                     return false;
                 },
-                getContinents: function() {
+                getContinents: function () {
                     doneCouns = [];
                     allConts = [];
                     justCouns = this.diagram.cells.filter((cf) => {
@@ -658,9 +672,9 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         });
                         allContsNoDups.push(reptCounts);
                     })
-                    return allContsNoDups;//should be ok? eep.
+                    return allContsNoDups; //should be ok? eep.
                 },
-                findNeighbors: function(n, m) {
+                findNeighbors: function (n, m) {
                     if (m) {
                         //root node
                         currCont = [];
@@ -705,7 +719,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     })
 
                 },
-                findNeighborsOld: function(c, mode) {
+                findNeighborsOld: function (c, mode) {
                     //OLD VERSION
                     if (mode) {
                         if (currCont && currCont.length) allConts.push(currCont);
@@ -749,9 +763,9 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                         console.log('cell', c, 'has NO kids');
                     }
                     var me = this;
-                    kids.forEach(function(k) {
+                    kids.forEach(function (k) {
                         var naybz = me.findNeighbors(k);
-                        naybz.forEach(function(n) {
+                        naybz.forEach(function (n) {
                             if (me.doneCouns.indexOf(n) == -1) {
                                 names.push(n);
                             }
@@ -759,7 +773,7 @@ app.factory('mapFact', function($rootScope, $http, $q) {
                     });
                     return names;
                 },
-                findNaybz: function(c, m) {
+                findNaybz: function (c, m) {
                     return findNeighbors(c, m);
                 }
             };

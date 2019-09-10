@@ -1,11 +1,9 @@
-var mongoose = require('mongoose'),
-    cookie = require('cookie'),
-    session = require('client-sessions')
+const session = require('client-sessions')
 newArmies = function(usrs, map) {
     //DO WE STILL NEED THIS (see 'addArmies' below)
     //function to add armies for each user
     usrs.forEach(function(u) {
-        var newArmies = 0,
+        let newArmies = 0,
             totalCells = 0;
         map.diagram.cells.forEach(function(c) {
             if (c.army.usr == u.name) {
@@ -18,11 +16,11 @@ newArmies = function(usrs, map) {
                 //single country 'island'
                 newArmies += 2;
             } else {
-                var firstUsr = map.getCellByName(cont[0]).name,
+                const firstUsr = map.getCellByName(cont[0]).name,
                     numCounts = 0;
                 if (firstUsr == u.name) {
                     numCounts++;
-                    for (var i = 1; i < cont.length; i++) {
+                    for (let i = 1; i < cont.length; i++) {
                         if (map.getCellByName(cont[i]).name == u.name) {
                             numCounts++;
                         }
@@ -45,7 +43,7 @@ newArmies = function(usrs, map) {
     })
 }, addArmies = function(conts, armies, usr) {
     //function to add armies for each user
-    var newArmies = 0,
+    let newArmies = 0,
         totalCells = 0,
         contBonus = 0,
         ownCountries = [];
@@ -62,9 +60,9 @@ newArmies = function(usrs, map) {
         if (c.length < 2 && ownCountries.indexOf(c[0]) > -1) {
             newArmies += 2;
         } else if (ownCountries.indexOf(c[0]) > -1) {
-            var numCounts = 0,
+            let numCounts = 0,
                 usrOwns = true;
-            for (var i = 1; i < c.length; i++) {
+            for (let i = 1; i < c.length; i++) {
                 if (ownCountries.indexOf(c[i]) > -1) {
                     numCounts
                 } else {
@@ -92,12 +90,12 @@ newArmies = function(usrs, map) {
 }, doFight = function(ca, cd, ra, rd) {
     console.log(ca.country, ca.num, 'vs', cd.country, cd.num)
         //take attack cell (ca), defend cell (cd), # rolls attacker (ra), and # rolls defender (rd)
-    var aRolls = [],
+    let aRolls = [],
         dRolls = [],
-        conflicts,
+        conflicts=null,
         results = [],
         status = false; //final status (true=conkr'd)
-    for (var i = 0; i < ra; i++) {
+    for (let i = 0; i < ra; i++) {
         //roll attacker
         aRolls.push(Math.ceil(Math.random() * 6));
     }
@@ -115,7 +113,7 @@ newArmies = function(usrs, map) {
     //number of 'conflicts' (i.e., one A army vs 1 D army is determined by min number of aRolls and dRolls.length)
     conflicts = (Math.min(aRolls.length, dRolls.length));
     for (i = 0; i < conflicts; i++) {
-        var attackWin = aRolls[i] > dRolls[i]; //true: offensive army wins. False: defensive army wins (or tie, in which case defender wins).
+        let attackWin = aRolls[i] > dRolls[i]; //true: offensive army wins. False: defensive army wins (or tie, in which case defender wins).
         //note that for attack modifiers, we ONLY look at the defending cell.
         if (cd.terr == 'plains' || cd.terr == 'urban' && Math.random() < .15) {
             //attack bonus!
@@ -147,7 +145,7 @@ newArmies = function(usrs, map) {
         status: status
     }
 }, getInitArmies = function(c, p) {
-    var arr = [];
+    const arr = [];
     c.forEach((n) => {
         console.log('N IS', n, 'END N')
         arr.push({
@@ -161,7 +159,7 @@ newArmies = function(usrs, map) {
     return arr;
 }, getAuthUsr = function(settings, rawDough) {
     //get the authorized username from the client sessions cookie. This allows us to authenticate that the person doing an attack is, in fact, the person doing the attack.
-    var ingredients = session.util.decode(settings, rawDough).content;
+    const ingredients = session.util.decode(settings, rawDough).content;
     return ingredients && ingredients.user && ingredients.user.name ? ingredients.user.name : false;
 };
 

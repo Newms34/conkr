@@ -1,27 +1,27 @@
-app.factory('fightFact', function($rootScope, $http) {
+app.factory('fightFact', function ($rootScope, $http) {
     // note: we are NOT writing an AI player for Conkr, as AI for playing Risk™ is notoriously difficult to write
-    var getCellCoords = function(m, c) {
-            console.log('Getting cell coords for', c);
-            for (var i = 0; i < m.length; i++) {
-                if (m[i].name == c) {
-                    return m[i].site;
-                }
+    var getCellCoords = function (m, c) {
+        console.log('Getting cell coords for', c);
+        for (var i = 0; i < m.length; i++) {
+            if (m[i].name == c) {
+                return m[i].site;
             }
-            return false;
-        };
+        }
+        return false;
+    };
     return {
-        getMaxArmy: function(c, m) {
+        getMaxArmy: function (c, m) {
             var attackPenalty = m ? 1 : 0;
             // note that this will at min be > 0.
             return Math.floor(c.army.num - attackPenalty);
         },
-        delGame: function(id) {
-            return $http.get('/game/del/' + id).then(function(r) {
+        delGame: function (id) {
+            return $http.get('/game/del/' + id).then(function (r) {
                 console.log('factory back from back end game del');
                 return r;
             });
         },
-        doFight: function(usr, ca, cd, ra, rd, id) {
+        doFight: function (usr, ca, cd, ra, rd, id) {
             socket.emit('sendDoFight', {
                 user: usr,
                 ca: ca,
@@ -31,16 +31,24 @@ app.factory('fightFact', function($rootScope, $http) {
                 gameId: id
             });
         },
-        nextTurn: function(map, game, usr) {
-            console.log('in fightfact, next turn',map,game,usr,map.getContinents())
-            socket.emit('nextTurn', { conts: map.getContinents(), game: game, usr: usr });
+        nextTurn: function (map, game, usr) {
+            console.log('in fightfact, next turn', map, game, usr, map.getContinents())
+            socket.emit('nextTurn', {
+                conts: map.getContinents(),
+                game: game,
+                usr: usr
+            });
         },
-        newGame: function(n, p, pwd) {
-            return $http.post('/game/new', { id: n, player: p, pwd: pwd }).then(function(p) {
+        newGame: function (n, p, pwd) {
+            return $http.post('/game/new', {
+                id: n,
+                player: p,
+                pwd: pwd
+            }).then(function (p) {
                 return p;
             });
         },
-        placeArmies: function(m, a, l) {
+        placeArmies: function (m, a, l) {
             //m:map, a: army, l: labels (unicode) organized by playaz
             var pieces = [];
             for (var n = 0; n < a.length; n++) {
@@ -63,19 +71,25 @@ app.factory('fightFact', function($rootScope, $http) {
             }
             return pieces;
         },
-        joinGame: function(m, p, pwd) {
+        joinGame: function (m, p, pwd) {
             //join a not-yet-started game;
-            return $http.post('/game/join', { gameId: m, player: p, pwd: pwd }, function(p) {
+            return $http.post('/game/join', {
+                gameId: m,
+                player: p,
+                pwd: pwd
+            }, function (p) {
                 return p;
             });
         },
-        addArmies: function(game) {
+        addArmies: function (game) {
             //function to add armies for each user
-            socket.emit('sendAddArmies', { game: game });
+            socket.emit('sendAddArmies', {
+                game: game
+            });
         },
-        saveGame: function(id, map) {
+        saveGame: function (id, map) {
             if (!id) {
-                sandalchest.alert('Map save error: no map id!', function() {
+                sandalchest.alert('Map save error: no map id!', function () {
                     return false;
                 });
             } else {
@@ -96,9 +110,9 @@ app.factory('fightFact', function($rootScope, $http) {
                 return $http.post('/game/saveGame', gameData);
             }
         },
-        startGame: function(id) {
+        startGame: function (id) {
             //creator of a game sets it to started, meaning no more doodz can join.
-            return $http.get('/game/startGame/' + id).then(function(r) {
+            return $http.get('/game/startGame/' + id).then(function (r) {
                 return r;
             });
         }
