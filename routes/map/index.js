@@ -1,6 +1,6 @@
 const express = require('express'),
     router = express.Router(),
-    mongoose = require('mongoose'),
+    mongoose = require('mongoose');
 module.exports = router;
 router.post('/newMap', function(req, res, next) {
     //create a new game!
